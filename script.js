@@ -1,18 +1,32 @@
 // ==========================================================================
-// OFFLINEDEVC — INTERACTIVE JAVASCRIPT WITH THEME SWITCHER
+// OFFLINEDEVC — INTERACTIVE JAVASCRIPT WITH ROBUST THEME SWITCHER
 // Minimalist, Clean UX/UI for Cybersecurity Technical Documentation
 // ==========================================================================
 
-// Immediate Theme Initialization (Prevents FOUT: Flash of Unstyled Theme)
-(() => {
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme) {
-    document.documentElement.setAttribute('data-theme', savedTheme);
-  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.documentElement.setAttribute('data-theme', 'dark');
-  } else {
-    document.documentElement.setAttribute('data-theme', 'light');
+// Helper: Safely get theme with fallback
+function getStoredTheme() {
+  try {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark' || saved === 'light') return saved;
+  } catch (e) {}
+
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    return 'dark';
   }
+  return 'light';
+}
+
+// Helper: Safely save theme
+function storeTheme(theme) {
+  try {
+    localStorage.setItem('theme', theme);
+  } catch (e) {}
+}
+
+// Immediate Theme Execution (Prevents FOUT)
+(() => {
+  const currentTheme = getStoredTheme();
+  document.documentElement.setAttribute('data-theme', currentTheme);
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -20,35 +34,38 @@ document.addEventListener('DOMContentLoaded', () => {
   // 1. Theme Toggle Logic
   const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn');
 
-  const updateToggleButtons = (currentTheme) => {
+  const updateToggleButtons = (theme) => {
     themeToggleBtns.forEach(btn => {
-      btn.setAttribute('aria-label', currentTheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode');
-      btn.setAttribute('title', currentTheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+      btn.setAttribute('title', theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode');
     });
   };
 
-  const initialTheme = document.documentElement.getAttribute('data-theme') || 'light';
+  const initialTheme = document.documentElement.getAttribute('data-theme') || getStoredTheme();
   updateToggleButtons(initialTheme);
 
   themeToggleBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const currentTheme = document.documentElement.getAttribute('data-theme') || getStoredTheme();
+      const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
-      document.documentElement.setAttribute('data-theme', newTheme);
-      localStorage.setItem('theme', newTheme);
-      updateToggleButtons(newTheme);
+      document.documentElement.setAttribute('data-theme', nextTheme);
+      storeTheme(nextTheme);
+      updateToggleButtons(nextTheme);
     });
   });
 
-  // Listen to OS theme changes if user has not explicitly set preference
+  // Listen for OS scheme changes if user hasn't explicitly set preference
   if (window.matchMedia) {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      if (!localStorage.getItem('theme')) {
-        const osTheme = e.matches ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', osTheme);
-        updateToggleButtons(osTheme);
-      }
+      try {
+        if (!localStorage.getItem('theme')) {
+          const osTheme = e.matches ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', osTheme);
+          updateToggleButtons(osTheme);
+        }
+      } catch (err) {}
     });
   }
 

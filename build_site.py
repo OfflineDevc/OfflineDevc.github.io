@@ -53,6 +53,14 @@ def generate_sidebar_html(current_slug):
 
     html = []
     html.append('<aside class="writeup-sidebar" id="sidebar">')
+    html.append('  <div class="sidebar-author-box">')
+    html.append('    <div class="sidebar-author-name">Kun Poonkasetvatana</div>')
+    html.append('    <div class="sidebar-author-meta">')
+    html.append('      <span class="author-badge-tag">@OfflineDevc</span>')
+    html.append('      <span class="author-badge-thm">THM: Distowel</span>')
+    html.append('    </div>')
+    html.append('  </div>')
+
     html.append('  <div class="sidebar-header">')
     html.append('    <span>WRITEUPS ARCHIVE</span>')
     html.append('    <span>11 ROOMS</span>')
@@ -60,17 +68,17 @@ def generate_sidebar_html(current_slug):
     html.append('  <nav class="sidebar-menu">')
 
     diff_config = [
-        ("Easy",   "EASY",   "diff-easy"),
-        ("Medium", "MEDIUM", "diff-medium"),
-        ("Hard",   "HARD",   "diff-hard"),
+        ("Easy",   "EASY",   "dot-easy",   "diff-easy"),
+        ("Medium", "MEDIUM", "dot-medium", "diff-medium"),
+        ("Hard",   "HARD",   "dot-hard",   "diff-hard"),
     ]
 
-    for diff_key, label, badge_cls in diff_config:
+    for diff_key, label, dot_cls, badge_cls in diff_config:
         items = groups[diff_key]
         room_label = "ROOM" if len(items) == 1 else "ROOMS"
         html.append('    <div class="sidebar-group">')
         html.append('      <div class="sidebar-group-header">')
-        html.append(f'        <span>{label}</span>')
+        html.append(f'        <div class="group-left"><span class="diff-indicator {dot_cls}"></span><span>{label}</span></div>')
         html.append(f'        <span class="badge {badge_cls}">{len(items)} {room_label}</span>')
         html.append('      </div>')
         html.append('      <ul class="sidebar-list">')
@@ -78,8 +86,9 @@ def generate_sidebar_html(current_slug):
             is_active = (slug == current_slug)
             active_cls = " active" if is_active else ""
             html.append(f'        <li class="sidebar-item{active_cls}">')
-            html.append(f'          <a href="{slug}.html" title="{title}">')
-            html.append(f'            <span>{title}</span>')
+            html.append(f'          <a href="{slug}.html" class="sidebar-link" title="{title}">')
+            html.append('            <span class="sidebar-item-bullet"></span>')
+            html.append(f'            <span class="sidebar-item-title">{title}</span>')
             html.append(f'            <span class="sidebar-os-badge">{os_name}</span>')
             html.append('          </a>')
             html.append('        </li>')
@@ -130,10 +139,8 @@ def generate_pagination_html(current_index):
 IMG_RE = re.compile(r'!\[\[([^\]]+\.png)\]\]', re.IGNORECASE)
 
 def preprocess_markdown(text, images_used):
-    # Remove redundant duplicate H1 header & trailing HR
     text = re.sub(r'^\s*#\s+.*?(?:Writeup|CTF).*?\n+(?:---\s*\n+)?', '', text, flags=re.IGNORECASE)
 
-    # Convert Obsidian image embeds
     def replace_img(m):
         fname = m.group(1).strip()
         images_used.add(fname)
@@ -215,15 +222,17 @@ def render_page(index, slug, title, difficulty, os_name, os_cls, platform, date,
   <!-- Immediate Theme Application (Prevents FOUT) -->
   <script>
     (function() {{
-      var theme = localStorage.getItem('theme');
-      if (theme) {{
-        document.documentElement.setAttribute('data-theme', theme);
-      }} else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {{
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }}
+      try {{
+        var theme = localStorage.getItem('theme');
+        if (theme) {{
+          document.documentElement.setAttribute('data-theme', theme);
+        }} else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {{
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }}
+      }} catch (e) {{}}
     }})();
   </script>
-  <link rel="stylesheet" href="../style.css?v=5.1"/>
+  <link rel="stylesheet" href="../style.css?v=5.2"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet"/>
@@ -241,7 +250,6 @@ def render_page(index, slug, title, difficulty, os_name, os_cls, platform, date,
         <a href="../index.html" class="nav-link-item">Home</a>
         <a href="../index.html#writeups" class="nav-link-item active">Writeups</a>
         <a href="../index.html#about" class="nav-link-item">About</a>
-        <a href="../template-writeup.html" class="nav-link-item">Template</a>
 
         <!-- Theme Toggle Button -->
         <button class="theme-toggle-btn" id="themeToggle" type="button" aria-label="Toggle Dark/Light Mode" title="Toggle Dark/Light Mode">
@@ -280,6 +288,7 @@ def render_page(index, slug, title, difficulty, os_name, os_cls, platform, date,
           All Writeups Archive
         </a>
         <div class="author-hero-pill">
+          <span class="author-live-dot"></span>
           <span>Author: <strong>Kun Poonkasetvatana</strong> (@OfflineDevc) · Published: {date}</span>
         </div>
       </div>
@@ -310,7 +319,7 @@ def render_page(index, slug, title, difficulty, os_name, os_cls, platform, date,
   <!-- BACKDROP OVERLAY FOR MOBILE SIDEBAR -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-  <!-- MAIN THREE-COLUMN / TWO-COLUMN LAYOUT -->
+  <!-- MAIN THREE-COLUMN LAYOUT -->
   <div class="writeup-layout">
     {sidebar_html}
 
@@ -337,7 +346,7 @@ def render_page(index, slug, title, difficulty, os_name, os_cls, platform, date,
     </div>
   </footer>
 
-  <script src="../script.js?v=5.1"></script>
+  <script src="../script.js?v=5.2"></script>
 </body>
 </html>
 """
@@ -374,4 +383,4 @@ for idx, (slug, md_file, title, difficulty, os_name, os_cls, platform, date, tag
 
     print(f"  [{idx+1:02d}/11] {title:15} | OS: {os_name:10} | Diff: {difficulty:6} -> {slug}.html")
 
-print(f"\nDone! All 11 writeups regenerated with verified accurate OS & Difficulty, Sticky Table of Contents, and Dark Mode Switch.")
+print(f"\nDone! All 11 writeups regenerated with verified accurate OS & Difficulty, Sticky Table of Contents, and Robust Dark Mode.")

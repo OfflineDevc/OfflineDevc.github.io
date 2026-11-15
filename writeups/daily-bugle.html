@@ -7,15 +7,17 @@
   <!-- Immediate Theme Application (Prevents FOUT) -->
   <script>
     (function() {
-      var theme = localStorage.getItem('theme');
-      if (theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
+      try {
+        var theme = localStorage.getItem('theme');
+        if (theme) {
+          document.documentElement.setAttribute('data-theme', theme);
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="../style.css?v=5.1"/>
+  <link rel="stylesheet" href="../style.css?v=5.2"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet"/>
@@ -33,7 +35,6 @@
         <a href="../index.html" class="nav-link-item">Home</a>
         <a href="../index.html#writeups" class="nav-link-item active">Writeups</a>
         <a href="../index.html#about" class="nav-link-item">About</a>
-        <a href="../template-writeup.html" class="nav-link-item">Template</a>
 
         <!-- Theme Toggle Button -->
         <button class="theme-toggle-btn" id="themeToggle" type="button" aria-label="Toggle Dark/Light Mode" title="Toggle Dark/Light Mode">
@@ -72,6 +73,7 @@
           All Writeups Archive
         </a>
         <div class="author-hero-pill">
+          <span class="author-live-dot"></span>
           <span>Author: <strong>Kun Poonkasetvatana</strong> (@OfflineDevc) · Published: 04 Nov 2026</span>
         </div>
       </div>
@@ -102,9 +104,16 @@
   <!-- BACKDROP OVERLAY FOR MOBILE SIDEBAR -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-  <!-- MAIN THREE-COLUMN / TWO-COLUMN LAYOUT -->
+  <!-- MAIN THREE-COLUMN LAYOUT -->
   <div class="writeup-layout">
     <aside class="writeup-sidebar" id="sidebar">
+  <div class="sidebar-author-box">
+    <div class="sidebar-author-name">Kun Poonkasetvatana</div>
+    <div class="sidebar-author-meta">
+      <span class="author-badge-tag">@OfflineDevc</span>
+      <span class="author-badge-thm">THM: Distowel</span>
+    </div>
+  </div>
   <div class="sidebar-header">
     <span>WRITEUPS ARCHIVE</span>
     <span>11 ROOMS</span>
@@ -112,13 +121,14 @@
   <nav class="sidebar-menu">
     <div class="sidebar-group">
       <div class="sidebar-group-header">
-        <span>EASY</span>
+        <div class="group-left"><span class="diff-indicator dot-easy"></span><span>EASY</span></div>
         <span class="badge diff-easy">1 ROOM</span>
       </div>
       <ul class="sidebar-list">
         <li class="sidebar-item">
-          <a href="skynet.html" title="Skynet">
-            <span>Skynet</span>
+          <a href="skynet.html" class="sidebar-link" title="Skynet">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Skynet</span>
             <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
@@ -126,43 +136,49 @@
     </div>
     <div class="sidebar-group">
       <div class="sidebar-group-header">
-        <span>MEDIUM</span>
+        <div class="group-left"><span class="diff-indicator dot-medium"></span><span>MEDIUM</span></div>
         <span class="badge diff-medium">6 ROOMS</span>
       </div>
       <ul class="sidebar-list">
         <li class="sidebar-item">
-          <a href="deaddrop.html" title="Deaddrop">
-            <span>Deaddrop</span>
+          <a href="deaddrop.html" class="sidebar-link" title="Deaddrop">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Deaddrop</span>
             <span class="sidebar-os-badge">Linux / AD</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="domino.html" title="Domino">
-            <span>Domino</span>
+          <a href="domino.html" class="sidebar-link" title="Domino">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Domino</span>
             <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="forward.html" title="Forward">
-            <span>Forward</span>
+          <a href="forward.html" class="sidebar-link" title="Forward">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Forward</span>
             <span class="sidebar-os-badge">Windows</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="mrrobotctf.html" title="Mr. Robot CTF">
-            <span>Mr. Robot CTF</span>
+          <a href="mrrobotctf.html" class="sidebar-link" title="Mr. Robot CTF">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Mr. Robot CTF</span>
             <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="relevant.html" title="Relevant">
-            <span>Relevant</span>
+          <a href="relevant.html" class="sidebar-link" title="Relevant">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Relevant</span>
             <span class="sidebar-os-badge">Windows</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="silent-monitor.html" title="Silent Monitor">
-            <span>Silent Monitor</span>
+          <a href="silent-monitor.html" class="sidebar-link" title="Silent Monitor">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Silent Monitor</span>
             <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
@@ -170,31 +186,35 @@
     </div>
     <div class="sidebar-group">
       <div class="sidebar-group-header">
-        <span>HARD</span>
+        <div class="group-left"><span class="diff-indicator dot-hard"></span><span>HARD</span></div>
         <span class="badge diff-hard">4 ROOMS</span>
       </div>
       <ul class="sidebar-list">
         <li class="sidebar-item">
-          <a href="brainpan1.html" title="Brainpan 1">
-            <span>Brainpan 1</span>
+          <a href="brainpan1.html" class="sidebar-link" title="Brainpan 1">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Brainpan 1</span>
             <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
         <li class="sidebar-item active">
-          <a href="daily-bugle.html" title="Daily Bugle">
-            <span>Daily Bugle</span>
+          <a href="daily-bugle.html" class="sidebar-link" title="Daily Bugle">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Daily Bugle</span>
             <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="internal.html" title="Internal">
-            <span>Internal</span>
+          <a href="internal.html" class="sidebar-link" title="Internal">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Internal</span>
             <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="retro.html" title="Retro">
-            <span>Retro</span>
+          <a href="retro.html" class="sidebar-link" title="Retro">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Retro</span>
             <span class="sidebar-os-badge">Windows</span>
           </a>
         </li>
@@ -488,6 +508,6 @@ root
     </div>
   </footer>
 
-  <script src="../script.js?v=5.1"></script>
+  <script src="../script.js?v=5.2"></script>
 </body>
 </html>

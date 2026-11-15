@@ -1,8 +1,7 @@
 /* ==========================================================================
-   OFFLINEDEVC — MINIMALIST TECHNICAL BLOG & CYBERSECURITY PORTFOLIO
+   OFFLINEDEVC — CLASSIC MINIMALIST SECURITY PORTFOLIO & TECHNICAL WRITEUPS
    Author: Kun Poonkasetvatana (@OfflineDevc)
-   Design System: Classic Clean Dual Theme (Light & Dark Mode)
-   Inspiration: Medium, GitBook & Stripe Technical Documentation
+   Design System: Classic Clean Dual Theme (Full Light & Dark Mode)
    ========================================================================== */
 
 /* ── Reset & CSS Custom Properties ───────────────────────────────────────── */
@@ -12,7 +11,7 @@
   padding: 0;
 }
 
-/* Light Theme (Default) */
+/* 1. Light Theme (Default Root Variables) */
 :root {
   --theme-transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 
@@ -24,7 +23,7 @@
   --bg-code:          #1E1E1E;   /* เทาเข้มเกือบดำ สำหรับ Code/Terminal */
   --bg-code-header:   #2A2A2A;   /* แถบหัว Code block */
   --bg-callout:       #F9FAFB;   /* พื้นหลัง Callout / Note box */
-  --nav-backdrop:     rgba(255, 255, 255, 0.92);
+  --nav-backdrop:     rgba(255, 255, 255, 0.94);
 
   /* Typography Colors */
   --text-main:        #1A1A1A;   /* สีดำชาร์โคล สำหรับเนื้อหาหลัก (ไม่ใช้ #000000 เพื่อลดอาการล้าของสายตา) */
@@ -32,7 +31,6 @@
   --text-muted:       #71717A;   /* สีเทากลาง สำหรับ Caption, Breadcrumbs, Placeholders */
   --text-dim:         #A1A1AA;   /* สีเทาอ่อน สำหรับ Sub-labels */
   --text-code:        #E5E7EB;   /* สีขาว/เทาอ่อน ใน Code block */
-  --badge-invert-text:#FFFFFF;
 
   /* Accents & Borders */
   --border-light:     #E5E7EB;   /* เส้นแบ่งส่วน กรอบรูป เส้นคั่นทั่วไป */
@@ -64,34 +62,70 @@
   --sidebar-width:     280px;
 }
 
-/* Dark Theme */
+/* 2. System Automatic Dark Mode (Active when user OS is Dark and no manual light override) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-body:          #0D0F12;   /* ดำลึก สบายตาแบบ OLED/GitHub Dark */
+    --bg-surface:       #16191E;   /* เทาเข้มพรีเมียม สำหรับ Container & Cards */
+    --bg-surface-hover: #1E232B;   /* พื้นหลัง Hover ใน Dark mode */
+    --bg-subtle:        #1A1E24;   /* เทาเข้มระดับกลาง สำหรับ Badges & Headers */
+    --bg-code:          #0E1116;   /* ดำสนิทสำหรับ Code / Terminal */
+    --bg-code-header:   #181C23;   /* แถบหัว Code block */
+    --bg-callout:       #13161C;   /* พื้นหลัง Callout ใน Dark mode */
+    --nav-backdrop:     rgba(22, 25, 30, 0.94);
+
+    --text-main:        #F0F3F6;   /* ขาวนวล สบายตา อ่านง่าย ไม่แสบตา */
+    --text-secondary:   #9CA3AF;   /* เทากลางสำหรับข้อมูลรอง */
+    --text-muted:       #6B7280;   /* เทาอ่อนสำหรับ Caption และ Subtitle */
+    --text-dim:         #4B5563;   /* เทาเข้มสำหรับตัวแบ่ง */
+    --text-code:        #E2E8F0;   /* ตัวอักษร Code Block */
+
+    --border-light:     #232833;   /* เส้นแบ่งส่วนคมชัดแต่ไม่สว่างจ้า */
+    --border-medium:    #323947;   /* ขอบปุ่มและการ์ด */
+    --border-dark:      #E5E7EB;   /* แถบเน้นสีขาวเทาสำหรับ Callout */
+    --shadow-sm:        0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md:        0 4px 16px rgba(0, 0, 0, 0.25);
+
+    --easy-color:       #4ADE80;
+    --easy-bg:          rgba(74, 222, 128, 0.1);
+    --easy-border:      rgba(74, 222, 128, 0.25);
+
+    --medium-color:     #FACC15;
+    --medium-bg:        rgba(250, 204, 21, 0.1);
+    --medium-border:    rgba(250, 204, 21, 0.25);
+
+    --hard-color:       #F87171;
+    --hard-bg:          rgba(248, 113, 113, 0.1);
+    --hard-border:      rgba(248, 113, 113, 0.25);
+  }
+}
+
+/* 3. Explicit Dark Theme (When user selects Dark Mode) */
+:root[data-theme="dark"],
+html[data-theme="dark"],
+body[data-theme="dark"],
 [data-theme="dark"] {
-  /* Background Colors */
-  --bg-body:          #0D0F12;   /* ดำลึก สบายตาแบบ OLED/GitHub Dark */
-  --bg-surface:       #16191E;   /* เทาเข้มพรีเมียม สำหรับ Container & Cards */
-  --bg-surface-hover: #1E232B;   /* พื้นหลัง Hover ใน Dark mode */
-  --bg-subtle:        #1A1E24;   /* เทาเข้มระดับกลาง สำหรับ Badges & Headers */
-  --bg-code:          #0E1116;   /* ดำสนิทสำหรับ Code / Terminal */
-  --bg-code-header:   #181C23;   /* แถบหัว Code block */
-  --bg-callout:       #13161C;   /* พื้นหลัง Callout ใน Dark mode */
-  --nav-backdrop:     rgba(22, 25, 30, 0.92);
+  --bg-body:          #0D0F12;
+  --bg-surface:       #16191E;
+  --bg-surface-hover: #1E232B;
+  --bg-subtle:        #1A1E24;
+  --bg-code:          #0E1116;
+  --bg-code-header:   #181C23;
+  --bg-callout:       #13161C;
+  --nav-backdrop:     rgba(22, 25, 30, 0.94);
 
-  /* Typography Colors */
-  --text-main:        #F0F3F6;   /* ขาวนวล สบายตา อ่านง่าย ไม่แสบตา */
-  --text-secondary:   #9CA3AF;   /* เทากลางสำหรับข้อมูลรอง */
-  --text-muted:       #6B7280;   /* เทาอ่อนสำหรับ Caption และ Subtitle */
-  --text-dim:         #4B5563;   /* เทาเข้มสำหรับตัวแบ่ง */
-  --text-code:        #E2E8F0;   /* ตัวอักษร Code Block */
-  --badge-invert-text:#0D0F12;
+  --text-main:        #F0F3F6;
+  --text-secondary:   #9CA3AF;
+  --text-muted:       #6B7280;
+  --text-dim:         #4B5563;
+  --text-code:        #E2E8F0;
 
-  /* Accents & Borders */
-  --border-light:     #232833;   /* เส้นแบ่งส่วนคมชัดแต่ไม่สว่างจ้า */
-  --border-medium:    #323947;   /* ขอบปุ่มและการ์ด */
-  --border-dark:      #E5E7EB;   /* แถบเน้นสีขาวเทาสำหรับ Callout */
+  --border-light:     #232833;
+  --border-medium:    #323947;
+  --border-dark:      #E5E7EB;
   --shadow-sm:        0 1px 3px rgba(0, 0, 0, 0.3);
   --shadow-md:        0 4px 16px rgba(0, 0, 0, 0.25);
 
-  /* Refined Difficulty Colors for Dark Mode */
   --easy-color:       #4ADE80;
   --easy-bg:          rgba(74, 222, 128, 0.1);
   --easy-border:      rgba(74, 222, 128, 0.25);
@@ -103,6 +137,45 @@
   --hard-color:       #F87171;
   --hard-bg:          rgba(248, 113, 113, 0.1);
   --hard-border:      rgba(248, 113, 113, 0.25);
+}
+
+/* 4. Explicit Light Theme (When user selects Light Mode) */
+:root[data-theme="light"],
+html[data-theme="light"],
+body[data-theme="light"],
+[data-theme="light"] {
+  --bg-body:          #FAFAFA;
+  --bg-surface:       #FFFFFF;
+  --bg-surface-hover: #F4F4F5;
+  --bg-subtle:        #F3F4F6;
+  --bg-code:          #1E1E1E;
+  --bg-code-header:   #2A2A2A;
+  --bg-callout:       #F9FAFB;
+  --nav-backdrop:     rgba(255, 255, 255, 0.94);
+
+  --text-main:        #1A1A1A;
+  --text-secondary:   #555555;
+  --text-muted:       #71717A;
+  --text-dim:         #A1A1AA;
+  --text-code:        #E5E7EB;
+
+  --border-light:     #E5E7EB;
+  --border-medium:    #D1D5DB;
+  --border-dark:      #1A1A1A;
+  --shadow-sm:        0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md:        0 4px 16px rgba(0, 0, 0, 0.04);
+
+  --easy-color:       #166534;
+  --easy-bg:          #F0FDF4;
+  --easy-border:      #BBF7D0;
+
+  --medium-color:     #854D0E;
+  --medium-bg:        #FEFCE8;
+  --medium-border:    #FEF08A;
+
+  --hard-color:       #991B1B;
+  --hard-bg:          #FEF2F2;
+  --hard-border:      #FECACA;
 }
 
 html {
@@ -229,20 +302,20 @@ a {
   height: 17px;
 }
 
-/* Hide sun in light mode, hide moon in dark mode */
-.sun-icon {
-  display: none;
-}
-.moon-icon {
-  display: block;
+/* Icon visibility rules for light & dark modes */
+.sun-icon { display: none; }
+.moon-icon { display: block; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .sun-icon { display: block; }
+  :root:not([data-theme="light"]) .moon-icon { display: none; }
 }
 
-[data-theme="dark"] .sun-icon {
-  display: block;
-}
-[data-theme="dark"] .moon-icon {
-  display: none;
-}
+[data-theme="dark"] .sun-icon { display: block !important; }
+[data-theme="dark"] .moon-icon { display: none !important; }
+
+[data-theme="light"] .sun-icon { display: none !important; }
+[data-theme="light"] .moon-icon { display: block !important; }
 
 .nav-social-pills {
   display: flex;
@@ -565,8 +638,19 @@ a {
 }
 
 .author-hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-size: 13px;
   color: var(--text-muted);
+}
+
+.author-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #10B981;
+  display: inline-block;
 }
 
 .hero-main-row {
@@ -646,7 +730,7 @@ a {
 }
 
 /* ==========================================================================
-   4. WRITEUP PAGE — THREE/TWO COLUMN LAYOUT
+   4. WRITEUP PAGE — THREE-COLUMN LAYOUT
    ========================================================================== */
 .writeup-layout {
   max-width: 1340px;
@@ -668,19 +752,53 @@ a {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-light);
   border-radius: 8px;
-  padding: 20px;
+  padding: 16px;
   transition: var(--theme-transition);
+}
+
+/* Sidebar Author Box */
+.sidebar-author-box {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  transition: var(--theme-transition);
+}
+
+.sidebar-author-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.sidebar-author-meta {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.author-badge-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.author-badge-thm {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 .sidebar-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 12px;
-  margin-bottom: 14px;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
   border-bottom: 1px solid var(--border-light);
   font-family: var(--font-mono);
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--text-muted);
 }
@@ -700,6 +818,23 @@ a {
   justify-content: space-between;
 }
 
+.group-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.diff-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-easy { background-color: var(--easy-color); }
+.dot-medium { background-color: var(--medium-color); }
+.dot-hard { background-color: var(--hard-color); }
+
 .sidebar-list {
   list-style: none;
   display: flex;
@@ -707,26 +842,46 @@ a {
   gap: 2px;
 }
 
-.sidebar-item a {
+.sidebar-link {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
   padding: 6px 10px;
   border-radius: 4px;
   font-size: 13.5px;
   color: var(--text-secondary);
+  transition: all 0.15s ease;
 }
 
-.sidebar-item a:hover {
+.sidebar-link:hover {
   background-color: var(--bg-subtle);
   color: var(--text-main);
 }
 
-.sidebar-item.active a {
+.sidebar-item.active .sidebar-link {
   background-color: var(--bg-subtle);
   color: var(--text-main);
   font-weight: 600;
   border-left: 3px solid var(--border-dark);
+}
+
+.sidebar-item-bullet {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--border-medium);
+  flex-shrink: 0;
+}
+
+.sidebar-item.active .sidebar-item-bullet {
+  background-color: var(--text-main);
+}
+
+.sidebar-item-title {
+  flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sidebar-os-badge {
@@ -818,7 +973,7 @@ a {
 }
 
 /* ==========================================================================
-   5. CONTENT STYLING ELEMENTS (TYPOGRAPHY & COMPONENTS)
+   5. CONTENT STYLING ELEMENTS
    ========================================================================== */
 .writeup-content p {
   margin-bottom: 22px;
@@ -862,7 +1017,7 @@ a {
   margin: 24px 0 10px;
 }
 
-/* Inline Code: พื้นหลังสีเทาอ่อน ตัวอักษรสีดำเข้ม ขอบมนเล็กน้อย */
+/* Inline Code */
 .writeup-content code {
   font-family: var(--font-mono);
   font-size: 0.88em;
@@ -874,7 +1029,7 @@ a {
   transition: var(--theme-transition);
 }
 
-/* Code Blocks / Terminal Output: #1E1E1E / #0E1116 พร้อมปุ่ม Copy & Header */
+/* Code Blocks / Terminal Output */
 .writeup-content pre {
   margin: 26px 0;
   border-radius: 6px;
@@ -921,7 +1076,7 @@ a {
   border-color: #9CA3AF;
 }
 
-/* Callout / Note Boxes: พื้นหลังเทาอ่อน มีแถบเส้นหนาสีดำด้านซ้าย */
+/* Callout / Note Boxes */
 .callout-box,
 blockquote {
   margin: 26px 0;
@@ -951,7 +1106,7 @@ blockquote p:last-child {
   color: var(--text-secondary);
 }
 
-/* Image Container: กรอบรูปภาพมีเส้นขอบสีเทาบางๆ พร้อมคำอธิบายใต้ภาพ */
+/* Image Container */
 .image-container,
 .writeup-content p:has(> img) {
   margin: 28px 0;
