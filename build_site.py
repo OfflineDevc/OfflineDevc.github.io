@@ -121,6 +121,7 @@ def html_template(slug, content_html, images_used):
        <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a> · 
        <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a></p>
   </footer>
+  <script src="../script.js"></script>
 </body>
 </html>
 """

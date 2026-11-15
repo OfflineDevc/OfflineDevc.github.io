@@ -35,3 +35,44 @@ cards.forEach((card, i) => {
   card.style.transition = `opacity .4s ${i * 0.06}s ease, transform .4s ${i * 0.06}s ease`;
   observer.observe(card);
 });
+
+// Writeup Screenshot Lightbox
+document.addEventListener('DOMContentLoaded', () => {
+  const images = document.querySelectorAll('.writeup-content img');
+  if (images.length === 0) return;
+
+  // Create lightbox container
+  const lightbox = document.createElement('div');
+  lightbox.className = 'lightbox-modal';
+  lightbox.innerHTML = `
+    <span class="lightbox-close">&times;</span>
+    <img src="" alt="Zoomed Screenshot" />
+  `;
+  document.body.appendChild(lightbox);
+
+  const lightboxImg = lightbox.querySelector('img');
+  const closeBtn = lightbox.querySelector('.lightbox-close');
+
+  images.forEach(img => {
+    img.addEventListener('click', (e) => {
+      e.stopPropagation();
+      lightboxImg.src = img.src;
+      lightbox.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  const closeLightbox = () => {
+    lightbox.classList.remove('active');
+    document.body.style.overflow = '';
+  };
+
+  lightbox.addEventListener('click', closeLightbox);
+  closeBtn.addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+      closeLightbox();
+    }
+  });
+});
+
