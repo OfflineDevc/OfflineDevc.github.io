@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    OFFLINEDEVC PORTFOLIO & WRITEUPS — UNIFIED DESIGN SYSTEM
    Author: Kun Poonkasetvatana (@OfflineDevc)
    Theme: Minimal Dark Cyber Slate / Bento Grid / Typography Focus
@@ -769,11 +769,57 @@ a {
   text-overflow: ellipsis;
 }
 
-.sidebar-os-tag {
+.sidebar-os-badge {
   font-family: var(--font-mono);
   font-size: 10px;
-  color: var(--text-dim);
-  letter-spacing: .04em;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+.sidebar-os-badge.os-linux {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+.sidebar-os-badge.os-windows {
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.1);
+  border: 1px solid rgba(96, 165, 250, 0.25);
+}
+.sidebar-os-badge.os-ad {
+  color: #c084fc;
+  background: rgba(192, 132, 252, 0.1);
+  border: 1px solid rgba(192, 132, 252, 0.25);
+}
+
+.badge-tag-os.os-linux, .badge-os.os-linux {
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.3);
+  background: rgba(56, 189, 248, 0.08);
+}
+.badge-tag-os.os-windows, .badge-os.os-windows {
+  color: #60a5fa;
+  border-color: rgba(96, 165, 250, 0.3);
+  background: rgba(96, 165, 250, 0.08);
+}
+.badge-tag-os.os-ad, .badge-os.os-ad {
+  color: #c084fc;
+  border-color: rgba(192, 132, 252, 0.3);
+  background: rgba(192, 132, 252, 0.08);
+}
+
+.pagination-badges-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+.prev-card .pagination-badges-row {
+  justify-content: flex-start;
+}
+.next-card .pagination-badges-row {
+  justify-content: flex-end;
 }
 
 .sidebar-link:hover {
