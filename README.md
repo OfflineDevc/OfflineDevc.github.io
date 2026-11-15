@@ -18,7 +18,7 @@ A minimal dark-themed GitHub Pages site showcasing CTF writeups from TryHackMe a
 | Relevant | THM | Medium | SMB, Token Impersonation, PrintSpoofer |
 | Retro | THM | Hard | WordPress, JuicyPotato, CVE-2017-0213 |
 | Silent Monitor | THM | Medium | SQLi, Command Injection, KeePass |
-| Skynet | THM | Medium | SMB, RFI, Tar Wildcard, SUID |
+| Skynet | THM | Easy | SMB, RFI, Tar Wildcard, SUID |
 
 ## Profiles
 
