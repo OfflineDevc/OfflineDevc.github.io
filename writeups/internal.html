@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Internal — OfflineDevc Writeups</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-inner">
+      <span class="nav-logo">&gt; OfflineDevc<span class="cursor">_</span></span>
+      <div class="nav-links">
+        <a href="../index.html#about">About</a>
+        <a href="../index.html#writeups">Writeups</a>
+        <a href="../index.html#contact">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="writeup-hero">
+    <div class="writeup-hero-inner">
+      <a href="../index.html#writeups" class="back-link">← Back to Writeups</a>
+      <div class="card-header" style="margin-bottom:12px">
+        <span class="platform thm-badge">THM</span>
+        <span class="difficulty hard-badge">Hard</span>
+      </div>
+      <h1 class="writeup-title">Internal</h1>
+      <p style="color:#666;font-size:14px;margin-top:8px">Linux (Ubuntu) + Docker · WordPress WPScan → Theme RCE → Docker Container → Jenkins Hydra → SSH → Root</p>
+      <div class="meta-row">
+        <div class="meta-item">🖥 OS: <span>Linux (Ubuntu) + Docker</span></div>
+        <div class="meta-item">🎯 Target: <span><code>10.10.x.x</code></span></div>
+      </div>
+    </div>
+  </header>
+
+  <article class="writeup-content">
+
+    <table class="info-table">
+      <tr><th>Room Name</th><td>Internal</td></tr>
+      <tr><th>Platform</th><td>TryHackMe</td></tr>
+      <tr><th>OS</th><td>Linux (Ubuntu) + Docker</td></tr>
+      <tr><th>Difficulty</th><td>Hard</td></tr>
+      <tr><th>Key Techniques</th><td>WordPress WPScan, Theme Editor RCE, Docker Pivot, Jenkins Hydra HTTP-POST</td></tr>
+    </table>
+
+    <h2>// Attack Chain</h2>
+    <div class="attack-chain">Recon (Nmap)
+  → Port 22 (SSH) · Port 80 (Apache + WordPress)
+  → WPScan → username: admin → brute-force → admin : ████████
+  → WP Admin → Appearance > Theme Editor > twentyseventeen/index.php → PHP shell
+  → Shell as www-data
+  → /etc/hosts → Docker container: 172.17.0.2
+  → Pivot into Docker → Jenkins on :8080
+  → Hydra HTTP POST → admin : ████████
+  → Jenkins Groovy Script Console → reverse shell
+  → Credentials in /var/jenkins_home → SSH key for aubreanna
+  → SSH aubreanna → user.txt
+  → Port forward Jenkins → password in note.txt → su root
+  → root.txt</div>
+
+    <h2>// Methodology</h2>
+    <p>This writeup follows the standard penetration testing lifecycle:
+    <strong>Reconnaissance</strong> → <strong>Enumeration</strong> → <strong>Exploitation</strong> →
+    <strong>Post-Exploitation</strong> → <strong>Privilege Escalation</strong> → <strong>Remediation</strong>.</p>
+    <p style="color:#555;font-size:13px;margin-top:12px">
+      📸 Full screenshot evidence is available in the original report.
+      Sensitive flags and credentials are redacted in compliance with TryHackMe guidelines.
+    </p>
+
+    <h2>// Tools Used</h2>
+    <ul style="color:#888;font-size:13px;line-height:2.2;margin-left:20px">
+      <li><code>Nmap</code></li>
+      <li><code>WPScan</code></li>
+      <li><code>Hydra</code></li>
+      <li><code>Penelope</code></li>
+      <li><code>SSH Port Forwarding</code></li>
+    </ul>
+
+  </article>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="https://github.com/OfflineDevc" target="_blank">GitHub</a>
+        <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a>
+        <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a>
+        <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a>
+      </div>
+      <p class="footer-copy">© 2026 Kun Poonkasetvatana. Educational purposes only.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

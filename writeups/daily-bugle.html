@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Bugle — OfflineDevc Writeups</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-inner">
+      <span class="nav-logo">&gt; OfflineDevc<span class="cursor">_</span></span>
+      <div class="nav-links">
+        <a href="../index.html#about">About</a>
+        <a href="../index.html#writeups">Writeups</a>
+        <a href="../index.html#contact">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="writeup-hero">
+    <div class="writeup-hero-inner">
+      <a href="../index.html#writeups" class="back-link">← Back to Writeups</a>
+      <div class="card-header" style="margin-bottom:12px">
+        <span class="platform thm-badge">THM</span>
+        <span class="difficulty medium-badge">Medium</span>
+      </div>
+      <h1 class="writeup-title">Daily Bugle</h1>
+      <p style="color:#666;font-size:14px;margin-top:8px">Linux (CentOS 7.x) · Joomla SQLi CVE-2017-8917 → Bcrypt Crack → Template RCE → Sudo yum Privesc</p>
+      <div class="meta-row">
+        <div class="meta-item">🖥 OS: <span>Linux (CentOS 7.x)</span></div>
+        <div class="meta-item">🎯 Target: <span><code>10.48.187.164</code></span></div>
+      </div>
+    </div>
+  </header>
+
+  <article class="writeup-content">
+
+    <table class="info-table">
+      <tr><th>Room Name</th><td>Daily Bugle</td></tr>
+      <tr><th>Platform</th><td>TryHackMe</td></tr>
+      <tr><th>OS</th><td>Linux (CentOS 7.x)</td></tr>
+      <tr><th>Target IP</th><td>10.48.187.164</td></tr>
+      <tr><th>Attacker IP</th><td>192.168.132.94</td></tr>
+      <tr><th>Difficulty</th><td>Medium</td></tr>
+      <tr><th>Key CVEs</th><td>CVE-2017-8917 (Joomla 3.7.0 SQLi)</td></tr>
+    </table>
+
+    <h2>// Attack Chain</h2>
+    <div class="attack-chain">Recon (Nmap)
+  → Port 22 (SSH) · Port 80 (Apache + Joomla 3.7.0) · Port 3306 (MariaDB)
+  → joomblah.py → extract jonah bcrypt hash
+  → john --format=bcrypt → cracked: ████████
+  → Login /administrator → Extensions > Templates > Beez3 > index.php
+  → Inject PHP reverse shell → penelope nc -p 4444
+  → Shell as apache
+  → grep -rn "password" /var/www/ → /configuration.php → DB password: ████████
+  → su jjameson → user.txt → ████████████████████████████████
+  → sudo -l → (ALL) NOPASSWD: /usr/bin/yum
+  → GTFOBins yum plugin → sh-4.2# whoami root
+  → cat root.txt → ████████████████████████████████</div>
+
+    <h2>// Methodology</h2>
+    <p>This writeup follows the standard penetration testing lifecycle:
+    <strong>Reconnaissance</strong> → <strong>Enumeration</strong> → <strong>Exploitation</strong> →
+    <strong>Post-Exploitation</strong> → <strong>Privilege Escalation</strong> → <strong>Remediation</strong>.</p>
+    <p style="color:#555;font-size:13px;margin-top:12px">
+      📸 Full screenshot evidence is available in the original report.
+      Sensitive flags and credentials are redacted in compliance with TryHackMe guidelines.
+    </p>
+
+    <h2>// Tools Used</h2>
+    <ul style="color:#888;font-size:13px;line-height:2.2;margin-left:20px">
+      <li><code>Nmap</code></li>
+      <li><code>joomblah.py</code></li>
+      <li><code>John the Ripper</code></li>
+      <li><code>Penelope</code></li>
+      <li><code>GTFOBins</code></li>
+    </ul>
+
+  </article>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="https://github.com/OfflineDevc" target="_blank">GitHub</a>
+        <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a>
+        <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a>
+        <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a>
+      </div>
+      <p class="footer-copy">© 2026 Kun Poonkasetvatana. Educational purposes only.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Domino — OfflineDevc Writeups</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-inner">
+      <span class="nav-logo">&gt; OfflineDevc<span class="cursor">_</span></span>
+      <div class="nav-links">
+        <a href="../index.html#about">About</a>
+        <a href="../index.html#writeups">Writeups</a>
+        <a href="../index.html#contact">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="writeup-hero">
+    <div class="writeup-hero-inner">
+      <a href="../index.html#writeups" class="back-link">← Back to Writeups</a>
+      <div class="card-header" style="margin-bottom:12px">
+        <span class="platform thm-badge">THM</span>
+        <span class="difficulty medium-badge">Medium</span>
+      </div>
+      <h1 class="writeup-title">Domino</h1>
+      <p style="color:#666;font-size:14px;margin-top:8px">Linux (Ubuntu 24.04) · Hydra → IDOR → JWT Tamper → LFI → AES Decrypt → SSH → Cron Hijack → Root</p>
+      <div class="meta-row">
+        <div class="meta-item">🖥 OS: <span>Linux (Ubuntu 24.04)</span></div>
+        <div class="meta-item">🎯 Target: <span><code>10.49.148.24</code></span></div>
+      </div>
+    </div>
+  </header>
+
+  <article class="writeup-content">
+
+    <table class="info-table">
+      <tr><th>Room Name</th><td>Domino</td></tr>
+      <tr><th>Platform</th><td>TryHackMe</td></tr>
+      <tr><th>OS</th><td>Linux (Ubuntu 24.04.4 LTS)</td></tr>
+      <tr><th>Target IP</th><td>10.49.148.24</td></tr>
+      <tr><th>Difficulty</th><td>Medium</td></tr>
+      <tr><th>Key Techniques</th><td>IDOR, JWT Tampering, LFI, AES-128-ECB Decrypt, Cron Hijack</td></tr>
+    </table>
+
+    <h2>// Attack Chain</h2>
+    <div class="attack-chain">Recon (Nmap)
+  → Port 22 (SSH) · Port 80 (Apache — NexusCorp Portal)
+  → Gobuster → /backup /static /api
+  → /backup/README.txt → config.enc (AES-128-ECB), key in static/app.js
+  → /static/app.js → _backupKey: '████████'
+  → /team.php → employee list → username: sarah.johnson
+  → Hydra HTTP POST → sarah.johnson : ████████
+  → Dashboard → /api/users/profile.php?id=1 → IDOR → Flag 1 (laura.hayes admin notes)
+  → Flag 1: THM{████████████████████████████████}
+  → JWT token → Base64 decode → "role":"user" → "role":"admin" → forge JWT
+  → /api/files.php?name=/var/www/html/config.php → LFI → DB_PASS = ████████
+  → openssl AES-128-ECB decrypt config.enc → system_user: devops
+  → SSH devops@10.49.148.24 (password: ████████)
+  → user.txt → THM{████████████████████████████████}  [Flag 4]
+  → /opt/flag3.txt → THM{████████████████████████████████}  [Flag 3]
+  → pspy64 → cron UID=0 → /opt/monitoring/health_report.sh (writable by devops!)
+  → Inject bash reverse shell into health_report.sh
+  → root shell → root.txt → THM{████████████████████████████████}  [Flag 5]</div>
+
+    <h2>// Methodology</h2>
+    <p>This writeup follows the standard penetration testing lifecycle:
+    <strong>Reconnaissance</strong> → <strong>Enumeration</strong> → <strong>Exploitation</strong> →
+    <strong>Post-Exploitation</strong> → <strong>Privilege Escalation</strong> → <strong>Remediation</strong>.</p>
+    <p style="color:#555;font-size:13px;margin-top:12px">
+      📸 Full screenshot evidence is available in the original report.
+      Sensitive flags and credentials are redacted in compliance with TryHackMe guidelines.
+    </p>
+
+    <h2>// Tools Used</h2>
+    <ul style="color:#888;font-size:13px;line-height:2.2;margin-left:20px">
+      <li><code>Nmap</code></li>
+      <li><code>Gobuster</code></li>
+      <li><code>Hydra</code></li>
+      <li><code>curl</code></li>
+      <li><code>OpenSSL</code></li>
+      <li><code>pspy64</code></li>
+      <li><code>Penelope</code></li>
+    </ul>
+
+  </article>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="https://github.com/OfflineDevc" target="_blank">GitHub</a>
+        <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a>
+        <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a>
+        <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a>
+      </div>
+      <p class="footer-copy">© 2026 Kun Poonkasetvatana. Educational purposes only.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

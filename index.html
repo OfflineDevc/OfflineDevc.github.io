@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OfflineDevc — CTF Writeups</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <span class="nav-logo">&gt; OfflineDevc<span class="cursor">_</span></span>
+      <div class="nav-links">
+        <a href="#about">About</a>
+        <a href="#writeups">Writeups</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero" id="about">
+    <div class="hero-inner">
+      <div class="hero-badge">CTF | Penetration Testing | Security Research</div>
+      <h1 class="hero-title">
+        <span class="dim">//</span> Kun Poonkasetvatana
+      </h1>
+      <p class="hero-sub">
+        Security enthusiast documenting CTF walkthroughs, penetration testing techniques,<br />
+        and exploit development on TryHackMe &amp; HackTheBox.
+      </p>
+
+      <div class="social-row">
+        <a href="https://github.com/OfflineDevc" target="_blank" rel="noopener" class="social-btn github">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.021c0 4.428 2.865 8.185 6.839 9.504.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.203 22 16.447 22 12.021 22 6.484 17.523 2 12 2z"/></svg>
+          GitHub
+        </a>
+        <a href="https://tryhackme.com/p/Distowel" target="_blank" rel="noopener" class="social-btn thm">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.705 0C7.54 0 4.908 2.13 4.173 5.047A4.226 4.226 0 0 0 0 9.248a4.226 4.226 0 0 0 4.226 4.226h6.479A4.226 4.226 0 0 0 14.93 9.248a4.21 4.21 0 0 0-1.733-3.4C12.95 2.56 11.937 0 10.705 0zm0 1.588c.983 0 1.869.924 2.388 2.44a4.19 4.19 0 0 0-2.388-.744 4.19 4.19 0 0 0-2.387.744c.518-1.516 1.404-2.44 2.387-2.44zM19.774 10.526a4.226 4.226 0 0 0-4.226 4.226 4.226 4.226 0 0 0 4.226 4.226A4.226 4.226 0 0 0 24 14.752a4.226 4.226 0 0 0-4.226-4.226z"/></svg>
+          TryHackMe
+        </a>
+        <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank" rel="noopener" class="social-btn htb">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.996 0 0 6.5v11L11.996 24 24 17.5v-11zm-.003 2.333 9.503 5.334v9.665l-9.503 5.334-9.5-5.334V7.667z"/></svg>
+          HackTheBox
+        </a>
+        <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank" rel="noopener" class="social-btn linkedin">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          LinkedIn
+        </a>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <span class="stat-num">11</span>
+          <span class="stat-label">Writeups</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num">2</span>
+          <span class="stat-label">Platforms</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num">4</span>
+          <span class="stat-label">Difficulty Levels</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- WRITEUPS -->
+  <section class="section" id="writeups">
+    <div class="section-inner">
+      <h2 class="section-title"><span class="dim">$</span> ls ./writeups</h2>
+      <p class="section-sub">All writeups are structured with Reconnaissance → Exploitation → Privilege Escalation → Remediation.</p>
+
+      <div class="filter-row">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="easy">Easy</button>
+        <button class="filter-btn" data-filter="medium">Medium</button>
+        <button class="filter-btn" data-filter="hard">Hard</button>
+        <button class="filter-btn" data-filter="thm">TryHackMe</button>
+      </div>
+
+      <div class="writeup-grid" id="writeup-grid">
+
+        <div class="writeup-card" data-tags="hard thm bof windows">
+          <div class="card-header">
+            <span class="platform thm-badge">THM</span>
+            <span class="difficulty hard-badge">Hard</span>
+          </div>
+          <h3 class="card-title">Brainpan 1</h3>
+          <p class="card-desc">Stack-based Buffer Overflow on a 32-bit Windows binary running under Wine. EIP control via Mona gadget search, then Linux reverse shell via JMP ESP with Sudo NOPASSWD privesc.</p>
+          <div class="card-tags">
+            <span class="tag">Buffer Overflow</span>
+            <span class="tag">x86 Exploit</span>
+            <span class="tag">Immunity Debugger</span>
+            <span class="tag">Mona.py</span>
+          </div>
+          <a href="writeups/brainpan1.html" class="card-link">Read Writeup →</a>
+        </div>
+
+        <div class="writeup-card" data-tags="medium thm web linux">
+          <div class="card-header">
+            <span class="platform thm-badge">THM</span>
+            <span class="difficulty medium-badge">Medium</span>
+          </div>
+          <h3 class="card-title">Daily Bugle</h3>
+          <p class="card-desc">Joomla 3.7.0 SQLi (CVE-2017-8917) → bcrypt hash cracking → Template RCE → Credential harvesting in config → Sudo yum GTFOBins privesc to root.</p>
+          <div class="card-tags">
+            <span class="tag">SQLi</span>
+            <span class="tag">Joomla</span>
+            <span class="tag">CVE-2017-8917</span>
+            <span class="tag">GTFOBins</span>
+          </div>
+          <a href="writeups/daily-bugle.html" class="card-link">Read Writeup →</a>
+        </div>
+
+        <div class="writeup-card" data-tags="medium hard thm linux windows activedirectory">
+          <div class="card-header">
+            <span class="platform thm-badge">THM</span>
+            <span class="difficulty hard-badge">Medium/Hard</span>
+          </div>
+          <h3 class="card-title">Deaddrop</h3>
+          <p class="card-desc">SQLi auth bypass → Node.js RCE → Shadow file cracking → Android APK reverse engineering (JADX) → SSH SOCKS pivot → Active Directory AddMember ACL abuse via bloodyAD.</p>
+          <div class="card-tags">
+            <span class="tag">SQLi</span>
+            <span class="tag">APK Reversing</span>
+            <span class="tag">JADX</span>
+            <span class="tag">Active Directory</span>
+            <span class="tag">bloodyAD</span>
+          </div>
+          <a href="writeups/deaddrop.html" class="card-link">Read Writeup →</a>
+        </div>
+
+        <div class="writeup-card" data-tags="medium thm linux web jwt">
+          <div class="card-header">
+            <span class="platform thm-badge">THM</span>
+            <span class="difficulty medium-badge">Medium</span>
+          </div>
+          <h3 class="card-title">Domino</h3>
+          <p class="card-desc">NexusCorp Portal → Hydra brute-force → IDOR on API → JWT role tampering → LFI → AES-128-ECB backup decryption → SSH → Writable cron script hijack → Root.</p>
+          <div class="card-tags">
+            <span class="tag">IDOR</span>
+            <span class="tag">JWT Tampering</span>
+            <span class="tag">LFI</span>
+            <span class="tag">Cron Hijack</span>
+          </div>
+          <a href="writeups/domino.html" class="card-link">Read Writeup →</a>
+        </div>
+
+        <div class="writeup-card" data-tags="hard thm activedirectory windows">
+          <div class="card-header">
+            <span class="platform thm-badge">THM</span>
+            <span class="difficulty hard-badge">Hard</span>
+          </div>
+          <h3 class="card-title">Forward</h3>
+          <p class="card-desc">Active Directory enumeration via BloodHound → Kerberoasting → Password spraying (NetExec) → RBCD attack chain (addcomputer → rbcd → getST → psexec) → Domain Admin.</p>
+          <div class="card-tags">
+            <span class="tag">Active Directory</span>
+            <span class="tag">RBCD</span>
+            <span class="tag">Kerberoasting</span>
+            <span class="tag">BloodHound</span>
+            <span class="tag">Impacket</span>
+          </div>
+          <a href="writeups/forward.html" class="card-link">Read Writeup →</a>
+        </div>
+
+        <div class="writeup-card" data-tags="hard thm linux wordpress">
+          <div class="card-header">
+            <span class="platform thm-badge">THM</span>
+            <span class="difficulty hard-badge">Hard</span>
+          </div>
+          <h3 class="card-title">Internal</h3>
+          <p class="card-desc">WordPress WPScan brute-force → theme editor PHP shell → Docker pivot → Jenkins Hydra HTTP-POST crack → tunnel → SSH privesc to root flag.</p>
+          <div class="card-tags">
+            <span class="tag">WordPress</span>
+            <span class="tag">WPScan</span>
+            <span class="tag">Jenkins</span>
+            <span class="tag">Docker Pivot</span>
+          </div>
+          <a href="writeups/internal.html" class="card-link">Read Writeup →</a>
+        </div>
+
+        <div class="writeup-card" data-tags="medium thm linux wordpress">
+          <div class="card-header">
+            <span class="platform thm-badge">THM</span>
+            <span class="difficulty medium-badge">Medium</span>
+          </div>
+          <h3 class="card-title">Mr. Robot CTF</h3>
+          <p class="card-desc">robots.txt disclosure → WordPress WPScan elliot brute-force → Theme editor RCE → MD5 raw hash crack → su robot → SUID nmap interactive mode → Root.</p>
+          <div class="card-tags">
+            <span class="tag">WordPress</span>
+            <span class="tag">SUID</span>
+            <span class="tag">Hash Cracking</span>
+            <span class="tag">Information Disclosure</span>
+          </div>
+          <a href="writeups/mrrobotctf.html" class="card-link">Read Writeup →</a>
+        </div>
+
+        <div class="writeup-card" data-tags="medium thm windows smb">
+          <div class="card-header">
+            <span class="platform thm-badge">THM</span>
+            <span class="difficulty medium-badge">Medium</span>
+          </div>
+          <h3 class="card-title">Relevant</h3>
+          <p class="card-desc">Anonymous SMB share enumeration → Base64-decoded credentials → SMB upload → Token impersonation via PrintSpoofer → System shell on Windows Server 2019.</p>
+          <div class="card-tags">
+            <span class="tag">SMB</span>
+            <span class="tag">Token Impersonation</span>
+            <span class="tag">PrintSpoofer</span>
+            <span class="tag">Windows</span>
+          </div>
+          <a href="writeups/relevant.html" class="card-link">Read Writeup →</a>
+        </div>
+
+        <div class="writeup-card" data-tags="hard thm windows wordpress">
+          <div class="card-header">
+            <span class="platform thm-badge">THM</span>
+            <span class="difficulty hard-badge">Hard</span>
+          </div>
+          <h3 class="card-title">Retro</h3>
+          <p class="card-desc">WordPress credential harvesting from blog comments → Theme editor 404.php RCE → JuicyPotato SeImpersonatePrivilege escalation → SYSTEM. Alt: FreeRDP + CVE-2017-0213.</p>
+          <div class="card-tags">
+            <span class="tag">WordPress</span>
+            <span class="tag">JuicyPotato</span>
+            <span class="tag">Token Impersonation</span>
+            <span class="tag">CVE-2017-0213</span>
+          </div>
+          <a href="writeups/retro.html" class="card-link">Read Writeup →</a>
+        </div>
+
+        <div class="writeup-card" data-tags="medium thm linux web sqli">
+          <div class="card-header">
+            <span class="platform thm-badge">THM</span>
+            <span class="difficulty medium-badge">Medium</span>
+          </div>
+          <h3 class="card-title">Silent Monitor</h3>
+          <p class="card-desc">SQLi auth bypass → Newline OS command injection via Burp Suite → Config file credential leak → SSH as sysadmin → KeePass database cracking (keepass2john) → su root.</p>
+          <div class="card-tags">
+            <span class="tag">SQLi</span>
+            <span class="tag">Command Injection</span>
+            <span class="tag">KeePass</span>
+            <span class="tag">Burp Suite</span>
+          </div>
+          <a href="writeups/silent-monitor.html" class="card-link">Read Writeup →</a>
+        </div>
+
+        <div class="writeup-card" data-tags="medium thm linux smb rfi">
+          <div class="card-header">
+            <span class="platform thm-badge">THM</span>
+            <span class="difficulty medium-badge">Medium</span>
+          </div>
+          <h3 class="card-title">Skynet</h3>
+          <p class="card-desc">Anonymous SMB → password log → Hydra SquirrelMail → Miles Dyson SMB credentials → Cuppa CMS RFI shell → pspy64 tar wildcard → SUID rootbash → Root flag.</p>
+          <div class="card-tags">
+            <span class="tag">SMB</span>
+            <span class="tag">RFI</span>
+            <span class="tag">Hydra</span>
+            <span class="tag">Tar Wildcard</span>
+            <span class="tag">SUID</span>
+          </div>
+          <a href="writeups/skynet.html" class="card-link">Read Writeup →</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <footer class="footer" id="contact">
+    <div class="footer-inner">
+      <p class="footer-title"><span class="dim">$</span> whoami</p>
+      <p class="footer-name">Kun Poonkasetvatana <span class="dim">// OfflineDevc</span></p>
+      <div class="footer-links">
+        <a href="https://github.com/OfflineDevc" target="_blank">GitHub</a>
+        <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a>
+        <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a>
+        <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a>
+      </div>
+      <p class="footer-copy">© 2026 Kun Poonkasetvatana. All writeups for educational purposes only.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

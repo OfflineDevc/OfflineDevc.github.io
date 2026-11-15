@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brainpan 1 — OfflineDevc Writeups</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-inner">
+      <span class="nav-logo">&gt; OfflineDevc<span class="cursor">_</span></span>
+      <div class="nav-links">
+        <a href="../index.html#about">About</a>
+        <a href="../index.html#writeups">Writeups</a>
+        <a href="../index.html#contact">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="writeup-hero">
+    <div class="writeup-hero-inner">
+      <a href="../index.html#writeups" class="back-link">← Back to Writeups</a>
+      <div class="card-header" style="margin-bottom:12px">
+        <span class="platform thm-badge">THM</span>
+        <span class="difficulty hard-badge">Hard</span>
+      </div>
+      <h1 class="writeup-title">Brainpan 1</h1>
+      <p style="color:#666;font-size:14px;margin-top:8px">Linux (Ubuntu + Wine — 32-bit PE) · Stack Buffer Overflow (x86) → Linux Reverse Shell → Sudo NOPASSWD Privesc</p>
+      <div class="meta-row">
+        <div class="meta-item">🖥 OS: <span>Linux (Ubuntu + Wine — 32-bit PE)</span></div>
+        <div class="meta-item">🎯 Target: <span><code>10.48.175.164</code></span></div>
+      </div>
+    </div>
+  </header>
+
+  <article class="writeup-content">
+
+    <table class="info-table">
+      <tr><th>Room Name</th><td>Brainpan 1</td></tr>
+      <tr><th>Platform</th><td>TryHackMe</td></tr>
+      <tr><th>OS</th><td>Linux (Ubuntu / Wine — 32-bit PE)</td></tr>
+      <tr><th>Target IP</th><td>10.48.175.164</td></tr>
+      <tr><th>Attacker IP</th><td>192.168.132.94</td></tr>
+      <tr><th>Difficulty</th><td>Hard</td></tr>
+      <tr><th>Key Techniques</th><td>Stack Buffer Overflow, JMP ESP gadget, msfvenom, Sudo NOPASSWD pager escape</td></tr>
+    </table>
+
+    <h2>// Attack Chain</h2>
+    <div class="attack-chain">Recon (Nmap)
+  → Port 9999 (Brainpan service) · Port 10000 (Python SimpleHTTPServer)
+  → Download brainpan.exe from /bin/brainpan.exe
+  → Fuzz with fuzz.py → crash at 600 bytes
+  → msf-pattern_create -l 1000 → EIP offset = 524
+  → Mona bytearray → Bad char = \x00 only
+  → !mona jmp -r esp → JMP ESP at 0x311712f3
+  → msfvenom linux/x86/shell_reverse_tcp → 95-byte shellcode
+  → exploit.py → nc -lvnp 4444 → shell as puck
+  → sudo -l → (root) NOPASSWD: /home/anansi/bin/anansi_util
+  → sudo /home/anansi/bin/anansi_util manual man
+  → !/bin/bash → root@brainpan</div>
+
+    <h2>// Methodology</h2>
+    <p>This writeup follows the standard penetration testing lifecycle:
+    <strong>Reconnaissance</strong> → <strong>Enumeration</strong> → <strong>Exploitation</strong> →
+    <strong>Post-Exploitation</strong> → <strong>Privilege Escalation</strong> → <strong>Remediation</strong>.</p>
+    <p style="color:#555;font-size:13px;margin-top:12px">
+      📸 Full screenshot evidence is available in the original report.
+      Sensitive flags and credentials are redacted in compliance with TryHackMe guidelines.
+    </p>
+
+    <h2>// Tools Used</h2>
+    <ul style="color:#888;font-size:13px;line-height:2.2;margin-left:20px">
+      <li><code>Nmap</code></li>
+      <li><code>Immunity Debugger + Mona.py</code></li>
+      <li><code>msf-pattern_create</code></li>
+      <li><code>msfvenom</code></li>
+      <li><code>Netcat</code></li>
+    </ul>
+
+  </article>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="https://github.com/OfflineDevc" target="_blank">GitHub</a>
+        <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a>
+        <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a>
+        <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a>
+      </div>
+      <p class="footer-copy">© 2026 Kun Poonkasetvatana. Educational purposes only.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
