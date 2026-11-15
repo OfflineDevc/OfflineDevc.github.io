@@ -20,7 +20,7 @@ A minimal dark-themed GitHub Pages site showcasing CTF writeups from TryHackMe a
 | Silent Monitor | THM | Medium | SQLi, Command Injection, KeePass |
 | Skynet | THM | Medium | SMB, RFI, Tar Wildcard, SUID |
 
-## 🔗 Profiles
+## Profiles
 
 - [GitHub](https://github.com/OfflineDevc)
 - [TryHackMe](https://tryhackme.com/p/Distowel)
