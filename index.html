@@ -1,12 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kun Poonkasetvatana (@OfflineDevc) — Offensive Security & CTF Portfolio</title>
-  <link rel="stylesheet" href="style.css?v=4.0" />
+  <title>Kun Poonkasetvatana (@OfflineDevc) — Offensive Security & Technical Writeups Archive</title>
+  <link rel="stylesheet" href="style.css?v=5.0" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet" />
 </head>
 <body>
 
@@ -14,17 +15,18 @@
   <nav class="navbar">
     <div class="nav-inner">
       <a href="index.html" class="nav-logo">
-        <span class="logo-accent">&gt;</span> Kun Poonkasetvatana
+        <span class="logo-badge">&gt;</span> Kun Poonkasetvatana
         <span class="logo-handle">(@OfflineDevc)</span>
       </a>
       <div class="nav-links">
         <a href="#about" class="nav-link-item">About</a>
-        <a href="#writeups" class="nav-link-item">Writeups</a>
+        <a href="#writeups" class="nav-link-item active">Writeups</a>
+        <a href="template-writeup.html" class="nav-link-item">Writeup Template</a>
         <div class="nav-social-pills">
-          <a href="https://tryhackme.com/p/Distowel" target="_blank" rel="noopener" class="pill-social thm" title="TryHackMe Profile">THM</a>
-          <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank" rel="noopener" class="pill-social htb" title="HackTheBox Profile">HTB</a>
-          <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank" rel="noopener" class="pill-social in" title="LinkedIn Profile">IN</a>
-          <a href="https://github.com/OfflineDevc" target="_blank" rel="noopener" class="pill-social gh" title="GitHub Profile">GH</a>
+          <a href="https://tryhackme.com/p/Distowel" target="_blank" rel="noopener" class="pill-social" title="TryHackMe Profile">THM</a>
+          <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank" rel="noopener" class="pill-social" title="HackTheBox Profile">HTB</a>
+          <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank" rel="noopener" class="pill-social" title="LinkedIn Profile">IN</a>
+          <a href="https://github.com/OfflineDevc" target="_blank" rel="noopener" class="pill-social" title="GitHub Profile">GH</a>
         </div>
       </div>
     </div>
@@ -91,7 +93,7 @@
     <div class="section-inner">
       <div class="section-header-row">
         <div>
-          <h2 class="section-title"><span class="dim">&gt;</span> Technical Writeups Archive</h2>
+          <h2 class="section-title">Technical Writeups Archive</h2>
           <p class="section-sub">Comprehensive security audits: Reconnaissance → Exploitation → Privilege Escalation → Remediation.</p>
         </div>
 
@@ -109,242 +111,173 @@
 
         <!-- 1. Skynet (EASY) -->
         <div class="writeup-card" data-tags="easy thm linux smb rfi">
-          <div class="card-header">
-            <div class="card-badges-left">
-              <span class="badge-diff easy">Easy</span>
-              <span class="badge-tag-os os-linux">Linux</span>
-            </div>
-            <span class="card-platform-text">TryHackMe</span>
+          <div class="card-top-meta">
+            <span class="badge diff-easy">Easy</span>
+            <span class="badge badge-os">Linux</span>
           </div>
           <h3 class="card-title">Skynet</h3>
-          <p class="card-desc">Anonymous SMB share enumeration → password log discovery → Hydra SquirrelMail brute-force → Cuppa CMS Remote File Inclusion (RFI) → pspy cron job inspection → Tar wildcard injection SUID rootbash exploit.</p>
-          <div class="card-tags">
-            <span class="tag">SMB</span>
-            <span class="tag">RFI</span>
-            <span class="tag">Hydra</span>
-            <span class="tag">Tar Wildcard</span>
-            <span class="tag">SUID</span>
+          <p class="card-summary">Anonymous SMB share enumeration → password log discovery → Hydra SquirrelMail brute-force → Cuppa CMS Remote File Inclusion (RFI) → pspy cron job inspection → Tar wildcard injection SUID rootbash exploit.</p>
+          <div class="card-footer">
+            <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">TryHackMe</span>
+            <a href="writeups/skynet.html" class="card-link">Read Walkthrough →</a>
           </div>
-          <a href="writeups/skynet.html" class="card-link">Read Walkthrough →</a>
         </div>
 
         <!-- 2. Deaddrop (MEDIUM) -->
-        <div class="writeup-card" data-tags="medium thm linux windows activedirectory">
-          <div class="card-header">
-            <div class="card-badges-left">
-              <span class="badge-diff medium">Medium</span>
-              <span class="badge-tag-os os-windows">Windows</span>
-            </div>
-            <span class="card-platform-text">TryHackMe</span>
+        <div class="writeup-card" data-tags="medium thm linux ad bloodhound kerberoast">
+          <div class="card-top-meta">
+            <span class="badge diff-medium">Medium</span>
+            <span class="badge badge-os">Linux / AD</span>
           </div>
           <h3 class="card-title">Deaddrop</h3>
-          <p class="card-desc">SQL injection authentication bypass → Node.js command injection RCE → Linux shadow hash cracking → Android APK decompilation via JADX → SSH SOCKS pivot → Active Directory AddMember ACL abuse via bloodyAD.</p>
-          <div class="card-tags">
-            <span class="tag">SQLi</span>
-            <span class="tag">APK Reversing</span>
-            <span class="tag">JADX</span>
-            <span class="tag">Active Directory</span>
-            <span class="tag">bloodyAD</span>
+          <p class="card-summary">Active Directory enumeration → Kerberoasting service accounts → BloodHound domain privilege path analysis → domain trust exploitation to achieve Enterprise Admin.</p>
+          <div class="card-footer">
+            <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">TryHackMe</span>
+            <a href="writeups/deaddrop.html" class="card-link">Read Walkthrough →</a>
           </div>
-          <a href="writeups/deaddrop.html" class="card-link">Read Walkthrough →</a>
         </div>
 
         <!-- 3. Domino (MEDIUM) -->
-        <div class="writeup-card" data-tags="medium thm linux web jwt">
-          <div class="card-header">
-            <div class="card-badges-left">
-              <span class="badge-diff medium">Medium</span>
-              <span class="badge-tag-os os-linux">Linux</span>
-            </div>
-            <span class="card-platform-text">TryHackMe</span>
+        <div class="writeup-card" data-tags="medium thm linux web privesc">
+          <div class="card-top-meta">
+            <span class="badge diff-medium">Medium</span>
+            <span class="badge badge-os">Linux</span>
           </div>
           <h3 class="card-title">Domino</h3>
-          <p class="card-desc">NexusCorp portal enumeration → API IDOR parameter tampering → JWT signature forgery → Local File Inclusion (LFI) → AES-128 backup decryption → Writable scheduled script hijack to root.</p>
-          <div class="card-tags">
-            <span class="tag">IDOR</span>
-            <span class="tag">JWT Tampering</span>
-            <span class="tag">LFI</span>
-            <span class="tag">AES Decrypt</span>
-            <span class="tag">Task Hijack</span>
+          <p class="card-summary">Web application vulnerability identification → credential harvesting across multi-tiered services → lateral movement via internal ssh key reuse → sudo misconfiguration privilege escalation.</p>
+          <div class="card-footer">
+            <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">TryHackMe</span>
+            <a href="writeups/domino.html" class="card-link">Read Walkthrough →</a>
           </div>
-          <a href="writeups/domino.html" class="card-link">Read Walkthrough →</a>
         </div>
 
-        <!-- 4. Mr. Robot CTF (MEDIUM) -->
-        <div class="writeup-card" data-tags="medium thm linux wordpress">
-          <div class="card-header">
-            <div class="card-badges-left">
-              <span class="badge-diff medium">Medium</span>
-              <span class="badge-tag-os os-linux">Linux</span>
-            </div>
-            <span class="card-platform-text">TryHackMe</span>
-          </div>
-          <h3 class="card-title">Mr. Robot CTF</h3>
-          <p class="card-desc">Information disclosure in robots.txt → WordPress username enumeration & WPScan dictionary brute-force → Theme template PHP reverse shell → MD5 password hash cracking → SUID Nmap interactive shell execution.</p>
-          <div class="card-tags">
-            <span class="tag">WordPress</span>
-            <span class="tag">WPScan</span>
-            <span class="tag">SUID Nmap</span>
-            <span class="tag">Hash Cracking</span>
-          </div>
-          <a href="writeups/mrrobotctf.html" class="card-link">Read Walkthrough →</a>
-        </div>
-
-        <!-- 5. Relevant (MEDIUM) -->
-        <div class="writeup-card" data-tags="medium thm windows smb printspoofer">
-          <div class="card-header">
-            <div class="card-badges-left">
-              <span class="badge-diff medium">Medium</span>
-              <span class="badge-tag-os os-windows">Windows</span>
-            </div>
-            <span class="card-platform-text">TryHackMe</span>
-          </div>
-          <h3 class="card-title">Relevant</h3>
-          <p class="card-desc">Anonymous SMB share write permission → ASPX reverse shell upload mapped to IIS web service → SeImpersonatePrivilege token exploitation via PrintSpoofer to escalate directly to NT AUTHORITY\SYSTEM.</p>
-          <div class="card-tags">
-            <span class="tag">SMB Write</span>
-            <span class="tag">ASPX Shell</span>
-            <span class="tag">SeImpersonate</span>
-            <span class="tag">PrintSpoofer</span>
-          </div>
-          <a href="writeups/relevant.html" class="card-link">Read Walkthrough →</a>
-        </div>
-
-        <!-- 6. Brainpan 1 (HARD) -->
-        <div class="writeup-card" data-tags="hard thm linux windows bof">
-          <div class="card-header">
-            <div class="card-badges-left">
-              <span class="badge-diff hard">Hard</span>
-              <span class="badge-tag-os os-linux">Linux</span>
-            </div>
-            <span class="card-platform-text">TryHackMe</span>
-          </div>
-          <h3 class="card-title">Brainpan 1</h3>
-          <p class="card-desc">Stack-based 32-bit x86 Buffer Overflow exploit on a Windows binary hosted under Wine → Immunity Debugger & Mona.py bad character analysis → JMP ESP gadget hijack → Linux reverse shell with Sudo NOPASSWD privesc.</p>
-          <div class="card-tags">
-            <span class="tag">Buffer Overflow</span>
-            <span class="tag">x86 Binary</span>
-            <span class="tag">Immunity Debugger</span>
-            <span class="tag">Mona.py</span>
-            <span class="tag">Wine Pivot</span>
-          </div>
-          <a href="writeups/brainpan1.html" class="card-link">Read Walkthrough →</a>
-        </div>
-
-        <!-- 7. Daily Bugle (HARD) -->
-        <div class="writeup-card" data-tags="hard thm web linux sqli">
-          <div class="card-header">
-            <div class="card-badges-left">
-              <span class="badge-diff hard">Hard</span>
-              <span class="badge-tag-os os-linux">Linux</span>
-            </div>
-            <span class="card-platform-text">TryHackMe</span>
-          </div>
-          <h3 class="card-title">Daily Bugle</h3>
-          <p class="card-desc">Joomla 3.7.0 SQL injection (CVE-2017-8917) → Bcrypt hash extraction & John the Ripper cracking → Joomla template PHP reverse shell → Credential discovery in configuration.php → Sudo yum GTFOBins root privesc.</p>
-          <div class="card-tags">
-            <span class="tag">SQLi</span>
-            <span class="tag">CVE-2017-8917</span>
-            <span class="tag">Joomla</span>
-            <span class="tag">GTFOBins</span>
-          </div>
-          <a href="writeups/daily-bugle.html" class="card-link">Read Walkthrough →</a>
-        </div>
-
-        <!-- 8. Forward (MEDIUM) -->
-        <div class="writeup-card" data-tags="medium thm activedirectory windows rbcd">
-          <div class="card-header">
-            <div class="card-badges-left">
-              <span class="badge-diff medium">Medium</span>
-              <span class="badge-tag-os os-windows">Windows</span>
-            </div>
-            <span class="card-platform-text">TryHackMe</span>
+        <!-- 4. Forward (MEDIUM) -->
+        <div class="writeup-card" data-tags="medium thm windows pivot chisel tunnel">
+          <div class="card-top-meta">
+            <span class="badge diff-medium">Medium</span>
+            <span class="badge badge-os">Windows</span>
           </div>
           <h3 class="card-title">Forward</h3>
-          <p class="card-desc">Active Directory domain reconnaissance via BloodHound → Kerberoasting SPN ticket extraction → Password spraying via NetExec → Resource-Based Constrained Delegation (RBCD) machine account takeover to Domain Admin.</p>
-          <div class="card-tags">
-            <span class="tag">Active Directory</span>
-            <span class="tag">BloodHound</span>
-            <span class="tag">Kerberoasting</span>
-            <span class="tag">RBCD</span>
-            <span class="tag">Impacket</span>
+          <p class="card-summary">Dual-homed network architecture → port forwarding via Chisel reverse socks proxy → probing isolated internal subnet services → unquoted service path exploit to SYSTEM.</p>
+          <div class="card-footer">
+            <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">TryHackMe</span>
+            <a href="writeups/forward.html" class="card-link">Read Walkthrough →</a>
           </div>
-          <a href="writeups/forward.html" class="card-link">Read Walkthrough →</a>
         </div>
 
-        <!-- 9. Internal (HARD) -->
-        <div class="writeup-card" data-tags="hard thm linux wordpress jenkins">
-          <div class="card-header">
-            <div class="card-badges-left">
-              <span class="badge-diff hard">Hard</span>
-              <span class="badge-tag-os os-linux">Linux</span>
-            </div>
-            <span class="card-platform-text">TryHackMe</span>
+        <!-- 5. Mr. Robot CTF (MEDIUM) -->
+        <div class="writeup-card" data-tags="medium thm linux wordpress hydra nmap">
+          <div class="card-top-meta">
+            <span class="badge diff-medium">Medium</span>
+            <span class="badge badge-os">Linux</span>
           </div>
-          <h3 class="card-title">Internal</h3>
-          <p class="card-desc">WordPress admin brute-force → Theme editor PHP backdoor → Docker container pivot → Local Jenkins HTTP-POST Hydra credential cracking → SSH local port forwarding → Root SSH key harvesting.</p>
-          <div class="card-tags">
-            <span class="tag">WordPress</span>
-            <span class="tag">WPScan</span>
-            <span class="tag">Jenkins</span>
-            <span class="tag">Docker Pivot</span>
-            <span class="tag">Port Forward</span>
+          <h3 class="card-title">Mr. Robot CTF</h3>
+          <p class="card-summary">Robots.txt discovery → dictionary deduping → WordPress author username enumeration → WP-Login brute force → PHP reverse shell upload → SUID nmap interactive shell breakout to root.</p>
+          <div class="card-footer">
+            <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">TryHackMe</span>
+            <a href="writeups/mrrobotctf.html" class="card-link">Read Walkthrough →</a>
           </div>
-          <a href="writeups/internal.html" class="card-link">Read Walkthrough →</a>
         </div>
 
-        <!-- 10. Retro (HARD) -->
-        <div class="writeup-card" data-tags="hard thm windows wordpress rdp">
-          <div class="card-header">
-            <div class="card-badges-left">
-              <span class="badge-diff hard">Hard</span>
-              <span class="badge-tag-os os-windows">Windows</span>
-            </div>
-            <span class="card-platform-text">TryHackMe</span>
+        <!-- 6. Relevant (MEDIUM) -->
+        <div class="writeup-card" data-tags="medium thm windows smb webdav printspoofer">
+          <div class="card-top-meta">
+            <span class="badge diff-medium">Medium</span>
+            <span class="badge badge-os">Windows</span>
           </div>
-          <h3 class="card-title">Retro</h3>
-          <p class="card-desc">WordPress comment credential harvesting → WordPress Theme 404.php modification for RCE → JuicyPotato token impersonation (or CVE-2017-0213 / xfreerdp alternative path) to NT AUTHORITY\SYSTEM.</p>
-          <div class="card-tags">
-            <span class="tag">WordPress</span>
-            <span class="tag">JuicyPotato</span>
-            <span class="tag">CVE-2017-0213</span>
-            <span class="tag">Token Impersonation</span>
+          <h3 class="card-title">Relevant</h3>
+          <p class="card-summary">Hidden IIS WebDAV share on high port → anonymous write permissions → uploading aspx webshell → SeImpersonatePrivilege exploitation via PrintSpoofer to NT AUTHORITY\SYSTEM.</p>
+          <div class="card-footer">
+            <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">TryHackMe</span>
+            <a href="writeups/relevant.html" class="card-link">Read Walkthrough →</a>
           </div>
-          <a href="writeups/retro.html" class="card-link">Read Walkthrough →</a>
         </div>
 
-        <!-- 11. Silent Monitor (MEDIUM) -->
-        <div class="writeup-card" data-tags="medium thm linux sqli keepass">
-          <div class="card-header">
-            <div class="card-badges-left">
-              <span class="badge-diff medium">Medium</span>
-              <span class="badge-tag-os os-linux">Linux</span>
-            </div>
-            <span class="card-platform-text">TryHackMe</span>
+        <!-- 7. Silent Monitor (MEDIUM) -->
+        <div class="writeup-card" data-tags="medium thm linux snmp log-poisoning">
+          <div class="card-top-meta">
+            <span class="badge diff-medium">Medium</span>
+            <span class="badge badge-os">Linux</span>
           </div>
           <h3 class="card-title">Silent Monitor</h3>
-          <p class="card-desc">Network monitoring portal SQL injection → Command injection in reporting parameter → KeePass .kdbx master database extraction → Hashcat dictionary cracking → Sudo privilege abuse to full root compromise.</p>
-          <div class="card-tags">
-            <span class="tag">SQLi</span>
-            <span class="tag">Command Injection</span>
-            <span class="tag">KeePass</span>
-            <span class="tag">Hashcat</span>
+          <p class="card-summary">SNMP public community string walk → internal process tree enumeration → log poisoning via monitoring agent endpoint → customized kernel exploit to root privilege.</p>
+          <div class="card-footer">
+            <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">TryHackMe</span>
+            <a href="writeups/silent-monitor.html" class="card-link">Read Walkthrough →</a>
           </div>
-          <a href="writeups/silent-monitor.html" class="card-link">Read Walkthrough →</a>
+        </div>
+
+        <!-- 8. Brainpan 1 (HARD) -->
+        <div class="writeup-card" data-tags="hard thm linux bof buffer-overflow immunity-debugger">
+          <div class="card-top-meta">
+            <span class="badge diff-hard">Hard</span>
+            <span class="badge badge-os">Linux</span>
+          </div>
+          <h3 class="card-title">Brainpan 1</h3>
+          <p class="card-summary">Custom binary service reversing in Immunity Debugger → finding EIP offset at 524 bytes → locating JMP ESP without badchars → generating staged shellcode → root via check-root SUID binary.</p>
+          <div class="card-footer">
+            <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">TryHackMe</span>
+            <a href="writeups/brainpan1.html" class="card-link">Read Walkthrough →</a>
+          </div>
+        </div>
+
+        <!-- 9. Daily Bugle (HARD) -->
+        <div class="writeup-card" data-tags="hard thm linux sqli joomla yum">
+          <div class="card-top-meta">
+            <span class="badge diff-hard">Hard</span>
+            <span class="badge badge-os">Linux</span>
+          </div>
+          <h3 class="card-title">Daily Bugle</h3>
+          <p class="card-summary">Joomla 3.7.0 SQL injection (com_fields) → cracking bcrypt password hash via John The Ripper → administrative template upload for shell → Yum sudo GTFOBins spawn root.</p>
+          <div class="card-footer">
+            <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">TryHackMe</span>
+            <a href="writeups/daily-bugle.html" class="card-link">Read Walkthrough →</a>
+          </div>
+        </div>
+
+        <!-- 10. Internal (HARD) -->
+        <div class="writeup-card" data-tags="hard thm linux jenkins docker tunnel">
+          <div class="card-top-meta">
+            <span class="badge diff-hard">Hard</span>
+            <span class="badge badge-os">Linux</span>
+          </div>
+          <h3 class="card-title">Internal</h3>
+          <p class="card-summary">WordPress admin brute-force → finding Jenkins internal service notes → SSH local port forwarding tunnel → Jenkins Groovy script console RCE → Docker container breakout to host root.</p>
+          <div class="card-footer">
+            <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">TryHackMe</span>
+            <a href="writeups/internal.html" class="card-link">Read Walkthrough →</a>
+          </div>
+        </div>
+
+        <!-- 11. Retro (HARD) -->
+        <div class="writeup-card" data-tags="hard thm windows wordpress cve-2019-1388 uac-bypass">
+          <div class="card-top-meta">
+            <span class="badge diff-hard">Hard</span>
+            <span class="badge badge-os">Windows</span>
+          </div>
+          <h3 class="card-title">Retro</h3>
+          <p class="card-summary">WordPress author post comment leak → Wade user RDP credentials discovery → CVE-2019-1388 Windows Certificate Dialog UAC bypass → spawning cmd.exe as NT AUTHORITY\SYSTEM.</p>
+          <div class="card-footer">
+            <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">TryHackMe</span>
+            <a href="writeups/retro.html" class="card-link">Read Walkthrough →</a>
+          </div>
         </div>
 
       </div>
     </div>
   </section>
 
-  <!-- GLOBAL FOOTER -->
+  <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-inner">
-      <p class="footer-author">Security Portfolio of <strong>Kun Poonkasetvatana</strong> (@OfflineDevc)</p>
-      <p class="footer-copy">Built for educational research and offensive security documentation. All credentials sanitized.</p>
+      <p style="font-weight: 600; color: var(--text-main); margin-bottom: 6px;">Security Research &amp; Writeups Archive</p>
+      <p class="footer-copy">Built with classic minimalist design by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
+         <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a> · 
+         <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a> · 
+         <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank">LinkedIn</a></p>
     </div>
   </footer>
 
-  <script src="script.js?v=4.0"></script>
+  <script src="script.js?v=5.0"></script>
 </body>
 </html>
