@@ -16,7 +16,7 @@ A minimal dark-themed GitHub Pages site showcasing CTF writeups from TryHackMe a
 | **Relevant** | THM | Windows (Server 2016) | Medium | Writable SMB Share, ASPX Reverse Shell, SeImpersonate PrintSpoofer Privesc |
 | **Silent Monitor** | THM | Linux (Ubuntu) | Medium | Monitoring Portal SQLi, Command Injection, KeePass KDBX Extraction, Hashcat |
 | **Brainpan 1** | THM | Linux (Wine x86) | Hard | 32-bit Stack Buffer Overflow, Immunity Debugger, Mona Gadget, Sudo NOPASSWD |
-| **Forward** | THM | Windows (Server 2019 AD) | Hard | BloodHound Recon, Kerberoasting, NetExec Spray, RBCD Machine Takeover |
+| **Forward** | THM | Windows (Server 2019 AD) | Medium | BloodHound Recon, Kerberoasting, NetExec Spray, RBCD Machine Takeover |
 | **Internal** | THM | Linux (Ubuntu) | Hard | WordPress WPScan, Docker Container Pivot, Jenkins Hydra HTTP-POST, SSH Tunnel |
 | **Retro** | THM | Windows (Server 2016) | Hard | WordPress Credential Leak, Theme 404.php RCE, JuicyPotato Token Impersonation |
 

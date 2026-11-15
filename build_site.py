@@ -3,7 +3,22 @@
 build_site.py
 Converts all .md writeup files to full HTML pages for OfflineDevc.github.io.
 Author: Kun Poonkasetvatana (@OfflineDevc)
-Accurate OS & Difficulty mapping verified directly against technical writeups.
+
+Verified Accurate Ground Truth:
+EASY (1):
+  - Skynet (Linux)
+MEDIUM (7):
+  - Daily Bugle (Linux)
+  - Deaddrop (Linux / AD)
+  - Domino (Linux)
+  - Forward (Windows)
+  - Mr. Robot CTF (Linux)
+  - Relevant (Windows)
+  - Silent Monitor (Linux)
+HARD (3):
+  - Brainpan 1 (Linux)
+  - Internal (Linux)
+  - Retro (Windows)
 """
 
 import os
@@ -23,27 +38,23 @@ WRITEUPS_DST = os.path.join(SITE_DIR, "writeups")
 os.makedirs(IMAGES_DST, exist_ok=True)
 os.makedirs(WRITEUPS_DST, exist_ok=True)
 
-# ── Ordered Writeups Registry (100% Accurate OS & Difficulty) ─────────────────
-# Verified against source Markdown files & room specifications:
-# Linux: Skynet, Daily Bugle, Domino, Mr. Robot CTF, Brainpan 1 (Ubuntu/Wine), Internal, Silent Monitor
-# Windows: Relevant (Server 2016), Forward (Server 2019 AD), Retro (Server 2016)
-# Hybrid/AD: Deaddrop (Ubuntu 24.04 Foothold + Windows Server 2019 DC Privesc)
+# ── Ordered Writeups Registry (100% Consistent Across Entire Site) ────────────
 WRITEUPS = [
     # (slug, filename, display_title, difficulty, os_name, os_class, platform)
     # EASY (1)
     ("skynet",         "Skynet.md",         "Skynet",         "Easy",   "Linux",      "os-linux",   "TryHackMe"),
 
-    # MEDIUM (6)
+    # MEDIUM (7)
     ("daily-bugle",    "Daily Bugle.md",    "Daily Bugle",    "Medium", "Linux",      "os-linux",   "TryHackMe"),
     ("deaddrop",       "Deaddrop.md",       "Deaddrop",       "Medium", "Linux / AD", "os-ad",      "TryHackMe"),
     ("domino",         "Domino.md",         "Domino",         "Medium", "Linux",      "os-linux",   "TryHackMe"),
+    ("forward",        "Forward.md",        "Forward",        "Medium", "Windows",    "os-windows", "TryHackMe"),
     ("mrrobotctf",     "MrRobotCTF.md",     "Mr. Robot CTF",  "Medium", "Linux",      "os-linux",   "TryHackMe"),
     ("relevant",       "Relevant.md",       "Relevant",       "Medium", "Windows",    "os-windows", "TryHackMe"),
     ("silent-monitor", "Silent Monitor.md", "Silent Monitor", "Medium", "Linux",      "os-linux",   "TryHackMe"),
 
-    # HARD (4)
+    # HARD (3)
     ("brainpan1",      "Brainpan1.md",      "Brainpan 1",     "Hard",   "Linux",      "os-linux",   "TryHackMe"),
-    ("forward",        "Forward.md",        "Forward",        "Hard",   "Windows",    "os-windows", "TryHackMe"),
     ("internal",       "Internal.md",       "Internal",       "Hard",   "Linux",      "os-linux",   "TryHackMe"),
     ("retro",          "Retro.md",          "Retro",          "Hard",   "Windows",    "os-windows", "TryHackMe"),
 ]
@@ -168,7 +179,7 @@ def render_page(index, slug, title, difficulty, os_name, os_cls, platform, conte
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{title} — TryHackMe Writeup | Kun Poonkasetvatana</title>
-  <link rel="stylesheet" href="../style.css?v=3.1"/>
+  <link rel="stylesheet" href="../style.css?v=3.2"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 </head>
@@ -259,7 +270,7 @@ def render_page(index, slug, title, difficulty, os_name, os_cls, platform, conte
     </div>
   </footer>
 
-  <script src="../script.js?v=3.1"></script>
+  <script src="../script.js?v=3.2"></script>
 </body>
 </html>
 """
@@ -297,4 +308,4 @@ for idx, (slug, md_file, title, difficulty, os_name, os_cls, platform) in enumer
 
     print(f"  [{idx+1:02d}/11] {title:15} | OS: {os_name:10} | Diff: {difficulty:6} -> {slug}.html")
 
-print(f"\nDone! All 11 writeups regenerated with verified accurate OS tags.")
+print(f"\nDone! All 11 writeups regenerated with verified accurate OS & Difficulty.")
