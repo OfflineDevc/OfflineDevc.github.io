@@ -3,7 +3,7 @@
 build_site.py
 Converts all .md writeup files to full HTML pages for OfflineDevc.github.io.
 Author: Kun Poonkasetvatana (@OfflineDevc)
-Design: Senior UI/UX & Technical Blog Standard (Minimalist White-Gray-Charcoal)
+Design: Senior UI/UX & Technical Blog Standard (Dual Theme: Light & Dark Mode)
 """
 
 import os
@@ -145,10 +145,6 @@ def preprocess_markdown(text, images_used):
 
 # ── Headings & Table of Contents Generator ────────────────────────────────────
 def process_headings_and_generate_toc(html_content):
-    """
-    Extracts H2 and H3 tags, adds unique id attributes to them,
-    and returns (modified_html, toc_html).
-    """
     headings = []
     used_ids = set()
 
@@ -171,7 +167,6 @@ def process_headings_and_generate_toc(html_content):
         attrs = match.group(2)
         inner = match.group(3)
 
-        # Check if id already exists
         id_match = re.search(r'id=["\']([^"\']+)["\']', attrs)
         if id_match:
             heading_id = id_match.group(1)
@@ -183,11 +178,9 @@ def process_headings_and_generate_toc(html_content):
 
         return f'<{tag} id="{heading_id}"{attrs}>{inner}</{tag}>'
 
-    # Regex to match <h2> and <h3> tags
     pattern = re.compile(r'<(h[23])(\s*[^>]*)>(.*?)</\1>', re.IGNORECASE | re.DOTALL)
     modified_html = pattern.sub(replace_h2_h3, html_content)
 
-    # Build TOC HTML
     toc_html_list = []
     toc_html_list.append('<aside class="toc-sidebar">')
     toc_html_list.append('  <div class="toc-title">ON THIS PAGE</div>')
@@ -219,7 +212,18 @@ def render_page(index, slug, title, difficulty, os_name, os_cls, platform, date,
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{title} — TryHackMe Writeup | Kun Poonkasetvatana</title>
-  <link rel="stylesheet" href="../style.css?v=5.0"/>
+  <!-- Immediate Theme Application (Prevents FOUT) -->
+  <script>
+    (function() {{
+      var theme = localStorage.getItem('theme');
+      if (theme) {{
+        document.documentElement.setAttribute('data-theme', theme);
+      }} else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {{
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }}
+    }})();
+  </script>
+  <link rel="stylesheet" href="../style.css?v=5.1"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet"/>
@@ -237,6 +241,26 @@ def render_page(index, slug, title, difficulty, os_name, os_cls, platform, date,
         <a href="../index.html" class="nav-link-item">Home</a>
         <a href="../index.html#writeups" class="nav-link-item active">Writeups</a>
         <a href="../index.html#about" class="nav-link-item">About</a>
+        <a href="../template-writeup.html" class="nav-link-item">Template</a>
+
+        <!-- Theme Toggle Button -->
+        <button class="theme-toggle-btn" id="themeToggle" type="button" aria-label="Toggle Dark/Light Mode" title="Toggle Dark/Light Mode">
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
         <div class="nav-social-pills">
           <a href="https://tryhackme.com/p/Distowel" target="_blank" rel="noopener" class="pill-social" title="TryHackMe Profile">THM</a>
           <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank" rel="noopener" class="pill-social" title="HackTheBox Profile">HTB</a>
@@ -313,7 +337,7 @@ def render_page(index, slug, title, difficulty, os_name, os_cls, platform, date,
     </div>
   </footer>
 
-  <script src="../script.js?v=5.0"></script>
+  <script src="../script.js?v=5.1"></script>
 </body>
 </html>
 """
@@ -341,7 +365,6 @@ for idx, (slug, md_file, title, difficulty, os_name, os_cls, platform, date, tag
     with open(out_path, 'w', encoding='utf-8') as f:
         f.write(full_html)
 
-    # Copy images
     for img_name in images_used:
         src = os.path.join(IMAGES_SRC, img_name)
         dst = os.path.join(IMAGES_DST, img_name)
@@ -351,4 +374,4 @@ for idx, (slug, md_file, title, difficulty, os_name, os_cls, platform, date, tag
 
     print(f"  [{idx+1:02d}/11] {title:15} | OS: {os_name:10} | Diff: {difficulty:6} -> {slug}.html")
 
-print(f"\nDone! All 11 writeups regenerated with verified accurate OS & Difficulty and Sticky Table of Contents.")
+print(f"\nDone! All 11 writeups regenerated with verified accurate OS & Difficulty, Sticky Table of Contents, and Dark Mode Switch.")

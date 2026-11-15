@@ -1,7 +1,7 @@
 /* ==========================================================================
    OFFLINEDEVC — MINIMALIST TECHNICAL BLOG & CYBERSECURITY PORTFOLIO
    Author: Kun Poonkasetvatana (@OfflineDevc)
-   Design System: Classic Clean (White - Charcoal - Neutral Gray)
+   Design System: Classic Clean Dual Theme (Light & Dark Mode)
    Inspiration: Medium, GitBook & Stripe Technical Documentation
    ========================================================================== */
 
@@ -12,8 +12,11 @@
   padding: 0;
 }
 
+/* Light Theme (Default) */
 :root {
-  /* Color Palette (Classic White-Gray-Black / Charcoal) */
+  --theme-transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+
+  /* Background Colors */
   --bg-body:          #FAFAFA;   /* ขาวนวล สบายตาสำหรับการอ่านบทความยาวๆ */
   --bg-surface:       #FFFFFF;   /* ขาวบริสุทธิ์ สำหรับ Card, Header และ Paper Container */
   --bg-surface-hover: #F4F4F5;   /* พื้นหลังตอน Hover */
@@ -21,21 +24,24 @@
   --bg-code:          #1E1E1E;   /* เทาเข้มเกือบดำ สำหรับ Code/Terminal */
   --bg-code-header:   #2A2A2A;   /* แถบหัว Code block */
   --bg-callout:       #F9FAFB;   /* พื้นหลัง Callout / Note box */
+  --nav-backdrop:     rgba(255, 255, 255, 0.92);
 
   /* Typography Colors */
   --text-main:        #1A1A1A;   /* สีดำชาร์โคล สำหรับเนื้อหาหลัก (ไม่ใช้ #000000 เพื่อลดอาการล้าของสายตา) */
-  --text-secondary:   #555555;   /* สีเทาเข้ม สำหรับข้อมูลรองและ Metadata เช่น วันที่, หมวดหมู่ */
+  --text-secondary:   #555555;   /* สีเทาเข้ม สำหรับข้อมูลรองและ Metadata */
   --text-muted:       #71717A;   /* สีเทากลาง สำหรับ Caption, Breadcrumbs, Placeholders */
   --text-dim:         #A1A1AA;   /* สีเทาอ่อน สำหรับ Sub-labels */
   --text-code:        #E5E7EB;   /* สีขาว/เทาอ่อน ใน Code block */
+  --badge-invert-text:#FFFFFF;
 
   /* Accents & Borders */
   --border-light:     #E5E7EB;   /* เส้นแบ่งส่วน กรอบรูป เส้นคั่นทั่วไป */
   --border-medium:    #D1D5DB;   /* ขอบที่ต้องการความเด่นชัดขึ้น */
   --border-dark:      #1A1A1A;   /* แถบเส้นหนาสีดำด้านซ้ายสำหรับ Callout */
-  --accent-primary:   #18181B;   /* ดำชาร์โคลสำหรับจุด Focus */
+  --shadow-sm:        0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md:        0 4px 16px rgba(0, 0, 0, 0.04);
 
-  /* Clean Restrained Difficulty Colors (Subtle & Professional) */
+  /* Clean Restrained Difficulty Colors */
   --easy-color:       #166534;
   --easy-bg:          #F0FDF4;
   --easy-border:      #BBF7D0;
@@ -53,9 +59,50 @@
   --font-mono:        'JetBrains Mono', 'Fira Code', Consolas, monospace;
 
   /* Layout Widths */
-  --content-max-width: 780px;    /* จำกัดความกว้างคอลัมน์เนื้อหา 750px - 800px กึ่งกลาง */
-  --toc-width:         240px;    /* สารบัญ Table of Contents */
-  --sidebar-width:     280px;    /* เมนูรายชื่อ Writeups */
+  --content-max-width: 780px;
+  --toc-width:         240px;
+  --sidebar-width:     280px;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  /* Background Colors */
+  --bg-body:          #0D0F12;   /* ดำลึก สบายตาแบบ OLED/GitHub Dark */
+  --bg-surface:       #16191E;   /* เทาเข้มพรีเมียม สำหรับ Container & Cards */
+  --bg-surface-hover: #1E232B;   /* พื้นหลัง Hover ใน Dark mode */
+  --bg-subtle:        #1A1E24;   /* เทาเข้มระดับกลาง สำหรับ Badges & Headers */
+  --bg-code:          #0E1116;   /* ดำสนิทสำหรับ Code / Terminal */
+  --bg-code-header:   #181C23;   /* แถบหัว Code block */
+  --bg-callout:       #13161C;   /* พื้นหลัง Callout ใน Dark mode */
+  --nav-backdrop:     rgba(22, 25, 30, 0.92);
+
+  /* Typography Colors */
+  --text-main:        #F0F3F6;   /* ขาวนวล สบายตา อ่านง่าย ไม่แสบตา */
+  --text-secondary:   #9CA3AF;   /* เทากลางสำหรับข้อมูลรอง */
+  --text-muted:       #6B7280;   /* เทาอ่อนสำหรับ Caption และ Subtitle */
+  --text-dim:         #4B5563;   /* เทาเข้มสำหรับตัวแบ่ง */
+  --text-code:        #E2E8F0;   /* ตัวอักษร Code Block */
+  --badge-invert-text:#0D0F12;
+
+  /* Accents & Borders */
+  --border-light:     #232833;   /* เส้นแบ่งส่วนคมชัดแต่ไม่สว่างจ้า */
+  --border-medium:    #323947;   /* ขอบปุ่มและการ์ด */
+  --border-dark:      #E5E7EB;   /* แถบเน้นสีขาวเทาสำหรับ Callout */
+  --shadow-sm:        0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md:        0 4px 16px rgba(0, 0, 0, 0.25);
+
+  /* Refined Difficulty Colors for Dark Mode */
+  --easy-color:       #4ADE80;
+  --easy-bg:          rgba(74, 222, 128, 0.1);
+  --easy-border:      rgba(74, 222, 128, 0.25);
+
+  --medium-color:     #FACC15;
+  --medium-bg:        rgba(250, 204, 21, 0.1);
+  --medium-border:    rgba(250, 204, 21, 0.25);
+
+  --hard-color:       #F87171;
+  --hard-bg:          rgba(248, 113, 113, 0.1);
+  --hard-border:      rgba(248, 113, 113, 0.25);
 }
 
 html {
@@ -68,10 +115,11 @@ body {
   color: var(--text-main);
   font-family: var(--font-sans);
   font-size: 16.5px;
-  line-height: 1.75;             /* Line-height 1.7 - 1.8 เพื่อความสบายตา */
+  line-height: 1.75;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: var(--theme-transition);
 }
 
 a {
@@ -81,17 +129,18 @@ a {
 }
 
 /* ==========================================================================
-   1. GLOBAL MINIMAL NAVBAR
+   1. GLOBAL MINIMAL NAVBAR & THEME TOGGLE
    ========================================================================== */
 .navbar {
   position: sticky;
   top: 0;
   z-index: 1000;
   height: 58px;
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: var(--nav-backdrop);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border-light);
+  transition: var(--theme-transition);
 }
 
 .nav-inner {
@@ -122,11 +171,12 @@ a {
   width: 24px;
   height: 24px;
   background-color: var(--text-main);
-  color: #FFFFFF;
+  color: var(--bg-body);
   border-radius: 4px;
   font-family: var(--font-mono);
   font-size: 13px;
   font-weight: 700;
+  transition: var(--theme-transition);
 }
 
 .logo-handle {
@@ -138,7 +188,7 @@ a {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
 }
 
 .nav-link-item {
@@ -153,12 +203,53 @@ a {
   color: var(--text-main);
 }
 
+/* Theme Switcher Button */
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: var(--theme-transition);
+  padding: 0;
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--bg-surface-hover);
+  border-color: var(--border-medium);
+}
+
+.theme-toggle-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* Hide sun in light mode, hide moon in dark mode */
+.sun-icon {
+  display: none;
+}
+.moon-icon {
+  display: block;
+}
+
+[data-theme="dark"] .sun-icon {
+  display: block;
+}
+[data-theme="dark"] .moon-icon {
+  display: none;
+}
+
 .nav-social-pills {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: 12px;
-  padding-left: 16px;
+  margin-left: 6px;
+  padding-left: 14px;
   border-left: 1px solid var(--border-light);
 }
 
@@ -179,18 +270,19 @@ a {
 
 .pill-social:hover {
   background-color: var(--text-main);
-  color: #FFFFFF;
+  color: var(--bg-body);
   border-color: var(--text-main);
 }
 
 /* ==========================================================================
-   2. HOMEPAGE STYLING (BENTO GRID - MINIMALIST)
+   2. HOMEPAGE STYLING (BENTO GRID)
    ========================================================================== */
 .hero {
   padding: 80px 24px 48px;
   background-color: var(--bg-surface);
   border-bottom: 1px solid var(--border-light);
   text-align: center;
+  transition: var(--theme-transition);
 }
 
 .hero-inner {
@@ -210,6 +302,7 @@ a {
   font-size: 12px;
   color: var(--text-secondary);
   margin-bottom: 24px;
+  transition: var(--theme-transition);
 }
 
 .status-dot {
@@ -288,6 +381,7 @@ a {
   border-radius: 8px;
   padding: 16px;
   text-align: center;
+  transition: var(--theme-transition);
 }
 
 .stat-num {
@@ -362,7 +456,7 @@ a {
 
 .filter-btn.active {
   background-color: var(--text-main);
-  color: #FFFFFF;
+  color: var(--bg-body);
   border-color: var(--text-main);
 }
 
@@ -385,7 +479,7 @@ a {
 
 .writeup-card:hover {
   border-color: var(--border-medium);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }
 
@@ -440,6 +534,7 @@ a {
   background-color: var(--bg-surface);
   border-bottom: 1px solid var(--border-light);
   padding: 40px 24px 32px;
+  transition: var(--theme-transition);
 }
 
 .writeup-hero-inner {
@@ -519,6 +614,7 @@ a {
   background-color: var(--bg-subtle);
   border: 1px solid var(--border-light);
   color: var(--text-secondary);
+  transition: var(--theme-transition);
 }
 
 .badge.diff-easy {
@@ -573,6 +669,7 @@ a {
   border: 1px solid var(--border-light);
   border-radius: 8px;
   padding: 20px;
+  transition: var(--theme-transition);
 }
 
 .sidebar-header {
@@ -657,6 +754,7 @@ a {
   color: var(--text-main);
   font-size: 16.5px;
   line-height: 1.78;
+  transition: var(--theme-transition);
 }
 
 /* Right Sticky Table of Contents (TOC) */
@@ -669,6 +767,7 @@ a {
   overflow-y: auto;
   padding-left: 18px;
   border-left: 1px solid var(--border-light);
+  transition: var(--theme-transition);
 }
 
 .toc-title {
@@ -763,7 +862,7 @@ a {
   margin: 24px 0 10px;
 }
 
-/* Inline Code: พื้นหลังสีเทาอ่อน (#F3F4F6) ตัวอักษรสีดำเข้ม ขอบมนเล็กน้อย */
+/* Inline Code: พื้นหลังสีเทาอ่อน ตัวอักษรสีดำเข้ม ขอบมนเล็กน้อย */
 .writeup-content code {
   font-family: var(--font-mono);
   font-size: 0.88em;
@@ -772,16 +871,18 @@ a {
   padding: 2px 6px;
   border-radius: 4px;
   border: 1px solid var(--border-light);
+  transition: var(--theme-transition);
 }
 
-/* Code Blocks / Terminal Output: #1E1E1E พร้อมปุ่ม Copy & Header */
+/* Code Blocks / Terminal Output: #1E1E1E / #0E1116 พร้อมปุ่ม Copy & Header */
 .writeup-content pre {
   margin: 26px 0;
   border-radius: 6px;
   overflow: hidden;
-  border: 1px solid #333333;
+  border: 1px solid var(--border-medium);
   background-color: var(--bg-code);
   position: relative;
+  transition: var(--theme-transition);
 }
 
 .writeup-content pre code {
@@ -803,7 +904,7 @@ a {
   top: 10px;
   right: 12px;
   background-color: rgba(255, 255, 255, 0.08);
-  border: 1px solid #4B5563;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 4px;
   color: #D1D5DB;
   font-family: var(--font-mono);
@@ -829,6 +930,7 @@ blockquote {
   border: 1px solid var(--border-light);
   border-left: 4px solid var(--border-dark);
   border-radius: 0 6px 6px 0;
+  transition: var(--theme-transition);
 }
 
 .callout-title {
@@ -861,9 +963,10 @@ blockquote p:last-child {
   height: auto;
   border: 1px solid var(--border-light);
   border-radius: 6px;
-  background-color: #FFFFFF;
+  background-color: var(--bg-surface);
   padding: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  box-shadow: var(--shadow-sm);
+  transition: var(--theme-transition);
 }
 
 .image-caption {
@@ -884,6 +987,8 @@ blockquote p:last-child {
   border: 1px solid var(--border-light);
   border-radius: 6px;
   overflow: hidden;
+  background-color: var(--bg-surface);
+  transition: var(--theme-transition);
 }
 
 .writeup-content th {
@@ -948,7 +1053,7 @@ blockquote p:last-child {
 
 .pagination-card:hover {
   border-color: var(--border-dark);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-md);
 }
 
 .pagination-sub {
@@ -988,6 +1093,7 @@ blockquote p:last-child {
   font-size: 14px;
   color: var(--text-secondary);
   margin-top: 60px;
+  transition: var(--theme-transition);
 }
 
 .footer-inner {
@@ -1008,6 +1114,7 @@ blockquote p:last-child {
   padding: 10px 16px;
   align-items: center;
   justify-content: space-between;
+  transition: var(--theme-transition);
 }
 
 .mobile-sidebar-toggle {
@@ -1028,8 +1135,9 @@ blockquote p:last-child {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.6);
   z-index: 1050;
+  backdrop-filter: blur(2px);
 }
 
 .sidebar-overlay.open {
@@ -1040,7 +1148,6 @@ blockquote p:last-child {
    7. RESPONSIVE DESIGN (MOBILE & TABLET ADAPTATION)
    ========================================================================== */
 @media (max-width: 1180px) {
-  /* ซ่อน Table of Contents ด้านขวาเมื่อหน้าจอแคบลง ตามข้อกำหนด */
   .toc-sidebar {
     display: none;
   }
@@ -1052,7 +1159,6 @@ blockquote p:last-child {
     padding: 20px 16px 60px;
   }
 
-  /* แปลง Left Sidebar เป็น Drawer สำหรับ Mobile */
   .writeup-sidebar {
     position: fixed;
     top: 0;
@@ -1067,7 +1173,7 @@ blockquote p:last-child {
 
   .writeup-sidebar.open {
     left: 0;
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
   }
 
   .mobile-sidebar-bar {
