@@ -21,7 +21,7 @@ if (filterBtns.length > 0) {
   });
 }
 
-// Fade-in on scroll
+// Fade-in on scroll (index cards)
 if (cards.length > 0) {
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
@@ -40,9 +40,9 @@ if (cards.length > 0) {
   });
 }
 
-// Writeup Features (Mobile Sidebar & Image Lightbox)
+// Writeup Page Interactive Features
 document.addEventListener('DOMContentLoaded', () => {
-  // Mobile Sidebar Toggle
+  // 1. Mobile Sidebar Toggle
   const sidebar = document.getElementById('sidebar');
   const sidebarToggle = document.getElementById('sidebarToggle');
   const sidebarOverlay = document.getElementById('sidebarOverlay');
@@ -66,7 +66,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Screenshot Lightbox Modal
+  // 2. Code Block Copy Buttons
+  const preBlocks = document.querySelectorAll('.writeup-content pre');
+  preBlocks.forEach(pre => {
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-btn';
+    copyBtn.type = 'button';
+    copyBtn.innerText = 'Copy';
+
+    copyBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const code = pre.querySelector('code');
+      const textToCopy = code ? code.innerText : pre.innerText;
+
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        copyBtn.innerText = 'Copied!';
+        copyBtn.style.color = '#9fef00';
+        copyBtn.style.borderColor = '#9fef00';
+        setTimeout(() => {
+          copyBtn.innerText = 'Copy';
+          copyBtn.style.color = '';
+          copyBtn.style.borderColor = '';
+        }, 2000);
+      }).catch(() => {
+        copyBtn.innerText = 'Error';
+      });
+    });
+
+    pre.appendChild(copyBtn);
+  });
+
+  // 3. Screenshot Lightbox Modal
   const images = document.querySelectorAll('.writeup-content img');
   if (images.length > 0) {
     const lightbox = document.createElement('div');

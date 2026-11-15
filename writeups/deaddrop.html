@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Deaddrop — Writeup | OfflineDevc</title>
-  <link rel="stylesheet" href="../style.css"/>
+  <title>Deaddrop — TryHackMe Writeup | Kun Poonkasetvatana</title>
+  <link rel="stylesheet" href="../style.css?v=2.2"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
@@ -13,11 +13,19 @@
   <!-- TOP NAVBAR -->
   <nav class="navbar">
     <div class="nav-inner">
-      <a href="../index.html" class="nav-logo">&gt; OfflineDevc<span class="cursor">_</span></a>
+      <a href="../index.html" class="nav-logo">
+        <span class="logo-accent">&gt;</span> Kun Poonkasetvatana
+        <span class="logo-handle">(@OfflineDevc)</span>
+      </a>
       <div class="nav-links">
         <a href="../index.html">Home</a>
-        <a href="../index.html#writeups">Writeups</a>
-        <a href="https://github.com/OfflineDevc" target="_blank" rel="noopener" class="nav-github-link">GitHub</a>
+        <a href="../index.html#writeups">All Writeups</a>
+        <div class="nav-social-pills">
+          <a href="https://tryhackme.com/p/Distowel" target="_blank" rel="noopener" class="pill-social thm" title="TryHackMe Profile">THM</a>
+          <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank" rel="noopener" class="pill-social htb" title="HackTheBox Profile">HTB</a>
+          <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank" rel="noopener" class="pill-social in" title="LinkedIn Profile">IN</a>
+          <a href="https://github.com/OfflineDevc" target="_blank" rel="noopener" class="pill-social gh" title="GitHub Profile">GH</a>
+        </div>
       </div>
     </div>
   </nav>
@@ -25,16 +33,22 @@
   <!-- WRITEUP HERO HEADER -->
   <header class="writeup-hero">
     <div class="writeup-hero-inner">
-      <div class="writeup-breadcrumb">
+      <div class="hero-top-meta">
         <a href="../index.html#writeups" class="back-link">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           All Writeups
         </a>
-        <span class="breadcrumb-slash">/</span>
-        <span class="breadcrumb-current">Deaddrop</span>
+        <div class="author-hero-pill">
+          <span class="author-live-dot"></span>
+          <span>Author: <strong>Kun Poonkasetvatana</strong> (@OfflineDevc)</span>
+        </div>
       </div>
-      <div class="writeup-header-content">
-        <h1 class="writeup-title">Deaddrop</h1>
+
+      <div class="hero-main-row">
+        <div>
+          <span class="room-platform-badge">TRYHACKME WALKTHROUGH</span>
+          <h1 class="writeup-title">Deaddrop</h1>
+        </div>
         <div class="writeup-badges">
           <span class="badge diff-medium">Medium</span>
           <span class="badge badge-os">Linux</span>
@@ -59,14 +73,21 @@
   <!-- MAIN TWO-COLUMN LAYOUT -->
   <div class="writeup-layout">
     <aside class="writeup-sidebar" id="sidebar">
+  <div class="sidebar-author-box">
+    <div class="sidebar-author-name">Kun Poonkasetvatana</div>
+    <div class="sidebar-author-meta">
+      <span class="author-badge-tag">@OfflineDevc</span>
+      <span class="author-badge-thm">THM: Distowel</span>
+    </div>
+  </div>
   <div class="sidebar-header">
-    <span class="sidebar-label">WRITEUPS</span>
+    <span class="sidebar-label">WRITEUPS ARCHIVE</span>
     <span class="sidebar-count">11 ROOMS</span>
   </div>
   <nav class="sidebar-menu">
-    <div class="sidebar-group">
+    <div class="sidebar-group group-easy">
       <div class="sidebar-group-header">
-        <span class="sidebar-group-name">EASY</span>
+        <div class="group-left"><span class="diff-indicator dot-easy"></span><span class="sidebar-group-name">EASY</span></div>
         <span class="sidebar-group-badge pill-easy">1</span>
       </div>
       <ul class="sidebar-list">
@@ -79,9 +100,9 @@
         </li>
       </ul>
     </div>
-    <div class="sidebar-group">
+    <div class="sidebar-group group-medium">
       <div class="sidebar-group-header">
-        <span class="sidebar-group-name">MEDIUM</span>
+        <div class="group-left"><span class="diff-indicator dot-medium"></span><span class="sidebar-group-name">MEDIUM</span></div>
         <span class="sidebar-group-badge pill-medium">4</span>
       </div>
       <ul class="sidebar-list">
@@ -115,9 +136,9 @@
         </li>
       </ul>
     </div>
-    <div class="sidebar-group">
+    <div class="sidebar-group group-hard">
       <div class="sidebar-group-header">
-        <span class="sidebar-group-name">HARD</span>
+        <div class="group-left"><span class="diff-indicator dot-hard"></span><span class="sidebar-group-name">HARD</span></div>
         <span class="sidebar-group-badge pill-hard">6</span>
       </div>
       <ul class="sidebar-list">
@@ -169,7 +190,7 @@
   <div class="sidebar-footer">
     <a href="../index.html#writeups" class="sidebar-home-link">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-      <span>All Writeups Grid</span>
+      <span>Back to Portfolio Grid</span>
     </a>
   </div>
 </aside>
@@ -429,12 +450,29 @@ THM{********************************}
 <li><strong>NetExec (<code>nxc</code>) &amp; Evil-WinRM</strong>: Remote command execution on Domain Controller</li>
 </ul>
       </article>
+
+      <!-- PREV / NEXT NAVIGATION -->
+      
+    <nav class="writeup-pagination">
+      <a href="skynet.html" class="pagination-card prev-card">
+        <span class="pagination-sub">← PREVIOUS WRITEUP</span>
+        <span class="pagination-title">Skynet</span>
+        <span class="pagination-badge diff-easy">Easy</span>
+      </a>
+      <a href="domino.html" class="pagination-card next-card">
+        <span class="pagination-sub">NEXT WRITEUP →</span>
+        <span class="pagination-title">Domino</span>
+        <span class="pagination-badge diff-medium">Medium</span>
+      </a>
+    </nav>
+    
     </main>
   </div>
 
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-inner">
+      <p class="footer-author">Security Portfolio of <strong>Kun Poonkasetvatana</strong></p>
       <p class="footer-copy">Built by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
          <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a> · 
          <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a> · 
@@ -442,6 +480,6 @@ THM{********************************}
     </div>
   </footer>
 
-  <script src="../script.js"></script>
+  <script src="../script.js?v=2.2"></script>
 </body>
 </html>

@@ -2,13 +2,7 @@
 """
 build_site.py
 Converts all .md writeup files to full HTML pages for OfflineDevc.github.io.
-Features:
-- Two-column layout with sticky writeup sidebar
-- Mobile drawer navigation
-- Dark theme typography and tables
-- Image lightbox zoom
-- Skynet marked as Easy
-- Automatic image copying from WriteupTHM/ to github-pages-site/images/
+Author: Kun Poonkasetvatana (@OfflineDevc)
 """
 
 import os
@@ -28,15 +22,19 @@ WRITEUPS_DST = os.path.join(SITE_DIR, "writeups")
 os.makedirs(IMAGES_DST, exist_ok=True)
 os.makedirs(WRITEUPS_DST, exist_ok=True)
 
-# ── Writeups Registry (Difficulty, Platform, OS) ──────────────────────────────
-# Skynet is explicitly marked as Easy!
+# ── Ordered Writeups Registry (Easy -> Medium -> Hard) ────────────────────────
 WRITEUPS = [
     # (slug, filename, display_title, difficulty, os_name, platform)
+    # EASY
     ("skynet",         "Skynet.md",         "Skynet",         "Easy",   "Linux",   "TryHackMe"),
+
+    # MEDIUM
     ("deaddrop",       "Deaddrop.md",       "Deaddrop",       "Medium", "Linux",   "TryHackMe"),
     ("domino",         "Domino.md",         "Domino",         "Medium", "Windows", "TryHackMe"),
     ("mrrobotctf",     "MrRobotCTF.md",     "Mr. Robot CTF",  "Medium", "Linux",   "TryHackMe"),
     ("relevant",       "Relevant.md",       "Relevant",       "Medium", "Windows", "TryHackMe"),
+
+    # HARD
     ("brainpan1",      "Brainpan1.md",      "Brainpan 1",     "Hard",   "Linux",   "TryHackMe"),
     ("daily-bugle",    "Daily Bugle.md",    "Daily Bugle",    "Hard",   "Linux",   "TryHackMe"),
     ("forward",        "Forward.md",        "Forward",        "Hard",   "Linux",   "TryHackMe"),
@@ -53,18 +51,32 @@ def generate_sidebar_html(current_slug):
 
     html = []
     html.append('<aside class="writeup-sidebar" id="sidebar">')
+    html.append('  <div class="sidebar-author-box">')
+    html.append('    <div class="sidebar-author-name">Kun Poonkasetvatana</div>')
+    html.append('    <div class="sidebar-author-meta">')
+    html.append('      <span class="author-badge-tag">@OfflineDevc</span>')
+    html.append('      <span class="author-badge-thm">THM: Distowel</span>')
+    html.append('    </div>')
+    html.append('  </div>')
+
     html.append('  <div class="sidebar-header">')
-    html.append('    <span class="sidebar-label">WRITEUPS</span>')
+    html.append('    <span class="sidebar-label">WRITEUPS ARCHIVE</span>')
     html.append('    <span class="sidebar-count">11 ROOMS</span>')
     html.append('  </div>')
+
     html.append('  <nav class="sidebar-menu">')
 
-    for diff in ["Easy", "Medium", "Hard"]:
-        items = groups[diff]
-        pill_cls = f"pill-{diff.lower()}"
-        html.append('    <div class="sidebar-group">')
+    diff_config = [
+        ("Easy",   "EASY",   "dot-easy",   "pill-easy",   "group-easy"),
+        ("Medium", "MEDIUM", "dot-medium", "pill-medium", "group-medium"),
+        ("Hard",   "HARD",   "dot-hard",   "pill-hard",   "group-hard"),
+    ]
+
+    for diff_key, label, dot_cls, pill_cls, group_cls in diff_config:
+        items = groups[diff_key]
+        html.append(f'    <div class="sidebar-group {group_cls}">')
         html.append('      <div class="sidebar-group-header">')
-        html.append(f'        <span class="sidebar-group-name">{diff.upper()}</span>')
+        html.append(f'        <div class="group-left"><span class="diff-indicator {dot_cls}"></span><span class="sidebar-group-name">{label}</span></div>')
         html.append(f'        <span class="sidebar-group-badge {pill_cls}">{len(items)}</span>')
         html.append('      </div>')
         html.append('      <ul class="sidebar-list">')
@@ -85,20 +97,44 @@ def generate_sidebar_html(current_slug):
     html.append('  <div class="sidebar-footer">')
     html.append('    <a href="../index.html#writeups" class="sidebar-home-link">')
     html.append('      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>')
-    html.append('      <span>All Writeups Grid</span>')
+    html.append('      <span>Back to Portfolio Grid</span>')
     html.append('    </a>')
     html.append('  </div>')
     html.append('</aside>')
     return '\n'.join(html)
 
+# ── Next / Previous Navigation ────────────────────────────────────────────────
+def generate_pagination_html(current_index):
+    n = len(WRITEUPS)
+    prev_idx = (current_index - 1) % n
+    next_idx = (current_index + 1) % n
+
+    prev_slug, _, prev_title, prev_diff, _, _ = WRITEUPS[prev_idx]
+    next_slug, _, next_title, next_diff, _, _ = WRITEUPS[next_idx]
+
+    return f"""
+    <nav class="writeup-pagination">
+      <a href="{prev_slug}.html" class="pagination-card prev-card">
+        <span class="pagination-sub">← PREVIOUS WRITEUP</span>
+        <span class="pagination-title">{prev_title}</span>
+        <span class="pagination-badge diff-{prev_diff.lower()}">{prev_diff}</span>
+      </a>
+      <a href="{next_slug}.html" class="pagination-card next-card">
+        <span class="pagination-sub">NEXT WRITEUP →</span>
+        <span class="pagination-title">{next_title}</span>
+        <span class="pagination-badge diff-{next_diff.lower()}">{next_diff}</span>
+      </a>
+    </nav>
+    """
+
 # ── Preprocess Markdown ───────────────────────────────────────────────────────
 IMG_RE = re.compile(r'!\[\[([^\]]+\.png)\]\]', re.IGNORECASE)
 
 def preprocess_markdown(text, images_used):
-    # 1. Remove duplicate leading H1 header (e.g. "# Brainpan 1 - TryHackMe Writeup") and following HR
+    # Remove redundant duplicate H1 header & trailing HR
     text = re.sub(r'^\s*#\s+.*?(?:Writeup|CTF).*?\n+(?:---\s*\n+)?', '', text, flags=re.IGNORECASE)
 
-    # 2. Convert Obsidian ![[Pasted image ...]] -> standard markdown ![](../images/...)
+    # Convert Obsidian image embeds
     def replace_img(m):
         fname = m.group(1).strip()
         images_used.add(fname)
@@ -109,8 +145,9 @@ def preprocess_markdown(text, images_used):
     return text
 
 # ── Page HTML Template ────────────────────────────────────────────────────────
-def render_page(slug, title, difficulty, os_name, platform, content_html):
+def render_page(index, slug, title, difficulty, os_name, platform, content_html):
     sidebar_html = generate_sidebar_html(slug)
+    pagination_html = generate_pagination_html(index)
     diff_class = f"diff-{difficulty.lower()}"
 
     return f"""<!DOCTYPE html>
@@ -118,8 +155,8 @@ def render_page(slug, title, difficulty, os_name, platform, content_html):
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>{title} — Writeup | OfflineDevc</title>
-  <link rel="stylesheet" href="../style.css"/>
+  <title>{title} — TryHackMe Writeup | Kun Poonkasetvatana</title>
+  <link rel="stylesheet" href="../style.css?v=2.2"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
@@ -128,11 +165,19 @@ def render_page(slug, title, difficulty, os_name, platform, content_html):
   <!-- TOP NAVBAR -->
   <nav class="navbar">
     <div class="nav-inner">
-      <a href="../index.html" class="nav-logo">&gt; OfflineDevc<span class="cursor">_</span></a>
+      <a href="../index.html" class="nav-logo">
+        <span class="logo-accent">&gt;</span> Kun Poonkasetvatana
+        <span class="logo-handle">(@OfflineDevc)</span>
+      </a>
       <div class="nav-links">
         <a href="../index.html">Home</a>
-        <a href="../index.html#writeups">Writeups</a>
-        <a href="https://github.com/OfflineDevc" target="_blank" rel="noopener" class="nav-github-link">GitHub</a>
+        <a href="../index.html#writeups">All Writeups</a>
+        <div class="nav-social-pills">
+          <a href="https://tryhackme.com/p/Distowel" target="_blank" rel="noopener" class="pill-social thm" title="TryHackMe Profile">THM</a>
+          <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank" rel="noopener" class="pill-social htb" title="HackTheBox Profile">HTB</a>
+          <a href="https://www.linkedin.com/in/kun-poonkasetvatana-4b6317326/" target="_blank" rel="noopener" class="pill-social in" title="LinkedIn Profile">IN</a>
+          <a href="https://github.com/OfflineDevc" target="_blank" rel="noopener" class="pill-social gh" title="GitHub Profile">GH</a>
+        </div>
       </div>
     </div>
   </nav>
@@ -140,16 +185,22 @@ def render_page(slug, title, difficulty, os_name, platform, content_html):
   <!-- WRITEUP HERO HEADER -->
   <header class="writeup-hero">
     <div class="writeup-hero-inner">
-      <div class="writeup-breadcrumb">
+      <div class="hero-top-meta">
         <a href="../index.html#writeups" class="back-link">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           All Writeups
         </a>
-        <span class="breadcrumb-slash">/</span>
-        <span class="breadcrumb-current">{title}</span>
+        <div class="author-hero-pill">
+          <span class="author-live-dot"></span>
+          <span>Author: <strong>Kun Poonkasetvatana</strong> (@OfflineDevc)</span>
+        </div>
       </div>
-      <div class="writeup-header-content">
-        <h1 class="writeup-title">{title}</h1>
+
+      <div class="hero-main-row">
+        <div>
+          <span class="room-platform-badge">TRYHACKME WALKTHROUGH</span>
+          <h1 class="writeup-title">{title}</h1>
+        </div>
         <div class="writeup-badges">
           <span class="badge {diff_class}">{difficulty}</span>
           <span class="badge badge-os">{os_name}</span>
@@ -179,12 +230,16 @@ def render_page(slug, title, difficulty, os_name, platform, content_html):
       <article class="writeup-content">
 {content_html}
       </article>
+
+      <!-- PREV / NEXT NAVIGATION -->
+      {pagination_html}
     </main>
   </div>
 
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-inner">
+      <p class="footer-author">Security Portfolio of <strong>Kun Poonkasetvatana</strong></p>
       <p class="footer-copy">Built by <a href="https://github.com/OfflineDevc" target="_blank">OfflineDevc</a> · 
          <a href="https://tryhackme.com/p/Distowel" target="_blank">TryHackMe</a> · 
          <a href="https://profile.hackthebox.com/profile/01a11ceb-de8c-7382-a00c-8fab28836ef1" target="_blank">HackTheBox</a> · 
@@ -192,7 +247,7 @@ def render_page(slug, title, difficulty, os_name, platform, content_html):
     </div>
   </footer>
 
-  <script src="../script.js"></script>
+  <script src="../script.js?v=2.2"></script>
 </body>
 </html>
 """
@@ -201,7 +256,7 @@ def render_page(slug, title, difficulty, os_name, platform, content_html):
 md_ext = ['fenced_code', 'tables', 'nl2br', 'sane_lists']
 
 total_images = 0
-for slug, md_file, title, difficulty, os_name, platform in WRITEUPS:
+for idx, (slug, md_file, title, difficulty, os_name, platform) in enumerate(WRITEUPS):
     md_path = os.path.join(WRITEUP_DIR, md_file)
     if not os.path.exists(md_path):
         print(f"  [MISSING FILE] {md_file}")
@@ -214,7 +269,7 @@ for slug, md_file, title, difficulty, os_name, platform in WRITEUPS:
     cleaned_md = preprocess_markdown(raw_md, images_used)
 
     content_html = markdown.markdown(cleaned_md, extensions=md_ext)
-    full_html = render_page(slug, title, difficulty, os_name, platform, content_html)
+    full_html = render_page(idx, slug, title, difficulty, os_name, platform, content_html)
 
     out_path = os.path.join(WRITEUPS_DST, f"{slug}.html")
     with open(out_path, 'w', encoding='utf-8') as f:
@@ -228,6 +283,6 @@ for slug, md_file, title, difficulty, os_name, platform in WRITEUPS:
             shutil.copy2(src, dst)
             total_images += 1
 
-    print(f"  [BUILT] {slug}.html ({len(images_used)} images, {difficulty})")
+    print(f"  [{idx+1:02d}/11] {title} ({difficulty}) -> {slug}.html ({len(images_used)} images)")
 
-print(f"\nDone! All writeup pages built successfully. Total images copied/verified: {total_images}")
+print(f"\nDone! All 11 writeup pages generated cleanly.")
