@@ -44,6 +44,21 @@ WRITEUPS = [
     ("retro",          "Retro.md",          "Retro",          "Hard",   "Windows",    "os-windows", "TryHackMe", "02 Nov 2026", "CVE-2019-1388, UAC Bypass, WordPress"),
 ]
 
+# ── TryHackMe Authentic Room Descriptions ─────────────────────────────────────
+ROOM_DESCRIPTIONS = {
+    "skynet": "A vulnerable machine inspired by the Terminator franchise. Features anonymous SMB shares, SquirrelMail credential harvesting, Cuppa CMS Remote File Inclusion (RFI), and root cron job wildcard injection.",
+    "deaddrop": "An enterprise Active Directory simulation focusing on anonymous LDAP recon, Kerberoasting service tickets, BloodHound privilege path mapping, and domain trust escalation to achieve Enterprise Admin.",
+    "domino": "A multi-stage Linux security audit focusing on multi-tiered web services, credential harvesting, lateral movement via internal SSH keys, and sudo privilege escalation.",
+    "forward": "A realistic network pivoting challenge navigating dual-homed subnets with Chisel reverse SOCKS proxies, internal service pivoting, and Windows unquoted service paths.",
+    "mrrobotctf": "Based on the Mr. Robot series. Features robots.txt clues, dictionary optimization, WordPress user brute-forcing, and SUID nmap interactive shell breakout to root.",
+    "relevant": "A penetration testing assessment involving high-port WebDAV anonymous file uploads, ASPX reverse webshells, and SeImpersonatePrivilege abuse via PrintSpoofer to NT AUTHORITY\\SYSTEM.",
+    "silent-monitor": "A Linux auditing challenge exploring SNMP public community strings, process tree snooping, monitoring agent log poisoning, and kernel-level root escalation.",
+    "brainpan1": "Classic binary exploitation room designed to teach x86 buffer overflows, Immunity Debugger memory inspection, finding EIP offsets, bad character elimination, and SUID root exploitation.",
+    "daily-bugle": "Joomla CMS exploitation room featuring CVE-2017-8917 SQL injection, bcrypt password hash cracking with John The Ripper, administrative PHP template uploads, and Yum sudo GTFOBins.",
+    "internal": "An enterprise penetration test scenario covering WordPress admin brute-forcing, SSH local port forwarding, internal Jenkins Groovy console RCE, and Docker container breakout.",
+    "retro": "A Windows security challenge involving web author comment credential leakage, RDP access, and Windows Certificate Dialog UAC bypass (CVE-2019-1388) to obtain NT AUTHORITY\\SYSTEM.",
+}
+
 # ── Sidebar Generator (Left Drawer / Desktop Sidebar) ─────────────────────────
 def generate_sidebar_html(current_slug):
     groups = {"Easy": [], "Medium": [], "Hard": []}
@@ -210,6 +225,7 @@ def render_page(index, slug, title, difficulty, os_name, os_cls, platform, date,
     sidebar_html = generate_sidebar_html(slug)
     pagination_html = generate_pagination_html(index)
     modified_content, toc_html = process_headings_and_generate_toc(content_html)
+    room_desc = ROOM_DESCRIPTIONS.get(slug, "A comprehensive TryHackMe security assessment and technical walkthrough.")
 
     diff_class = f"diff-{difficulty.lower()}"
 
@@ -232,7 +248,7 @@ def render_page(index, slug, title, difficulty, os_name, os_cls, platform, date,
       }} catch (e) {{}}
     }})();
   </script>
-  <link rel="stylesheet" href="../style.css?v=5.2"/>
+  <link rel="stylesheet" href="../style.css?v=5.3"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet"/>
@@ -284,7 +300,7 @@ def render_page(index, slug, title, difficulty, os_name, os_cls, platform, date,
     <div class="writeup-hero-inner">
       <div class="hero-top-meta">
         <a href="../index.html#writeups" class="back-link">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           All Writeups Archive
         </a>
         <div class="author-hero-pill">
@@ -294,10 +310,12 @@ def render_page(index, slug, title, difficulty, os_name, os_cls, platform, date,
       </div>
 
       <div class="hero-main-row">
-        <div>
+        <div class="hero-title-group">
           <span class="room-platform-badge">{platform.upper()} ROOM WALKTHROUGH</span>
           <h1 class="writeup-title">{title}</h1>
+          <p class="writeup-room-desc">{room_desc}</p>
         </div>
+
         <div class="writeup-badges">
           <span class="badge {diff_class}">{difficulty}</span>
           <span class="badge badge-os">{os_name}</span>
@@ -346,7 +364,7 @@ def render_page(index, slug, title, difficulty, os_name, os_cls, platform, date,
     </div>
   </footer>
 
-  <script src="../script.js?v=5.2"></script>
+  <script src="../script.js?v=5.3"></script>
 </body>
 </html>
 """
@@ -383,4 +401,4 @@ for idx, (slug, md_file, title, difficulty, os_name, os_cls, platform, date, tag
 
     print(f"  [{idx+1:02d}/11] {title:15} | OS: {os_name:10} | Diff: {difficulty:6} -> {slug}.html")
 
-print(f"\nDone! All 11 writeups regenerated with verified accurate OS & Difficulty, Sticky Table of Contents, and Robust Dark Mode.")
+print(f"\nDone! All 11 writeups regenerated with enhanced room title and authentic TryHackMe descriptions.")

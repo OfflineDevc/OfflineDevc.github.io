@@ -655,29 +655,41 @@ a {
 
 .hero-main-row {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: 32px;
+}
+
+.hero-title-group {
+  flex: 1;
+  min-width: 0;
 }
 
 .room-platform-badge {
-  display: block;
+  display: inline-block;
   font-family: var(--font-mono);
   font-size: 11.5px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-muted);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .writeup-title {
-  font-size: 32px;
+  font-size: 42px;
   font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.25;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
   color: var(--text-main);
+  margin-bottom: 10px;
+}
+
+.writeup-room-desc {
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  max-width: 860px;
 }
 
 .writeup-badges {
@@ -685,6 +697,8 @@ a {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
+  padding-top: 14px;
 }
 
 .badge {
@@ -1347,8 +1361,22 @@ blockquote p:last-child {
     font-size: 20px;
   }
 
+  .hero-main-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
   .writeup-title {
-    font-size: 24px;
+    font-size: 32px;
+  }
+
+  .writeup-room-desc {
+    font-size: 15px;
+  }
+
+  .writeup-badges {
+    padding-top: 0;
   }
 
   .writeup-pagination {
