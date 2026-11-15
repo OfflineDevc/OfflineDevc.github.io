@@ -7,16 +7,16 @@ Author: Kun Poonkasetvatana (@OfflineDevc)
 Verified Accurate Ground Truth:
 EASY (1):
   - Skynet (Linux)
-MEDIUM (7):
-  - Daily Bugle (Linux)
+MEDIUM (6):
   - Deaddrop (Linux / AD)
   - Domino (Linux)
   - Forward (Windows)
   - Mr. Robot CTF (Linux)
   - Relevant (Windows)
   - Silent Monitor (Linux)
-HARD (3):
+HARD (4):
   - Brainpan 1 (Linux)
+  - Daily Bugle (Linux)
   - Internal (Linux)
   - Retro (Windows)
 """
@@ -44,8 +44,7 @@ WRITEUPS = [
     # EASY (1)
     ("skynet",         "Skynet.md",         "Skynet",         "Easy",   "Linux",      "os-linux",   "TryHackMe"),
 
-    # MEDIUM (7)
-    ("daily-bugle",    "Daily Bugle.md",    "Daily Bugle",    "Medium", "Linux",      "os-linux",   "TryHackMe"),
+    # MEDIUM (6)
     ("deaddrop",       "Deaddrop.md",       "Deaddrop",       "Medium", "Linux / AD", "os-ad",      "TryHackMe"),
     ("domino",         "Domino.md",         "Domino",         "Medium", "Linux",      "os-linux",   "TryHackMe"),
     ("forward",        "Forward.md",        "Forward",        "Medium", "Windows",    "os-windows", "TryHackMe"),
@@ -53,8 +52,9 @@ WRITEUPS = [
     ("relevant",       "Relevant.md",       "Relevant",       "Medium", "Windows",    "os-windows", "TryHackMe"),
     ("silent-monitor", "Silent Monitor.md", "Silent Monitor", "Medium", "Linux",      "os-linux",   "TryHackMe"),
 
-    # HARD (3)
+    # HARD (4)
     ("brainpan1",      "Brainpan1.md",      "Brainpan 1",     "Hard",   "Linux",      "os-linux",   "TryHackMe"),
+    ("daily-bugle",    "Daily Bugle.md",    "Daily Bugle",    "Hard",   "Linux",      "os-linux",   "TryHackMe"),
     ("internal",       "Internal.md",       "Internal",       "Hard",   "Linux",      "os-linux",   "TryHackMe"),
     ("retro",          "Retro.md",          "Retro",          "Hard",   "Windows",    "os-windows", "TryHackMe"),
 ]
@@ -179,7 +179,7 @@ def render_page(index, slug, title, difficulty, os_name, os_cls, platform, conte
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{title} — TryHackMe Writeup | Kun Poonkasetvatana</title>
-  <link rel="stylesheet" href="../style.css?v=3.2"/>
+  <link rel="stylesheet" href="../style.css?v=3.3"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 </head>
@@ -270,7 +270,7 @@ def render_page(index, slug, title, difficulty, os_name, os_cls, platform, conte
     </div>
   </footer>
 
-  <script src="../script.js?v=3.2"></script>
+  <script src="../script.js?v=3.3"></script>
 </body>
 </html>
 """

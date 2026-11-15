@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Daily Bugle — TryHackMe Writeup | Kun Poonkasetvatana</title>
-  <link rel="stylesheet" href="../style.css?v=3.2"/>
+  <link rel="stylesheet" href="../style.css?v=3.3"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 </head>
@@ -50,7 +50,7 @@
           <h1 class="writeup-title">Daily Bugle</h1>
         </div>
         <div class="writeup-badges">
-          <span class="badge diff-medium">Medium</span>
+          <span class="badge diff-hard">Hard</span>
           <span class="badge badge-os os-linux">Linux</span>
           <span class="badge badge-platform">TryHackMe</span>
         </div>
@@ -103,16 +103,9 @@
     <div class="sidebar-group group-medium">
       <div class="sidebar-group-header">
         <div class="group-left"><span class="diff-indicator dot-medium"></span><span class="sidebar-group-name">MEDIUM</span></div>
-        <span class="sidebar-group-badge pill-medium">7 ROOMS</span>
+        <span class="sidebar-group-badge pill-medium">6 ROOMS</span>
       </div>
       <ul class="sidebar-list">
-        <li class="sidebar-item active">
-          <a href="daily-bugle.html" class="sidebar-link" title="Daily Bugle">
-            <span class="sidebar-item-bullet"></span>
-            <span class="sidebar-item-title">Daily Bugle</span>
-            <span class="sidebar-os-badge os-linux">Linux</span>
-          </a>
-        </li>
         <li class="sidebar-item">
           <a href="deaddrop.html" class="sidebar-link" title="Deaddrop">
             <span class="sidebar-item-bullet"></span>
@@ -160,13 +153,20 @@
     <div class="sidebar-group group-hard">
       <div class="sidebar-group-header">
         <div class="group-left"><span class="diff-indicator dot-hard"></span><span class="sidebar-group-name">HARD</span></div>
-        <span class="sidebar-group-badge pill-hard">3 ROOMS</span>
+        <span class="sidebar-group-badge pill-hard">4 ROOMS</span>
       </div>
       <ul class="sidebar-list">
         <li class="sidebar-item">
           <a href="brainpan1.html" class="sidebar-link" title="Brainpan 1">
             <span class="sidebar-item-bullet"></span>
             <span class="sidebar-item-title">Brainpan 1</span>
+            <span class="sidebar-os-badge os-linux">Linux</span>
+          </a>
+        </li>
+        <li class="sidebar-item active">
+          <a href="daily-bugle.html" class="sidebar-link" title="Daily Bugle">
+            <span class="sidebar-item-bullet"></span>
+            <span class="sidebar-item-title">Daily Bugle</span>
             <span class="sidebar-os-badge os-linux">Linux</span>
           </a>
         </li>
@@ -228,7 +228,7 @@
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Difficulty</strong></td>
-<td style="text-align: left;">Medium</td>
+<td style="text-align: left;">Hard</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Key Attack Vectors</strong></td>
@@ -419,20 +419,20 @@ root
       <!-- PREV / NEXT NAVIGATION -->
       
     <nav class="writeup-pagination">
-      <a href="skynet.html" class="pagination-card prev-card">
+      <a href="brainpan1.html" class="pagination-card prev-card">
         <span class="pagination-sub">← PREVIOUS WRITEUP</span>
-        <span class="pagination-title">Skynet</span>
+        <span class="pagination-title">Brainpan 1</span>
         <div class="pagination-badges-row">
-          <span class="pagination-badge diff-easy">Easy</span>
+          <span class="pagination-badge diff-hard">Hard</span>
           <span class="pagination-badge badge-os">Linux</span>
         </div>
       </a>
-      <a href="deaddrop.html" class="pagination-card next-card">
+      <a href="internal.html" class="pagination-card next-card">
         <span class="pagination-sub">NEXT WRITEUP →</span>
-        <span class="pagination-title">Deaddrop</span>
+        <span class="pagination-title">Internal</span>
         <div class="pagination-badges-row">
-          <span class="pagination-badge diff-medium">Medium</span>
-          <span class="pagination-badge badge-os">Linux / AD</span>
+          <span class="pagination-badge diff-hard">Hard</span>
+          <span class="pagination-badge badge-os">Linux</span>
         </div>
       </a>
     </nav>
@@ -451,6 +451,6 @@ root
     </div>
   </footer>
 
-  <script src="../script.js?v=3.2"></script>
+  <script src="../script.js?v=3.3"></script>
 </body>
 </html>
